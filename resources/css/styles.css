@@ -1,0 +1,9 @@
+.root {
+    -fx-background-image: url("../images/music-maker-background.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+
+    /* Whitewash effect using opacity */
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+}

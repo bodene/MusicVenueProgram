@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminController">
+
+    <!-- Background Image (Set via CSS) -->
+    <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
+
+    <!-- Whitewash Effect (Semi-transparent White Overlay) -->
+    <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
+
+    <!-- Main UI -->
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="462.0" prefWidth="766.0">
+
+        <top>
+            <MenuBar BorderPane.alignment="CENTER">
+                <menus>
+                    <Menu mnemonicParsing="false" text="File">
+                        <items>
+                            <MenuItem mnemonicParsing="false" text="Close" />
+                        </items>
+                    </Menu>
+                    <Menu mnemonicParsing="false" text="Edit">
+                        <items>
+                            <MenuItem mnemonicParsing="false" text="Delete" />
+                        </items>
+                    </Menu>
+                    <Menu mnemonicParsing="false" text="Help">
+                        <items>
+                            <MenuItem mnemonicParsing="false" text="About" />
+                        </items>
+                    </Menu>
+                </menus>
+            </MenuBar>
+        </top>
+
+        <center>
+            <SplitPane id="backgroundImg" dividerPositions="0.26700367647058826" opacity="0.9" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                <items>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="100.0" prefWidth="160.0">
+                        <children>
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Admin Settings" textAlignment="CENTER">
+                                <font>
+                                    <Font name="Montreal Regular" size="36.0" />
+                                </font>
+                            </Label>
+                        </children>
+                    </AnchorPane>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="373.0" prefWidth="765.0">
+                        <children>
+                            <SplitPane prefHeight="257.0" prefWidth="772.0">
+                                <items>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="183.0" prefWidth="770.0">
+                                        <children>
+                                 <VBox layoutX="23.2" prefHeight="250.0" prefWidth="303.0" AnchorPane.leftAnchor="23.0">
+                                    <children>
+                                       <Label prefHeight="28.0" prefWidth="167.0" text="Admin Options">
+                                          <font>
+                                             <Font name="Montreal Regular" size="24.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="10.0" left="10.0" />
+                                          </VBox.margin>
+                                       </Label>
+                                       <Button fx:id="viewVenuesButton" mnemonicParsing="false" onAction="#viewVenues" prefHeight="36.0" prefWidth="244.0" text="View Venues">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="viewOrders" mnemonicParsing="false" onAction="#viewOrders" prefHeight="36.0" prefWidth="245.0" text="View Orders">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="calculateCommissionButton" mnemonicParsing="false" onAction="#calculateCommission" prefHeight="36.0" prefWidth="245.0" text="Calculate Commission">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets left="20.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                    </children>
+                                 </VBox>
+                                 <VBox prefHeight="240.0" prefWidth="310.0" AnchorPane.rightAnchor="88.0">
+                                    <children>
+                                       <Label text="Data Management">
+                                          <font>
+                                             <Font name="Montreal Regular" size="24.0" />
+                                          </font>
+                                       </Label>
+                                       <Button fx:id="importVenuesCSVButton" mnemonicParsing="false" onAction="#importVenuesCSV" prefHeight="36.0" prefWidth="216.0" text="Import Venues CSV">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" top="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="importEventsCSVButton" mnemonicParsing="false" onAction="#importEventsCSV" prefHeight="36.0" prefWidth="217.0" text="Import Events CSV">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" top="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="backupDataButton" mnemonicParsing="false" onAction="#backupData" prefHeight="36.0" prefWidth="216.0" text="Backup Data">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" top="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="masterBackupButton" mnemonicParsing="false" onAction="#masterBackup" prefHeight="36.0" prefWidth="217.0" text="Master Backup">
+                                          <font>
+                                             <Font name="Montreal Regular" size="18.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" left="20.0" top="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                    </children>
+                                 </VBox>
+                                        </children>
+                                    </AnchorPane>
+                                </items>
+                            </SplitPane>
+                     <ButtonBar layoutX="268.0" layoutY="258.0" prefHeight="44.0" prefWidth="171.0">
+                       <buttons>
+                           <Button fx:id="backButton1" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToDashboard" prefHeight="38.0" prefWidth="162.0" style="-fx-background-color: blue;" text="Back" textAlignment="CENTER" textFill="WHITE">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+                              </padding>
+                           </Button>
+                       </buttons>
+                     </ButtonBar>
+                        </children>
+                    </AnchorPane>
+                </items>
+            </SplitPane>
+        </center>
+    </BorderPane>
+</StackPane>
