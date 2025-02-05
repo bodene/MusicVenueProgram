@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane styleClass="popup-background" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EventDetailsController">
+
+    <!-- Main Container -->
+    <AnchorPane prefHeight="618.0" prefWidth="710.0" style="-fx-background-color: rgba(255, 255, 255, 0.9); -fx-padding: 20px; -fx-background-radius: 10;">
+        <children>
+
+            <!-- BorderPane to structure layout -->
+            <BorderPane prefHeight="546.0" prefWidth="670.0">
+
+                <!-- Center Content -->
+                <center>
+                    <VBox alignment="CENTER" prefHeight="497.0" prefWidth="670.0" spacing="20" BorderPane.alignment="CENTER">
+                        <padding>
+                            <Insets bottom="20" left="20" right="20" top="20" />
+                        </padding>
+                        <children>
+
+                            <!-- Header Label -->
+                            <Label prefHeight="54.0" prefWidth="261.0" styleClass="main-header" text="Event Details" />
+
+                            <!-- HBox for Event Info -->
+                            <HBox alignment="CENTER" spacing="30">
+                                <children>
+
+                                    <!-- Left VBox for labels -->
+                                    <VBox alignment="CENTER_RIGHT" prefHeight="460.0" prefWidth="235.0" spacing="15">
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="55.0" prefWidth="230.0" text="Event Name:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="28.0" prefWidth="238.0" text="Artist:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="28.0" prefWidth="243.0" text="Date:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="28.0" prefWidth="254.0" text="Time:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="38.0" prefWidth="240.0" text="Duration:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="28.0" prefWidth="249.0" text="Target Audience:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label text="Event Type:">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label text="Category:">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="28.0" prefWidth="277.0" text="Client:" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                    </VBox>
+
+                                    <!-- Right VBox for values -->
+                                    <VBox prefHeight="460.0" prefWidth="365.0" spacing="15">
+                                        <Label fx:id="eventNameLabel" prefHeight="38.0" prefWidth="394.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventArtistLabel" prefHeight="38.0" prefWidth="411.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventDateLabel" prefHeight="38.0" prefWidth="401.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventTimeLabel" prefHeight="38.0" prefWidth="405.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventDurationLabel" prefHeight="38.0" prefWidth="422.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventCapacityLabel" prefHeight="38.0" prefWidth="413.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventTypeLabel" prefHeight="38.0" prefWidth="412.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventCategoryLabel" prefHeight="38.0" prefWidth="428.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                        <Label fx:id="eventClientLabel" prefHeight="38.0" prefWidth="419.0" styleClass="label-text">
+                                 <font>
+                                    <Font name="Montreal Regular" size="24.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="5.0" top="5.0" />
+                                 </padding></Label>
+                                    </VBox>
+
+                                </children>
+                            </HBox>
+
+                        </children>
+                    </VBox>
+                </center>
+
+                <!-- Bottom Section (Close Button) -->
+                <bottom>
+                    <Button onAction="#closeWindow" style="-fx-font-size: 16px; -fx-padding: 10;" text="Close" BorderPane.alignment="CENTER" />
+                </bottom>
+
+            </BorderPane>
+
+        </children>
+    </AnchorPane>
+</StackPane>

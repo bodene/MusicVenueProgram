@@ -28,34 +28,14 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="566.0" prefWidth="766.0">
-
-        <top>
-            <MenuBar BorderPane.alignment="CENTER">
-                <menus>
-                    <Menu mnemonicParsing="false" text="File">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="Close" />
-                        </items>
-                    </Menu>
-                    <Menu mnemonicParsing="false" text="Help">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="About" />
-                        </items>
-                    </Menu>
-                </menus>
-            </MenuBar>
-        </top>
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="632.0" prefWidth="766.0">
 
         <center>
-            <SplitPane id="backgroundImg" dividerPositions="0.2062314540059347" opacity="0.9" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane id="backgroundImg" dividerPositions="0.2062314540059347" opacity="0.9" orientation="VERTICAL" prefHeight="594.0" prefWidth="766.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Dashboard" textAlignment="CENTER">
-                                <font>
-                                    <Font name="Montreal Regular" size="36.0" />
-                                </font>
+                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Dashboard" textAlignment="CENTER">
                             </Label>
                      <Button fx:id="logoutButton" layoutX="717.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout">
                         <graphic>
@@ -79,9 +59,9 @@
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
                         <children>
-                            <VBox prefHeight="420.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
+                            <VBox prefHeight="450.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
                                 <children>
-                           <Button fx:id="showRequestDetailsButton" onAction="#showRequestDetails" prefHeight="30.0" prefWidth="236.0" text="Show Request Details">
+                           <Button fx:id="showEventDetailsButton" onAction="#showEventDetails" prefHeight="30.0" prefWidth="236.0" text="Show Event Details">
                               <font>
                                  <Font name="Montreal Regular" size="16.0" />
                               </font>
@@ -180,30 +160,40 @@
                                  <Insets bottom="5.0" top="5.0" />
                               </padding>
                            </Button>
+                           <Label text="Current Bookings for tis Venue">
+                              <font>
+                                 <Font name="Montreal Regular" size="14.0" />
+                              </font>
+                           </Label>
                            <TableView fx:id="currentBookingTable" prefHeight="200.0" prefWidth="200.0">
                              <columns>
-                               <TableColumn prefWidth="74.40002596378326" text="Date" />
-                               <TableColumn prefWidth="71.19994354248047" text="Time" />
-                                 <TableColumn prefWidth="82.4000244140625" text="Request No" />
+                               <TableColumn fx:id="bookingDateColumn" prefWidth="74.40002596378326" text="Date" />
+                               <TableColumn fx:id="bookingTimeColumn" prefWidth="71.19994354248047" text="Time" />
+                                 <TableColumn fx:id="bookingRequestColumn" prefWidth="82.4000244140625" text="Request No" />
                              </columns>
                            </TableView>
                                 </children>
                             </VBox>
-                     <TableView fx:id="eventTable" prefHeight="200.0" prefWidth="512.0">
+                     <TableView fx:id="eventTable" layoutY="25.0" prefHeight="200.0" prefWidth="512.0">
                        <columns>
-                         <TableColumn prefWidth="84.80001217126846" text="RequestNo" />
-                         <TableColumn prefWidth="152.8000030517578" text="Event Name" />
-                           <TableColumn prefWidth="138.40003967285156" text="Artist" />
-                           <TableColumn prefWidth="136.79998779296875" text="Client" />
+                           <TableColumn fx:id="eventIdColumn" prefWidth="84.80001217126846" text="RequestNo" />
+                           <TableColumn fx:id="eventNameColumn" prefWidth="152.8000030517578" text="Event Name" />
+                           <TableColumn fx:id="eventArtistColumn" prefWidth="138.40003967285156" text="Artist" />
+                           <TableColumn fx:id="eventClientColumn" prefWidth="136.79998779296875" text="Client" />
                        </columns>
                      </TableView>
-                     <TableView fx:id="venueTable" layoutY="225.0" prefHeight="200.0" prefWidth="512.0">
+                     <TableView fx:id="venueTable" layoutY="277.0" prefHeight="200.0" prefWidth="512.0">
                         <columns>
-                           <TableColumn prefWidth="82.39998775720596" text="Venue No" />
-                           <TableColumn prefWidth="274.4000549316406" text="Venue Name" />
-                           <TableColumn prefWidth="154.39996337890625" text="Compatibility Score" />
+                           <TableColumn fx:id="venueNoColumn" prefWidth="82.39998775720596" text="Venue No" />
+                           <TableColumn fx:id="venueNameColumn" prefWidth="274.4000549316406" text="Venue Name" />
+                           <TableColumn fx:id="compatibilityScoreColumn" prefWidth="154.39996337890625" text="Compatibility Score" />
                         </columns>
                      </TableView>
+                     <Label layoutX="14.0" layoutY="2.0" text="Upcoming Event Requests">
+                        <font>
+                           <Font name="Montreal Regular" size="18.0" />
+                        </font>
+                     </Label>
                         </children>
                     </AnchorPane>
                 </items>

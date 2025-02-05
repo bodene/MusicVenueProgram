@@ -8,7 +8,6 @@ import java.time.LocalTime;
 public class Event {
 
 	private int eventId;
-	private static int eventIdCounter = 0;
 	private String eventName;
 	private String artist;
 	private LocalDate eventDate;
@@ -17,7 +16,7 @@ public class Event {
 	private int requiredCapacity;
 	private String eventType;
 	private VenueCategory eventCategory;
-	private Client clientName;
+	private String clientName;
 
 	/**
 	 *
@@ -28,10 +27,10 @@ public class Event {
 	 * @param eventTime
 	 * @param duration
 	 * @param eventType
-	 * @param client
+	 * @param clientName
 	 */
-	public Event(String eventName, String artist, LocalDate eventDate, LocalTime eventTime, int duration, int requiredCapacity, String eventType, String eventCategory, String client) {
-		this.eventId = ++eventIdCounter;
+	public Event(int eventId, String eventName, String artist, LocalDate eventDate, LocalTime eventTime, int duration, int requiredCapacity, String eventType, String eventCategory, String clientName) {
+		this.eventId = eventId;
 		this.eventName = eventName;
 		this.artist = artist;
 		this.eventDate = eventDate;
@@ -40,7 +39,9 @@ public class Event {
 		this.requiredCapacity = requiredCapacity;
 		this.eventType = eventType;
 		this.eventCategory = setCategory(eventCategory);
-		this.clientName = ClientDAO.findOrCreateClient(client);
+		// Store client as String instead of Client object
+		Client client = ClientDAO.findOrCreateClient(clientName);
+		this.clientName = client.getClientName();
 	}
 
 	public int getEventId() {
@@ -141,17 +142,12 @@ public class Event {
 		return eventCategory;
 	}
 
-	public Client getClient() {
+	public String getClientName() {
 		return this.clientName;
 	}
 
-	public void setClient(Client client) {
-		this.clientName = client; //
-	}
-
-	// Overloaded method to set Client using a String name
-	public void setClient(String clientName) {
-		this.clientName = ClientDAO.findOrCreateClient(clientName);
+	public void setClientName(String clientName) {
+		this.clientName = clientName; //
 	}
 
 
@@ -167,8 +163,7 @@ public class Event {
 				", requiredCapacity=" + requiredCapacity +
 				", eventType='" + eventType + '\'' +
 				", eventCategory=" + eventCategory +
-				", client=" + (clientName != null ? clientName.getClientName() : "No Client Assigned") +
-				'}';
+				", client=" + clientName;
 	}
 
 }

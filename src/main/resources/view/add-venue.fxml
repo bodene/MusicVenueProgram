@@ -30,37 +30,12 @@
     <!-- Main UI -->
     <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="518.0" prefWidth="816.0">
 
-        <top>
-            <MenuBar BorderPane.alignment="CENTER">
-                <menus>
-                    <Menu mnemonicParsing="false" text="File">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="Close" />
-                        </items>
-                    </Menu>
-                    <Menu mnemonicParsing="false" text="Edit">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="Delete" />
-                        </items>
-                    </Menu>
-                    <Menu mnemonicParsing="false" text="Help">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="About" />
-                        </items>
-                    </Menu>
-                </menus>
-            </MenuBar>
-        </top>
-
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.26700367647058826" opacity="0.79" orientation="VERTICAL" prefHeight="510.0" prefWidth="832.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.95" prefHeight="127.0" prefWidth="814.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Add a New Venue" textAlignment="CENTER">
-                                <font>
-                                    <Font name="Montreal Regular" size="36.0" />
-                                </font>
+                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Add a New Venue" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>

@@ -56,10 +56,7 @@
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="100.0" prefWidth="160.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Add User for Live Music Venue Matchmaker" textAlignment="CENTER">
-                                <font>
-                                    <Font name="Montreal Regular" size="36.0" />
-                                </font>
+                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Add User for Live Music Venue Matchmaker" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>

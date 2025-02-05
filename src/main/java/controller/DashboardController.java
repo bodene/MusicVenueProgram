@@ -1,27 +1,104 @@
 package controller;
 
-import model.UserRole;
+import dao.EventDAO;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import model.*;
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import service.SessionManager;
 
+import java.sql.SQLException;
+import java.util.List;
+
 public class DashboardController {
 
-    @FXML
-    private TableView<?> eventTable;
+    // Event Table
+    @FXML private TableView<Event> eventTable;
+    @FXML private TableColumn<Event, Integer> eventIdColumn;
+    @FXML private TableColumn<Event, String> eventNameColumn;
+    @FXML private TableColumn<Event, String> eventArtistColumn;
+    @FXML private TableColumn<Event, String> eventClientColumn;
+    private ObservableList<Event> eventList = FXCollections.observableArrayList();
+
+    // Venue Table
+    @FXML private TableView<Venue> venueTable;
+    @FXML private TableColumn<Venue, Integer> venueNoColumn;
+    @FXML private TableColumn<Venue, String> venueNameColumn;
+    @FXML private TableColumn<Venue, String> compatibilityScoreColumn;
+    private ObservableList<Venue> venueList = FXCollections.observableArrayList();
+
+    // Bookings Table
+    @FXML private TableView<Booking> currentBookingTable;
+    @FXML private TableColumn<Booking, String> bookingDateColumn;
+    @FXML private TableColumn<Booking, String> bookingTimeColumn;
+    @FXML private TableColumn<Booking, String> bookingRequestColumn;
+    private ObservableList<Booking> bookingList = FXCollections.observableArrayList();
+
+    @FXML private CheckBox availableCheckbox, sufficientCapacityCheckbox, eventTypeCheckbox, venueCategoryCheckbox;
+    @FXML private Button showRequestDetailsButton, filterVenuesButton, autoMatchButton, showVenueDetailsButton, bookVenueButton, logoutButton, settingsButton;
+
+
 
     @FXML
-    private TableView<?> venueTable;
+    public void initialize() {
+        setupTableColumns();
+        Platform.runLater(this::loadData);
+    }
 
-    @FXML
-    private TableView<?> currentBookingTable;
+    /**
+     * Set up columns to match Event object properties.
+     */
+    private void setupTableColumns() {
+        // EVENT TABLE
+        eventIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventId()));
+        eventNameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventName()));
+        eventArtistColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getArtist()));
+        eventClientColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getClientName()));
 
-    @FXML
-    private CheckBox availableCheckbox, sufficientCapacityCheckbox, eventTypeCheckbox, venueCategoryCheckbox;
+        // VENUE TABLE
+        venueNoColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getVenueId()));
+        venueNameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getName()));
+        //compatibilityScoreColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventId()));
 
-    @FXML
-    private Button showRequestDetailsButton, filterVenuesButton, autoMatchButton, showVenueDetailsButton, bookVenueButton, logoutButton, settingsButton;
+        // BOOKING TABLE
+       // bookingDateColumn.setCellValueFactory(cellData -> cellData.getValue().bookingIdProperty().asObject());
+       // bookingTimeColumn.setCellValueFactory(cellData -> cellData.getValue().customerNameProperty());
+       // bookingRequestColumn.setCellValueFactory(cellData -> cellData.getValue().eventDateProperty());
+    }
+
+    private void loadData() {
+        System.out.println("🔄 Loading events from database...");
+        List<Event> eventResults = EventDAO.getAllEvents();
+
+        if (eventResults == null || eventResults.isEmpty()) {
+            System.out.println("❌ No events found in the database!");
+        } else {
+            for (Event e : eventResults) {
+                System.out.println("✅ Loaded event: " + e.getEventName());
+            }
+        }
+        eventList.setAll(eventResults);
+        eventTable.setItems(eventList);
+
+//            List<Venue> venueResults = VenueDAO.getAllVenues();
+//            venueList.setAll(venueResults);
+//            venueTable.setItems(venueList);
+//
+//            List<Booking> bookingResults = BookingDAO.getAllBookings();
+//            bookingList.setAll(bookingResults);
+//            currentBookingTable.setItems(bookingList);
+
+    }
 
     // Show Request Details
     @FXML
@@ -78,15 +155,44 @@ public class DashboardController {
             SceneManager.switchScene("admin-view.fxml");
         }
     }
-//    public void openSettings() {
-//        UserRole role = SessionManager.getCurrentUser().getUserRole();
-//
-//        if (role == UserRole.MANAGER) {
-//            SceneManager.switchScene("manager-view.fxml");
-//        } else {
-//            SceneManager.switchScene("admin-view.fxml");
-//        }
-//    }
+
+    @FXML
+    private void showEventDetails() {
+        Event selectedEvent = eventTable.getSelectionModel().getSelectedItem();
+        if (selectedEvent == null) {
+            showAlert("No Event Selected", "Please select an event to view details.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/event-details-view.fxml"));
+            Parent root = loader.load();
+
+            // Pass event data to the popup controller
+            EventDetailsController controller = loader.getController();
+            controller.setEventDetails(selectedEvent);
+
+            // Create popup window
+            Stage stage = new Stage();
+            stage.setTitle("Event Details");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load event details.");
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
     @FXML
     private void logout() {

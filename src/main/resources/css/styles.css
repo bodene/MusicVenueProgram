@@ -7,3 +7,29 @@
     /* Whitewash effect using opacity */
     -fx-background-color: rgba(255, 255, 255, 0.4);
 }
+
+.popup-background {
+    -fx-background-image: url("../images/music-maker-background.jpg");
+    -fx-background-size: cover;
+    -fx-background-color: rgba(255, 255, 255, 0.8); /* White overlay */
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 2);
+}
+
+
+.label {
+    -fx-font-family: "Montreal Regular";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333; /* Darker text color for visibility */
+
+}
+
+.main-header {
+    -fx-font-family: "Montreal Regular";
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333; /* Darker text color for visibility */
+}

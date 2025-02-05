@@ -23,40 +23,19 @@
 <StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.VenuesController">
 
     <!-- Background Image (Set via CSS) -->
-    <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
+    <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css"/>
 
     <!-- Whitewash Effect (Semi-transparent White Overlay) -->
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
     <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="566.0" prefWidth="766.0">
-
-        <top>
-            <MenuBar BorderPane.alignment="CENTER">
-                <menus>
-                    <Menu mnemonicParsing="false" text="File">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="Close" />
-                        </items>
-                    </Menu>
-                    <Menu mnemonicParsing="false" text="Help">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="About" />
-                        </items>
-                    </Menu>
-                </menus>
-            </MenuBar>
-        </top>
-
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.2062314540059347" opacity="0.9" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Manage Venues" textAlignment="CENTER">
-                                <font>
-                                    <Font name="Montreal Regular" size="36.0" />
-                                </font>
+                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Manage Venues" textAlignment="CENTER">
                             </Label>
                             <Button fx:id="logoutButton" layoutX="717.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout">
                                 <graphic>

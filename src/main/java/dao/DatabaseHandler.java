@@ -21,17 +21,13 @@ public class DatabaseHandler {
 	private static final String DB_URL = "jdbc:sqlite:src/main/resources/music_venue.db";
 	private static Connection connection;
 
-	public static Connection getConnection() throws SQLException {
-		if (connection == null || connection.isClosed()) {
-			try {
-				connection = DriverManager.getConnection(DB_URL);
-				System.out.println("Connected to SQLite database successfully.");
-				initialiseDatabase();
-			} catch (SQLException e) {
-				throw new SQLException("Error connecting to database: " + e.getMessage(), e);
-			}
+	public static Connection getConnection() {
+		try {
+			return DriverManager.getConnection(DB_URL);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
-		return connection;
 	}
 
 	// Close connection

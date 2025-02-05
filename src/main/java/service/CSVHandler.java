@@ -1,5 +1,6 @@
 package service;
 
+import dao.ClientDAO;
 import dao.DatabaseHandler;
 import model.*;
 
@@ -61,9 +62,8 @@ public class CSVHandler {
 //        } catch (SQLException e) {
 //            throw new RuntimeException(e);
 //        }
-        return venues;
+		return venues;
 	}
-
 
 	public static List<Event> importEventDataCSV(String filePath) {
 		List<Event> events = new ArrayList<>();
@@ -77,13 +77,16 @@ public class CSVHandler {
 					firstLine = false;
 					continue; // Skip header row
 				}
+				System.out.println("Processing row: " + line); // Debug print
 
 				String[] data = line.split(",");
-				if (data.length < 9) {
+				if (data.length < 9) { // Ensure enough columns
+					System.out.println("Skipping row due to insufficient columns: " + Arrays.toString(data));
 					continue;
 				}
 
 				try {
+					int eventId = generateNewEventId(); // Or extract from CSV
 					String clientName = data[0].trim();
 					String title = data[1].trim();
 					String artist = data[2].trim();
@@ -94,37 +97,31 @@ public class CSVHandler {
 					String suitable = data[7].trim();
 					String category = data[8].trim().toUpperCase();
 
-					// Convert date and time using improved parsing methods
 					LocalDate eventDate = parseDate(rawDate);
 					LocalTime startTime = parseTime(rawTime);
 
-					Event event = new Event(title, artist, eventDate, startTime, duration, audience, suitable, category, clientName);
+					System.out.println("Creating event: " + title + " on " + eventDate + " at " + startTime);
+
+					Event event = new Event(eventId, title, artist, eventDate, startTime, duration, audience, suitable, category, clientName);
 					events.add(event);
 
-				} catch (DateTimeParseException e) {
-					System.err.println("⚠ Skipping invalid date/time format in row: " + line);
-					continue;
-				} catch (NumberFormatException e) {
-					System.err.println("⚠ Skipping row due to invalid number format: " + line);
-					continue;
 				} catch (Exception e) {
-					System.err.println("⚠ Skipping row due to unexpected error: " + line);
+					System.err.println("Skipping row due to an error: " + line);
 					e.printStackTrace();
-					continue;
 				}
 			}
 
 		} catch (IOException e) {
-			System.err.println("❌ Error reading file: " + filePath);
+			System.err.println("Error reading file: " + filePath);
 			e.printStackTrace();
 		}
 
-//		try {
-//			saveEventsToDatabase(events);
-//		} catch (SQLException e) {
-//			throw new RuntimeException(e);
-//		}
+		System.out.println("Total events imported: " + events.size());
 		return events;
+	}
+
+	private static int generateNewEventId() {
+		return (int) (System.currentTimeMillis() % Integer.MAX_VALUE); // Simple unique ID
 	}
 
 	public static LocalTime parseTime(String timeStr) {
@@ -156,13 +153,13 @@ public class CSVHandler {
 		for (String format : formats) {
 			try {
 				return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(format));
-			} catch (DateTimeParseException ignored) {}
+			} catch (DateTimeParseException ignored) {
+			}
 		}
 		throw new DateTimeParseException("Invalid date format: " + dateStr, dateStr, 0);
 	}
 
 	/**
-	 * 
 	 * @param venues
 	 */
 	public static void saveVenuesToDatabase(List<Venue> venues) throws SQLException {
@@ -209,43 +206,69 @@ public class CSVHandler {
 	}
 
 	/**
-	 *
 	 * @param events
 	 */
 	public static void saveEventsToDatabase(List<Event> events) throws SQLException {
-		String insertEventSQL = "INSERT INTO events (event_name, event_artist, event_date, event_time, event_duration, required_capacity, event_type, event_category, client_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		String insertClientSQL = "INSERT INTO clients (client_name) VALUES (?)";
+		String insertEventSQL = "INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration, required_capacity, event_type, event_category, client_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (Connection connection = DatabaseHandler.getConnection();
-			 PreparedStatement eventStmt = connection.prepareStatement(insertEventSQL, Statement.RETURN_GENERATED_KEYS);
-			 PreparedStatement clientStmt = connection.prepareStatement(insertClientSQL, Statement.RETURN_GENERATED_KEYS)) {
+			 PreparedStatement eventStmt = connection.prepareStatement(insertEventSQL)) {
+
+			connection.setAutoCommit(false); // 🔹 Disable auto-commit to batch inserts
 
 			for (Event event : events) {
 				try {
-					// Ensure client exists before inserting the event
-					int clientId = findOrCreateClientId(event.getClient().getClientName(), connection);
+					int eventId = generateUniqueEventId(connection); // Generate unique event ID
+					int clientId = ClientDAO.findOrCreateClientId(event.getClientName(), connection); // Ensure client exists
 
-					// Insert event into database
-					eventStmt.setString(1, event.getEventName());
-					eventStmt.setString(2, event.getArtist());
-					eventStmt.setString(3, event.getEventDate().toString());
-					eventStmt.setString(4, event.getEventTime().toString());
-					eventStmt.setInt(5, event.getDuration());
-					eventStmt.setInt(6, event.getRequiredCapacity());
-					eventStmt.setString(7, event.getEventType());
-					eventStmt.setString(8, event.getCategory().name());
-					eventStmt.setInt(9, clientId);
+					// 🛑 **Handle invalid client ID**
+					if (clientId <= 0) {
+						System.err.println("⚠ ERROR: Invalid Client ID for event: " + event.getEventName());
+						continue; // Skip this event
+					}
+
+					eventStmt.setInt(1, eventId);
+					eventStmt.setString(2, event.getEventName());
+					eventStmt.setString(3, event.getArtist());
+					eventStmt.setString(4, event.getEventDate().toString());
+					eventStmt.setString(5, event.getEventTime().toString());
+					eventStmt.setInt(6, event.getDuration());
+					eventStmt.setInt(7, event.getRequiredCapacity());
+					eventStmt.setString(8, event.getEventType());
+					eventStmt.setString(9, event.getCategory().name());
+					eventStmt.setInt(10, clientId);
 
 					eventStmt.executeUpdate();
-					System.out.println("Event saved: " + event.getEventName());
+					System.out.println("✅ Successfully inserted: " + event.getEventName() + " | Event ID: " + eventId);
 
 				} catch (SQLException e) {
-					System.err.println("Error inserting event: " + event.getEventName() + " | " + e.getMessage());
+					System.err.println("❌ SQL Error inserting event: " + event.getEventName() + " | " + e.getMessage());
+					e.printStackTrace();
 				}
 			}
+
+			connection.commit(); // 🔹 Commit the batch insertions
+			System.out.println("✅ All events committed successfully.");
+
 		} catch (SQLException e) {
-			throw new RuntimeException("Database error while saving events: " + e.getMessage(), e);
+			System.err.println("❌ Database Error: " + e.getMessage());
+			throw new RuntimeException("Error inserting events", e);
 		}
-		System.out.println("Events & their clients saved successfully.");
 	}
+
+
+	private static int generateUniqueEventId(Connection connection) throws SQLException {
+		String query = "SELECT COALESCE(MAX(event_id), 0) + 1 FROM events";
+		try (PreparedStatement stmt = connection.prepareStatement(query);
+			 ResultSet rs = stmt.executeQuery()) {
+			if (rs.next()) {
+				return rs.getInt(1); // Return the next available event_id
+			}
+		}
+		throw new SQLException("Error generating event ID");
+	}
+
+
+
+
 }

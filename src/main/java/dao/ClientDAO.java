@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class ClientDAO {
     private static List<Client> clients = new ArrayList<>();
 
@@ -15,11 +16,18 @@ public class ClientDAO {
                 return client; // ✅ Found existing client
             }
         }
-        // ✅ If client not found, create a new one and add to the list
-        Client newClient = new Client(clientName, "unknown@contact.com");
-        clients.add(newClient);
-        return newClient;
+
+        try (Connection connection = DatabaseHandler.getConnection()) {  // ✅ Open connection
+            int newClientId = findOrCreateClientId(clientName, connection);
+            Client newClient = new Client(newClientId, clientName, "unknown@contact.com");
+            clients.add(newClient);
+            return newClient;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+
 
     // For database importing
     public static int findOrCreateClientId(String clientName, Connection connection) throws SQLException {
@@ -30,7 +38,7 @@ public class ClientDAO {
             findStmt.setString(1, clientName);
             ResultSet rs = findStmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("client_id");
+                return rs.getInt("client_id"); // Return existing client ID
             }
         }
 
@@ -43,7 +51,27 @@ public class ClientDAO {
             }
         }
 
-        throw new SQLException("Error: Could not insert or find client: " + clientName);
+        throw new SQLException("Could not insert or find client: " + clientName);
+    }
+
+    public static Client getClientById(int clientId) throws SQLException {
+        String sql = "SELECT * FROM clients WHERE client_id = ?";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setInt(1, clientId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new Client(
+                        rs.getInt("client_id"),
+                        rs.getString("client_name"),
+                        rs.getString("contact_info")
+                );
+            }
+        }
+        return null;
     }
 
 }

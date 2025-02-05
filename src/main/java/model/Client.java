@@ -3,7 +3,6 @@ package model;
 public class Client {
 
 	private int clientId;
-	private static int clientIdCounter = 0;
 	private String clientName;
 	private String contactInfo;
 
@@ -11,8 +10,8 @@ public class Client {
 	 * @param clientName
 	 * @param contactInfo
 	 */
-	public Client(String clientName, String contactInfo) {
-		this.clientId = ++clientIdCounter;
+	public Client(int clientId, String clientName, String contactInfo) {
+		this.clientId = clientId;
 		this.clientName = clientName;
 		this.contactInfo = contactInfo;
 	}
