@@ -15,17 +15,19 @@
     </properties>
 
     <dependencies>
+        <!-- JUnit 5 API for writing tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
+            <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- JUnit Engine for running tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <version>5.10.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
         <dependency>
@@ -81,21 +83,23 @@
                 <version>0.0.8</version>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                         <configuration>
-                            <mainClass>com.example.musicvenueprogram/app.Main
-                            </mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <noHeaderFiles>true</noHeaderFiles>
+                            <mainClass>app.Main</mainClass>
+                            <options>
+                                <option>--module-path</option>
+                                <option>${project.build.directory}/lib</option>
+                                <option>--add-modules</option>
+                                <option>javafx.controls,javafx.fxml</option>
+                            </options>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>
