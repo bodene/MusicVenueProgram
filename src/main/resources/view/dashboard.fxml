@@ -4,9 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -35,7 +32,7 @@
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
                         <children>
-                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Dashboard" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Dashboard" textAlignment="CENTER">
                             </Label>
                      <Button fx:id="logoutButton" layoutX="717.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout">
                         <graphic>
@@ -59,14 +56,14 @@
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
                         <children>
-                            <VBox prefHeight="450.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
+                            <VBox prefHeight="494.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
                                 <children>
                            <Button fx:id="showEventDetailsButton" onAction="#showEventDetails" prefHeight="30.0" prefWidth="236.0" text="Show Event Details">
                               <font>
                                  <Font name="Montreal Regular" size="16.0" />
                               </font>
                               <VBox.margin>
-                                 <Insets bottom="3.0" />
+                                 <Insets bottom="3.0" top="5.0" />
                               </VBox.margin>
                               <padding>
                                  <Insets bottom="5.0" top="5.0" />
@@ -132,7 +129,7 @@
                                             <Font name="Montreal Regular" size="16.0" />
                                         </font>
                               <VBox.margin>
-                                 <Insets bottom="3.0" />
+                                 <Insets bottom="35.0" />
                               </VBox.margin>
                               <padding>
                                  <Insets bottom="5.0" top="5.0" />
@@ -165,7 +162,7 @@
                                  <Font name="Montreal Regular" size="14.0" />
                               </font>
                            </Label>
-                           <TableView fx:id="currentBookingTable" prefHeight="200.0" prefWidth="200.0">
+                           <TableView fx:id="currentBookingTable" prefHeight="143.0" prefWidth="227.0">
                              <columns>
                                <TableColumn fx:id="bookingDateColumn" prefWidth="74.40002596378326" text="Date" />
                                <TableColumn fx:id="bookingTimeColumn" prefWidth="71.19994354248047" text="Time" />
@@ -182,7 +179,7 @@
                            <TableColumn fx:id="eventClientColumn" prefWidth="136.79998779296875" text="Client" />
                        </columns>
                      </TableView>
-                     <TableView fx:id="venueTable" layoutY="277.0" prefHeight="200.0" prefWidth="512.0">
+                     <TableView fx:id="venueTable" layoutY="258.0" prefHeight="233.0" prefWidth="512.0">
                         <columns>
                            <TableColumn fx:id="venueNoColumn" prefWidth="82.39998775720596" text="Venue No" />
                            <TableColumn fx:id="venueNameColumn" prefWidth="274.4000549316406" text="Venue Name" />

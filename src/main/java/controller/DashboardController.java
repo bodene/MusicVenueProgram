@@ -28,7 +28,7 @@ public class DashboardController {
     @FXML private TableColumn<Event, String> eventNameColumn;
     @FXML private TableColumn<Event, String> eventArtistColumn;
     @FXML private TableColumn<Event, String> eventClientColumn;
-    private ObservableList<Event> eventList = FXCollections.observableArrayList();
+    private ObservableList<Event> eventList;
 
     // Venue Table
     @FXML private TableView<Venue> venueTable;
@@ -50,6 +50,7 @@ public class DashboardController {
     @FXML
     public void initialize() {
         setupTableColumns();
+        eventList = FXCollections.observableArrayList();
         Platform.runLater(this::loadData);
     }
 
@@ -75,17 +76,18 @@ public class DashboardController {
     }
 
     private void loadData() {
-        System.out.println("🔄 Loading events from database...");
         List<Event> eventResults = EventDAO.getAllEvents();
 
         if (eventResults == null || eventResults.isEmpty()) {
             System.out.println("❌ No events found in the database!");
         } else {
-            for (Event e : eventResults) {
-                System.out.println("✅ Loaded event: " + e.getEventName());
-            }
+            eventResults.forEach(event -> System.out.println("✅ Loaded event: " + event.getEventName()));
         }
-        eventList.setAll(eventResults);
+        if (eventResults != null) {
+            eventList.setAll(eventResults);
+        } else {
+            eventList.clear(); // Ensure table is cleared if no results
+        }
         eventTable.setItems(eventList);
 
 //            List<Venue> venueResults = VenueDAO.getAllVenues();
@@ -146,7 +148,6 @@ public class DashboardController {
     // When manager logs in go to manager setting and admin for Admin Settings
     @FXML
     private void goToSettings() {
-
         if (SessionManager.getInstance().isManager()) {
             SceneManager.switchScene("manager-view.fxml");
         } else {

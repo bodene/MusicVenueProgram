@@ -1,25 +1,21 @@
 package controller;
 
-import dao.UserDAO;
-import javafx.scene.control.Alert;
-import model.Staff;
-import model.Manager;
-import model.UserRole;
-import javafx.scene.control.TextField;
-import service.SceneManager;
+import java.util.Optional;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
+import model.Staff;
+import service.SceneManager;
 import service.SessionManager;
-import java.sql.SQLException;
+import service.UserService;
+import util.AlertUtils;
 
 public class LoginController {
 
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private TextField passwordField;
+    @FXML private TextField usernameField;
+    @FXML private TextField passwordField;
 
-    @FXML
-    private void goToMain() {
+    @FXML private void goToMain() {
         SceneManager.switchScene("main-view.fxml");
     }
 
@@ -29,40 +25,20 @@ public class LoginController {
         String password = passwordField.getText().trim();
 
         // Authenticate user
-        UserDAO.UserAuthResult authResult = UserDAO.authenticateUser(username, password);
+        Optional<Staff> authenticatedUser = UserService.authenticateUser(username, password);
 
-        if (authResult != null) {
-            try {
-                // Get user details from DB
-                Staff loggedInUser = UserDAO.getUserByUsername(username);
+        if (authenticatedUser.isPresent()) {
+            // Store user in session
+            SessionManager.getInstance().setCurrentUser(authenticatedUser.get());
 
-                if (loggedInUser != null) {
-
-                    // Store user in session with full details
-                    SessionManager.getInstance().setCurrentUser(loggedInUser);
-
-                    // Redirect based on role
-                    if (SessionManager.getInstance().isManager()) {
-                        SceneManager.switchScene("manager-view.fxml");
-                    } else {
-                        SceneManager.switchScene("admin-view.fxml");
-                    }
-                } else {
-                    showAlert("Login Failed", "Error retrieving user details.", Alert.AlertType.ERROR);
-                }
-            } catch (SQLException e) {
-                showAlert("Database Error", "Could not retrieve user details. Please try again.", Alert.AlertType.ERROR);
+            // Redirect based on role
+            if (SessionManager.getInstance().isManager()) {
+                SceneManager.switchScene("manager-view.fxml");
+            } else {
+                SceneManager.switchScene("admin-view.fxml");
             }
         } else {
-            showAlert("Login Failed", "Invalid username or password.", Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Login Failed", "Invalid username or password.", Alert.AlertType.ERROR);
         }
-    }
-
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

@@ -1,50 +1,39 @@
 package controller;
 
+import service.AuthService;
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.AnchorPane;
+import util.AlertUtils;
 
 public class MainController {
 
-    @FXML
-    private AnchorPane managerCodePane;
+    @FXML private AnchorPane managerCodePane;
+    @FXML private PasswordField managerCodeField;
 
-    @FXML
-    private PasswordField managerCodeField;
-
-    // Define Manager code
-    private final String MANAGER_CODE = "909";
-
+    // Show manage code pane and prompt for code
     @FXML
     private void goToAddNewUser() {
-        // Show manage code pane and prompt for code
-        managerCodePane.setVisible(true);
+        managerCodePane.setVisible(true); // Show manager code pane
     }
 
     // When submit is pressed in manager code pane
     @FXML
     private void handleManagerCodeSubmit() {
-        String code = managerCodeField.getText();
-        if (MANAGER_CODE.equals(code)) {
-            // Hide Manager code pane and continue to add user
+        String code = managerCodeField.getText().trim();
+
+        if (AuthService.validateManagerCode(code)) {
             managerCodePane.setVisible(false);
-            System.out.println("Manager Code entered succesfully, proceeding to signup...");
+            System.out.println("✅ Manager Code validated, proceeding to signup...");
             SceneManager.switchScene("add-user-view.fxml");
-        }
-        else {
-            // Alert code was incorrect
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Invalid Code");
-            alert.setHeaderText(null);
-            alert.setContentText("The manager code is incorrect. Please try again");
-            alert.showAndWait();
+        } else {
+            AlertUtils.showAlert("Invalid Code", "The manager code is incorrect. Please try again.", Alert.AlertType.ERROR);
         }
     }
 
-    @FXML
-    private void goToLogin() {
+    @FXML private void goToLogin() {
         SceneManager.switchScene("login-view.fxml");
     }
 }

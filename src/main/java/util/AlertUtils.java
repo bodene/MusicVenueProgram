@@ -26,7 +26,7 @@ public class AlertUtils {
     public static boolean showConfirmation(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
-        alert.setHeaderText(null);
+        alert.setHeaderText("Confirmation Required");
         alert.setContentText(message);
 
         Optional<ButtonType> result = alert.showAndWait();

@@ -4,9 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -31,7 +28,7 @@
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="100.0" prefWidth="160.0">
                         <children>
-                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Admin Settings" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Admin Settings" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>
@@ -52,14 +49,6 @@
                                           </VBox.margin>
                                        </Label>
                                        <Button fx:id="viewVenuesButton" mnemonicParsing="false" onAction="#viewVenues" prefHeight="36.0" prefWidth="244.0" text="View Venues">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" left="20.0" />
-                                          </VBox.margin>
-                                       </Button>
-                                       <Button fx:id="viewEventsButton" mnemonicParsing="false" onAction="#viewEvents" prefHeight="36.0" prefWidth="244.0" text="View Events">
                                           <font>
                                              <Font name="Montreal Regular" size="18.0" />
                                           </font>

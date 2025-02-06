@@ -23,9 +23,14 @@ public class EventDAO {
         FROM events e
         JOIN clients c ON e.client_id = c.client_id""";
 
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        Connection connection = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DatabaseHandler.getConnection();
+            pstmt = connection.prepareStatement(sql);
+            rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 int eventId = rs.getInt("event_id");
@@ -40,19 +45,33 @@ public class EventDAO {
                 int eventCapacity = rs.getInt("required_capacity");
                 String eventType = rs.getString("event_type");
                 String eventCategory = rs.getString("event_category");
-                String clientName = rs.getString("client_name"); // ✅ No extra query needed
+                String clientName = rs.getString("client_name");
 
-                // ✅ Create and add Event object
+                // Create and add Event object
                 Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration, eventCapacity, eventType, eventCategory, clientName);
                 eventList.add(event);
-                System.out.println("✅ Loaded event: " + eventName);
             }
-
-            System.out.println("🔎 Found " + eventList.size() + " events in database.");
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("❌ Error fetching events from database.");
+            System.err.println("❌ Error fetching events from database: " + e.getMessage());
+        } finally {
+            // ✅ Close resources properly
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (connection != null) connection.close(); // ✅ Ensures new connection each time
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.err.println("❌ Error closing resources: " + e.getMessage());
+            }
+        }
+
+        // ✅ Print the results **after** the try-with-resources block
+        if (!eventList.isEmpty()) {
+            eventList.forEach(event -> System.out.println("✅ Loaded event: " + event.getEventName()));
+        } else {
+            System.out.println("❌ No events found in the database.");
         }
 
         return eventList;

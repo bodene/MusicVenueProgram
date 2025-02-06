@@ -1,41 +1,32 @@
 package controller;
 
-import dao.VenueDAO;
+import java.util.*;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import service.SceneManager;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.*;
-
-import java.sql.SQLException;
-import java.text.NumberFormat;
-import javafx.util.StringConverter;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.StringConverter;
+import model.Venue;
+import model.VenueType;
+import service.SceneManager;
 import service.SessionManager;
+import service.VenueService;
+import util.AlertUtils;
 
-import java.util.ArrayList;
-import java.util.Locale;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class VenuesController {
 
-    @FXML private Button logoutButton;
-    @FXML private Button settingsButton;
-    @FXML private Button addVenueButton;
-    @FXML private Button deleteVenueButton;
-    @FXML private Button returnToDashboardButton;
-    @FXML private Button searchVenuesButton;
+    @FXML private Button logoutButton, settingsButton, addVenueButton, deleteVenueButton, returnToDashboardButton, searchVenuesButton;
     @FXML private RadioButton indoorVenueRadio, outdoorVenueRadio, convertibleVenueRadio;
     private ToggleGroup categoryGroup;
     @FXML private TextField searchVenueNameField;
-
     @FXML private TableView<Venue> searchVenueTable;
     @FXML private TableColumn<Venue, Integer> venueIdColumn;
     @FXML private TableColumn<Venue, String> venueNameColumn;
@@ -45,7 +36,6 @@ public class VenuesController {
     @FXML private TableColumn<Venue, Double> pricePerHourColumn;
     private ObservableList<Venue> venueList = FXCollections.observableArrayList();
 
-    // Initialise Search Venue Tables
     @FXML
     public void initialize() {
         setupTableColumns();
@@ -59,7 +49,7 @@ public class VenuesController {
 
         // Allow deselection (by setting all to false if clicked again)
         categoryGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) { // If the user clicks again on the selected button, deselect all
+            if (newVal == null) {
                 categoryGroup.getSelectedToggle().setSelected(false);
             }
         });
@@ -68,14 +58,13 @@ public class VenuesController {
             try {
                 searchVenues();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                AlertUtils.showAlert("Error", "Failed to search venues.", Alert.AlertType.ERROR);
             }
         });
     }
 
-    /**
-     * Set up columns to match Venue object properties.
-     */
+    // Set Up Venue Table Columns
     private void setupTableColumns() {
         // Set up Venue Table
         venueIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getVenueId()));
@@ -111,7 +100,7 @@ public class VenuesController {
 
         venueCategoryColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getCategory()).asString());
 
-       // Adds thousands separator and adds dollar sign
+        // Adds thousands separator and adds dollar sign
         pricePerHourColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getHirePricePerHour()));
         pricePerHourColumn.setCellFactory(column -> new TextFieldTableCell<>(new StringConverter<Double>() {
             private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
@@ -131,31 +120,18 @@ public class VenuesController {
     }
 
     private void loadData() {
-        System.out.println("🔄 Loading venues from database...");
-        List<Venue> venueResults = VenueDAO.getAllVenues();
-
-        if (venueResults == null || venueResults.isEmpty()) {
-            System.out.println("❌ No venues found in the database!");
-        } else {
-            for (Venue v : venueResults) {
-                System.out.println("✅ Loaded Venue: " + v.getName());
-            }
-        }
-        venueList.setAll(venueResults);
-        searchVenueTable.setItems(venueList);
+        searchVenueTable.setItems(VenueService.getAllVenues());
     }
 
+    // Search Venues form
     @FXML
     private void searchVenues() throws SQLException {
         String searchText = searchVenueNameField.getText().trim();
         List<String> categories = new ArrayList<>();
 
-        // Determine category selected
+        // Determine category selected. If indoors include convertible, if outdoors include convertible
         if (categoryGroup.getSelectedToggle() != null) {
-            RadioButton selectedButton = (RadioButton) categoryGroup.getSelectedToggle();
-            String selectedCategory = selectedButton.getText().toUpperCase();
-
-            // If indoors include convertible, if outdoors include convertible
+            String selectedCategory = ((RadioButton) categoryGroup.getSelectedToggle()).getText().toUpperCase();
             if ("INDOOR".equals(selectedCategory)) {
                 categories.add("INDOOR");
                 categories.add("CONVERTIBLE");
@@ -166,52 +142,29 @@ public class VenuesController {
                 categories.add("CONVERTIBLE");
             }
         }
-        // Get Venues with search logic
-        ObservableList<Venue> filteredVenues = VenueDAO.searchVenues(searchText, categories);
-        searchVenueTable.setItems(filteredVenues);
+        searchVenueTable.setItems(VenueService.searchVenues(searchText, categories));
     }
 
-    // Add Venue
     @FXML
-    private void addVenue() {
-        SceneManager.switchScene("add-venue-view.fxml");
-    }
+    private void addVenue() {SceneManager.switchScene("add-venue-view.fxml");}
 
-    // Delete Venue
+    // Delete Selected Venue
     @FXML
     private void deleteVenue() {
-        // Get the selected venue from Table
         Venue selectedVenue = searchVenueTable.getSelectionModel().getSelectedItem();
         if (selectedVenue == null) {
-            showAlert("No Selection", "Select a venue to delete");
+            AlertUtils.showAlert("No Selection", "Select a venue to delete", Alert.AlertType.WARNING);
             return;
         }
         // Confirm deletion
-        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmationAlert.setTitle("Confirm Deletion");
-        confirmationAlert.setHeaderText("Are you sure you want to delete this venue?");
-        confirmationAlert.setContentText("This action cannot be undone.\nVenue: " + selectedVenue.getName());
-
-        if (confirmationAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            // Delete Venue
-            boolean success = VenueDAO.deleteVenue(selectedVenue.getVenueId());
-
-            if (success) {
+        if (AlertUtils.showConfirmation("Confirm Deletion", "Are you sure you want to delete this venue?\nVenue: " + selectedVenue.getName())) {
+            if (VenueService.deleteVenue(selectedVenue.getVenueId())) {
                 venueList.remove(selectedVenue);
-                showAlert("Success", "Venue deleted successfully");
+                AlertUtils.showAlert("Success", "Venue deleted successfully", Alert.AlertType.INFORMATION);
             } else {
-                showAlert("Error", "Failed to delete the venue");
+                AlertUtils.showAlert("Error", "Failed to delete the venue", Alert.AlertType.ERROR);
             }
         }
-    }
-
-
-
-
-
-    @FXML
-    private void returnToDashboard() {
-        SceneManager.switchScene("dashboard.fxml");
     }
 
     // go to either manager or admin settings page
@@ -219,14 +172,9 @@ public class VenuesController {
     private void goToSettings() {
         if (SessionManager.getInstance().isManager()) {
             SceneManager.switchScene("manager-view.fxml");
-        } else {
-            SceneManager.switchScene("admin-view.fxml");
-        }
+        } else {SceneManager.switchScene("admin-view.fxml");}
     }
 
-    @FXML
-    private void logout() {
-        //TODO implement logout
-        SceneManager.switchScene("main-view.fxml");
-    }
+    @FXML private void returnToDashboard() {SceneManager.switchScene("dashboard.fxml");}
+    @FXML private void logout() { SceneManager.switchScene("main-view.fxml"); }
 }

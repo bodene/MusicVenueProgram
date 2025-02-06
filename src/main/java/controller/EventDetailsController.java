@@ -6,8 +6,10 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Event;
-
+import service.EventService;
+import util.AlertUtils;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EventDetailsController {
@@ -22,13 +24,17 @@ public class EventDetailsController {
     @FXML private Label eventCategoryLabel;
     @FXML private Label eventClientLabel;
 
+    // Shows Full event details in a popup screen
     public void setEventDetails(Event event) {
-        if (event == null) return;
+        if (event == null) {
+            AlertUtils.showAlert("Error", "No event data available!", javafx.scene.control.Alert.AlertType.ERROR);
+            return;
+        }
 
         eventNameLabel.setText(event.getEventName());
         eventArtistLabel.setText(event.getArtist());
-        eventDateLabel.setText(event.getEventDate().toString());
-        eventTimeLabel.setText(event.getEventTime().toString());
+        eventDateLabel.setText(EventService.formatDate(Optional.ofNullable(event.getEventDate().toString())));
+        eventTimeLabel.setText(EventService.formatTime(Optional.ofNullable(event.getEventTime().toString())));
         eventDurationLabel.setText(event.getDuration() + " hours");
         eventCapacityLabel.setText(String.valueOf(event.getRequiredCapacity()));
         eventTypeLabel.setText(event.getEventType());
@@ -36,10 +42,12 @@ public class EventDetailsController {
         eventClientLabel.setText(event.getClientName());
     }
 
-    public void initialise(URL location, ResourceBundle resources) {
-        eventNameLabel.getScene().getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+    public void initialize(URL location, ResourceBundle resources) {
+        // Ensure styles are applied correctly
+        if (eventNameLabel.getScene() != null) {
+            eventNameLabel.getScene().getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        }
     }
-
 
     @FXML
     private void closeWindow() {

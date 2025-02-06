@@ -1,10 +1,5 @@
 package dao;
 
-import model.Booking;
-import model.Event;
-import model.Venue;
-import model.VenueCategory;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,123 +7,65 @@ import java.sql.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
 public class DatabaseHandler {
 
 	private static final String DB_URL = "jdbc:sqlite:db/music_venue.db";
-	private static Connection connection;
 
-	public static Connection getConnection() {
-		try {
-			if (connection == null || connection.isClosed()) {
-				connection = DriverManager.getConnection(DB_URL);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return connection;
+	// Always return a fresh connection
+	public static Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(DB_URL);
 	}
 
-	// Close connection
-	public static void closeConnection() {
-		try {
-			if (connection != null && !connection.isClosed()) {
+	// Close connection properly
+	public static void closeConnection(Connection connection) {
+		if (connection != null) {
+			try {
 				connection.close();
 				System.out.println("Disconnected from SQLite database.");
+			} catch (SQLException e) {
+				System.err.println("Error closing the database connection: " + e.getMessage());
 			}
-		} catch (SQLException e) {
-			System.err.println("Error closing the database connection: " + e.getMessage());
 		}
 	}
 
+	// Initialize database by checking & executing schema.sql
 	public static void initialiseDatabase() {
 		String filePath = "src/main/resources/db/schema.sql";
 		String checkTablesSQL = """
-        SELECT COUNT(*) AS count FROM sqlite_master
-        WHERE type='table' 
-        AND name IN ('clients', 'events', 'venues', 'venue_types', 'venue_types_venues', 'bookings', 'users');
-    """;
+            SELECT COUNT(*) AS count FROM sqlite_master
+            WHERE type='table' 
+            AND name IN ('clients', 'events', 'venues', 'venue_types', 'venue_types_venues', 'bookings', 'users');
+        """;
 
-		try (Connection checkConn = DriverManager.getConnection(DB_URL);
-			 Statement checkStmt = checkConn.createStatement()) {
+		try (Connection conn = getConnection();
+			 Statement stmt = conn.createStatement()) {
 
-			// Check if tables exist before proceeding
-			ResultSet rs = checkStmt.executeQuery(checkTablesSQL);
-			if (rs.next() && rs.getInt("count") == 7) { // All tables exist
-				System.out.println("All database tables already exist. Skipping initialisation.");
+			// Check if tables already exist
+			ResultSet rs = stmt.executeQuery(checkTablesSQL);
+			if (rs.next() && rs.getInt("count") == 7) {
+				System.out.println("All database tables exist. Skipping initialization.");
 				return;
 			}
-		} catch (SQLException e) {
-			System.err.println("Error checking existing tables: " + e.getMessage());
-		}
 
-		// Now open a separate connection to execute schema.sql
-		try (Connection conn = getConnection();
-			 Statement stmt = conn.createStatement();
-			 BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+			// Execute schema.sql to create tables
+			System.out.println("Initializing database... Creating tables.");
 
-			System.out.println("Initialising database... Creating tables.");
-
-			StringBuilder sql = new StringBuilder();
-			String line;
-			while ((line = br.readLine()) != null) {
-				sql.append(line).append("\n");
-				if (line.trim().endsWith(";")) { // Executes only at the end of each statement
-					stmt.execute(sql.toString());
-					sql.setLength(0); // Clear buffer after executing
+			try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+				StringBuilder sql = new StringBuilder();
+				String line;
+				while ((line = br.readLine()) != null) {
+					sql.append(line).append("\n");
+					if (line.trim().endsWith(";")) { // Execute when full statement is formed
+						stmt.execute(sql.toString());
+						sql.setLength(0); // Reset StringBuilder
+					}
 				}
+				System.out.println("Database schema initialized successfully.");
 			}
 
-			System.out.println("Database schema initialised successfully.");
-
 		} catch (IOException | SQLException e) {
-			System.err.println("Error executing schema.sql: " + e.getMessage());
+			System.err.println("Error initializing database: " + e.getMessage());
 		}
 	}
-
-
-	/**
-	 * 
-	 * @param event
-	 */
-	public void saveEvent(Event event) {
-		// TODO - implement DatabaseHandler.saveEvent
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
-	 * @param booking
-	 */
-	public void saveBooking(Booking booking) {
-		// TODO - implement DatabaseHandler.saveBooking
-		throw new UnsupportedOperationException();
-	}
-
-	public List<Venue> getVenues() {
-		// TODO - implement DatabaseHandler.getVenues
-		throw new UnsupportedOperationException();
-	}
-
-	public List<Event> getEvents() {
-		// TODO - implement DatabaseHandler.getEvents
-		throw new UnsupportedOperationException();
-	}
-
-	public List<Booking> getBookings() {
-		// TODO - implement DatabaseHandler.getBookings
-		throw new UnsupportedOperationException();
-	}
-
-	public List<VenueCategory> getVenueCategories() {
-		// TODO - implement DatabaseHandler.getVenueCategories
-		throw new UnsupportedOperationException();
-	}
-
-	public List<Venue> getAvailableVenues() {
-		// TODO - implement DatabaseHandler.getAvailableVenues
-		throw new UnsupportedOperationException();
-	}
-
 }

@@ -1,14 +1,11 @@
 package controller;
 
-
-import dao.UserDAO;
-import model.Staff;
-import model.Manager;
 import model.UserRole;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import service.SceneManager;
-
+import service.UserService;
+import util.AlertUtils;
 import java.sql.SQLException;
 
 public class AddUserController {
@@ -23,21 +20,23 @@ public class AddUserController {
     @FXML private Button confirmUserButton;
     @FXML private Button backButton1;
 
+    private ToggleGroup roleToggleGroup;
+
     // Ensure only one user role button is selected
     @FXML
-    private void initialise() {
-        ToggleGroup group = new ToggleGroup();
-        staffRadioButton.setToggleGroup(group);
-        managerRadioButton.setToggleGroup(group);
+    public void initialize() {
+        roleToggleGroup = new ToggleGroup();
+        staffRadioButton.setToggleGroup(roleToggleGroup);
+        managerRadioButton.setToggleGroup(roleToggleGroup);
     }
 
-
+    // Go to Entry Screen
     @FXML
     private void goToMain() {
-
         SceneManager.switchScene("main-view.fxml");
     }
 
+    // Add new user
     @FXML
     private void confirmUser() {
         String firstName = firstNameField.getText().trim();
@@ -47,12 +46,13 @@ public class AddUserController {
         String confirmPassword = confirmPasswordField.getText().trim();
 
         if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            showAlert("Error", "All Fields Must be Filled", Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Error", "All Fields Must be Filled", Alert.AlertType.ERROR);
             return;
         }
+
         // Ensure password and confirm password matches
         if(!password.equals(confirmPassword)) {
-            showAlert("Error", "Passwords must match", Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Error", "Passwords must match", Alert.AlertType.ERROR);
             return;
         }
 
@@ -63,36 +63,22 @@ public class AddUserController {
         } else if (managerRadioButton.isSelected()) {
             role = UserRole.MANAGER;
         } else {
-            showAlert("Error", "Please select a user role", Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Error", "Please select a user role", Alert.AlertType.ERROR);
             return;
         }
 
         // Create and save user
         try {
-            if (UserDAO.userExists(username)) {
-                showAlert("Error", "User already exists", Alert.AlertType.ERROR);
-                return;
-            }
-
-            boolean success = UserDAO.addUser(firstName, lastName, username, password, role);
+            boolean success = UserService.addUser(firstName, lastName, username, password, role);
             if (success) {
-                showAlert("Success", "User has been added", Alert.AlertType.INFORMATION);
+                AlertUtils.showAlert("Success", "User has been added", Alert.AlertType.INFORMATION);
                 SceneManager.switchScene("login-view.fxml");
             } else {
-                showAlert("Error", "Failed to add user", Alert.AlertType.ERROR);
+                AlertUtils.showAlert("Error", "User already exists", Alert.AlertType.ERROR);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Error", "Database error: " + e.getMessage(), Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Error", "Database error: " + e.getMessage(), Alert.AlertType.ERROR);
         }
-    }
-
-    // Alert System
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

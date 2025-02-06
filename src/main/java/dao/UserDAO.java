@@ -105,11 +105,11 @@ public class UserDAO {
     }
 
     // Update User Details
-    public static void updateUser(Staff loggedInUser) throws SQLException {
+    public static boolean updateUser(Staff loggedInUser) throws SQLException {
         String sql = "UPDATE users SET user_first_name = ?, user_last_name = ?, user_name = ?, user_password = ? WHERE user_id = ?";
 
         try (Connection connection = DatabaseHandler.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(sql)) {
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, loggedInUser.getFirstName());
             pstmt.setString(2, loggedInUser.getLastName());
@@ -118,15 +118,8 @@ public class UserDAO {
 
             pstmt.setInt(5, loggedInUser.getUserId());
 
-            int rowsUpdated = pstmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("User updated successfully");
-            } else {
-                System.out.println("User update failed. No user found with the given ID.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error updating user in database: " + e.getMessage());
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
         }
     }
 
