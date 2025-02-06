@@ -17,12 +17,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static dao.ClientDAO.findOrCreateClientId;
-import static dao.SuitabilityDAO.findOrCreateSuitabilityId;
+import static dao.VenueTypeDAO.findOrCreateVenueTypeId;
 
 public class CSVHandler {
 
 
-	// Imports a list of venues from the csv file
+	// Imports a list of venues from the CSV file
 	public static List<Venue> importVenueDataCSV(String filePath) throws FileNotFoundException, SQLException {
 		List<Venue> venues = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -32,38 +32,35 @@ public class CSVHandler {
 			while ((line = br.readLine()) != null) {
 				if (firstLine) {
 					firstLine = false;
-					continue;
+					continue; // Skip header row
 				}
 
 				String[] data = line.split(",");
-				if (data.length < 5) continue;
+				if (data.length < 5) continue; // Ensure there are enough columns
 
 				String venueName = data[0].trim();
 				int venueCapacity = Integer.parseInt(data[1].trim());
-				String suitableFor = data[2].trim();
+				String venueTypesString = data[2].trim(); // Venue types as a string
 				String category = data[3].trim().toUpperCase();
 				double pricePerHour = Double.parseDouble(data[4].trim());
 
 				Venue venue = new Venue(venueName, category, venueCapacity, pricePerHour);
 
-				// Add Multiple suitabilities
-				String[] eventTypes = suitableFor.split(";");
-				for (String eventType : eventTypes) {
-					venue.addSuitability(new Suitability(venueName, eventType.trim()));
+				// ✅ Add multiple venue types
+				String[] venueTypes = venueTypesString.split(";"); // Split by semicolon
+				for (String venueType : venueTypes) {
+					venue.addVenueType(new VenueType(venueType.trim())); // Add each type
 				}
+
 				venues.add(venue);
 			}
 		} catch (IOException | NumberFormatException e) {
 			e.printStackTrace(); // Handle incorrect formatting issues
 		}
 
-//        try {
-//            saveVenuesToDatabase(venues);
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
 		return venues;
 	}
+
 
 	public static List<Event> importEventDataCSV(String filePath) {
 		List<Event> events = new ArrayList<>();
@@ -164,11 +161,11 @@ public class CSVHandler {
 	 */
 	public static void saveVenuesToDatabase(List<Venue> venues) throws SQLException {
 		String insertVenueSQL = "INSERT INTO venues (venue_name, venue_category, venue_capacity, hire_price) VALUES (?, ?, ?, ?)";
-		String insertSuitabilitySQL = "INSERT INTO suitabilities_venues (venue_id, suitability_id) VALUES (?, ?)";
+		String insertVenueTypesSQL = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
 
 		try (Connection connection = DatabaseHandler.getConnection();
 			 PreparedStatement venueStmt = connection.prepareStatement(insertVenueSQL, Statement.RETURN_GENERATED_KEYS);
-			 PreparedStatement suitabilityStmt = connection.prepareStatement(insertSuitabilitySQL)) {
+			 PreparedStatement venueTypesStmt = connection.prepareStatement(insertVenueTypesSQL)) {
 
 			for (Venue venue : venues) {
 				try {
@@ -185,12 +182,12 @@ public class CSVHandler {
 					if (rs.next()) {
 						int venueId = rs.getInt(1);
 
-						// Insert suitability values
-						for (Suitability suitability : venue.getSuitabilities()) {
-							int suitabilityId = findOrCreateSuitabilityId(suitability.getEventType(), connection);
-							suitabilityStmt.setInt(1, venueId);
-							suitabilityStmt.setInt(2, suitabilityId);
-							suitabilityStmt.executeUpdate();
+						// Insert venue type values
+						for (VenueType venueType : venue.getVenueTypes()) {
+							int venueTypeId = findOrCreateVenueTypeId(venueType.getVenueType(), connection);
+							venueTypesStmt.setInt(1, venueId);
+							venueTypesStmt.setInt(2, venueTypeId);
+							venueTypesStmt.executeUpdate();
 						}
 					}
 
@@ -202,7 +199,7 @@ public class CSVHandler {
 			throw new RuntimeException("Database error while saving venues: " + e.getMessage(), e);
 		}
 
-		System.out.println("Venues and their suitability saved successfully.");
+		System.out.println("✅ Venues and Venue Types saved successfully.");
 	}
 
 	/**

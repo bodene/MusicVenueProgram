@@ -47,8 +47,6 @@ public class DashboardController {
     @FXML private CheckBox availableCheckbox, sufficientCapacityCheckbox, eventTypeCheckbox, venueCategoryCheckbox;
     @FXML private Button showRequestDetailsButton, filterVenuesButton, autoMatchButton, showVenueDetailsButton, bookVenueButton, logoutButton, settingsButton;
 
-
-
     @FXML
     public void initialize() {
         setupTableColumns();

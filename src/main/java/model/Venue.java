@@ -12,13 +12,12 @@ import java.util.List;
 public class Venue {
 
 	private int venueId;
-	private static int venueIdCounter = 0;
 	private String name;
 	private VenueCategory category;
 	private int capacity;
 	private double hirePricePerHour;
-	private List<Suitability> suitabilities;
-	private boolean available;
+	private List<VenueType> venueTypes;
+//	private boolean available;
 	private Set<Booking> bookings;
 
 	/**
@@ -29,24 +28,32 @@ public class Venue {
 	 * @param price
 	 */
 	public Venue(String name, String category, int capacity, double price) {
-		this.venueId = ++venueIdCounter;
 		this.name = name;
 		this.category = setCategory(category);
 		this.capacity = capacity;
 		this.hirePricePerHour = price;
-		this.available = true;
-		this.suitabilities = new ArrayList<>();
-
+		this.venueTypes = new ArrayList<>();
 	}
 
 	// Constructor for DB loading (fetching existing venue data)
-	public Venue(int id, String name, int capacity, boolean available, List<Suitability> suitabilities) {
+	public Venue(int id, String name, int capacity, List<VenueType> venueTypes) {
 		this.venueId = id;
 		this.name = name;
 		this.capacity = capacity;
-		this.available = available;
-		this.suitabilities = suitabilities;
+//		this.available = available;
+		this.venueTypes = venueTypes;
 	}
+
+	// Constructor for the database to table conversion
+	public Venue(int venueId, String venueName, String venueCategory, int venueCapacity, String hirePricePerHour, String venueTypes) {
+		this.venueId = venueId;
+		this.name = venueName;
+		this.category = setCategory(venueCategory); // Convert String to VenueCategory Enum
+		this.capacity = venueCapacity;
+		this.hirePricePerHour = Double.parseDouble(hirePricePerHour); // Convert price from String to double
+		this.venueTypes = parseVenueTypes(venueTypes); // Convert CSV string to List<VenueTypes>
+	}
+
 
 	public int getVenueId() {
 		return this.venueId;
@@ -102,19 +109,16 @@ public class Venue {
 		this.hirePricePerHour = price;
 	}
 
-	/**
-	 * 
-	 * @param availability
-	 */
-	public void setAvailability(boolean availability) {
-		this.available = availability;
-	}
+
+	//public void setAvailability(boolean availability) {
+	//	this.available = availability;
+	//}
 
 	// Checks Venue Availability for specific date and time
 	public boolean checkAvailability(int venueId, LocalDate requestedDate, LocalTime requestedTime, int duration) {
-		if(!available) {
-			return false;
-		}
+//		if(!available) {
+//			return false;
+//		}
 
 		// Convert hours to minutes and calculate the end time of event
 		int durationMinutes = duration * 60;
@@ -128,14 +132,26 @@ public class Venue {
 		return conflictingBookings.isEmpty();
 	}
 
-	// Add a suitability manually (used when loading from CSV)
-	public void addSuitability(Suitability suitability) {
-		this.suitabilities.add(suitability);
+	// Add a venueType manually (used when loading from CSV)
+	public void addVenueType(VenueType venueTypes) {
+		this.venueTypes.add(venueTypes);
 	}
 
-	// Returns a list of suitabilities
-	public List<Suitability> getSuitabilities() {
-		return this.suitabilities;
+	// Returns a list of venueTypes
+	public List<VenueType> getVenueTypes() {
+		return this.venueTypes;
+	}
+
+	// Converts the String from databse into venueTypes objects
+	private List<VenueType> parseVenueTypes(String venueTypes) {
+		List<VenueType> venueTypesList = new ArrayList<>();
+		if (venueTypes != null && !venueTypes.isEmpty()) {
+			String[] venueTypesArray = venueTypes.split(", "); // Split CSV string
+			for (String venueType : venueTypesArray) {
+				venueTypesList.add(new VenueType(venueType.trim())); // Create Venue Type objects
+			}
+		}
+		return venueTypesList;
 	}
 
 	/**
@@ -162,7 +178,7 @@ public class Venue {
 
 	@Override
 	public String toString() {
-		return "Venue ID: " + venueId + ", Name: " + name + ", Category: " + category + ", Capacity: " + capacity + ", Hourly Hire Price: " + hirePricePerHour + ", Suitabilities: " + suitabilities;
+		return "Venue ID: " + venueId + ", Name: " + name + ", Category: " + category + ", Capacity: " + capacity + ", Hourly Hire Price: " + hirePricePerHour + ", Venue Types: " + venueTypes;
 	}
 
 

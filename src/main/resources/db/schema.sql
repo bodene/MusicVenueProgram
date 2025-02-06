@@ -59,16 +59,16 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Suitabilities Table
-CREATE TABLE IF NOT EXISTS suitabilities (
-                                             suitability_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                             suitable_description TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS venue_types (
+                                             venue_type_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                             venue_type TEXT NOT NULL
 );
 
--- Suitabilities_Venues (Mapping Table)
-CREATE TABLE IF NOT EXISTS suitabilities_venues (
-                                                    suitability_id INTEGER NOT NULL,
+-- Venue_Types_Venues (Mapping Table)
+CREATE TABLE IF NOT EXISTS venue_types_venues (
+                                                    venue_type_id INTEGER NOT NULL,
                                                     venue_id INTEGER NOT NULL,
-                                                    PRIMARY KEY (suitability_id, venue_id),
-                                                    FOREIGN KEY (suitability_id) REFERENCES suitabilities(suitability_id),
+                                                    PRIMARY KEY (venue_type_id, venue_id),
+                                                    FOREIGN KEY (venue_type_id) REFERENCES venue_types(venue_type_id),
                                                     FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
     );

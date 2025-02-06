@@ -1,5 +1,7 @@
 package controller;
 
+import dao.VenueDAO;
+import model.Venue;
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -16,13 +18,13 @@ import java.util.ResourceBundle;
 public class AddVenueController implements Initializable {
 
     @FXML
-    private TextField venueName, capacity, pricePerHour;
+    private TextField venueNameField, venueCapacityField, pricePerHourField;
 
     @FXML
-    private HBox suitableForContainer;
+    private HBox venueTypeContainer;
 
     @FXML
-    private VBox suitableForColumn1, suitableForColumn2;
+    private VBox venueTypeColumn1, venueTypeColumn2;
 
     private final String[] eventTypes = {
             "Gig", "Disco", "Live Concert", "Festival", "Large Live Concert"
@@ -58,8 +60,8 @@ public class AddVenueController implements Initializable {
     // Populate the VBox with CheckBoxes for multiple selections
     private void initialiseEventTypes() {
         // Clear previous checkboxes
-        suitableForColumn1.getChildren().clear();
-        suitableForColumn2.getChildren().clear();
+        venueTypeColumn1.getChildren().clear();
+        venueTypeColumn2.getChildren().clear();
 
         for (int i = 0; i < eventTypes.length; i++) {
             CheckBox checkBox = new CheckBox(eventTypes[i]);
@@ -69,9 +71,9 @@ public class AddVenueController implements Initializable {
 
             // Distribute checkboxes into two columns
             if (i % 2 == 0) {
-                suitableForColumn1.getChildren().add(checkBox);
+                venueTypeColumn1.getChildren().add(checkBox);
             } else {
-                suitableForColumn2.getChildren().add(checkBox);
+                venueTypeColumn2.getChildren().add(checkBox);
             }
         }
     }
@@ -79,35 +81,93 @@ public class AddVenueController implements Initializable {
 
     @FXML
     private void addVenue() {
+        // Get the venue name
+        String venueName = venueNameField.getText().trim();
+        if (venueName.isEmpty()) {
+            showAlert("Error", "Venue can not be empty");
+            return;
+        }
+        // Get Venue capacity
+        int venueCapacity = 0;
+        try {
+            venueCapacity = Integer.parseInt(venueCapacityField.getText().trim());
+            if (venueCapacity <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert("Error", "Invalid Venue Capacity, Must be a positive number.");
+            return;
+        }
+        // Get price per hour
+        double pricePerHour = 0.0;
+        try {
+            pricePerHour = Double.parseDouble(pricePerHourField.getText().trim());
+            if (pricePerHour <= 0.0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert("Error", "Invalid price, Must be a positive number.");
+            return;
+        }
         // Get selected category
         RadioButton selectedCategory = (RadioButton) categoryGroup.getSelectedToggle();
-        String category = (selectedCategory != null) ? selectedCategory.getText() : "None";
+        if (selectedCategory == null) {
+            showAlert("Error", "Please select a venue category!");
+            return;
+        }
+        String category = selectedCategory.getText().toUpperCase();
 
         // Retrieve selected checkboxes from both columns
         List<String> selectedEventTypes = new ArrayList<>();
 
-        for (Node node : suitableForColumn1.getChildren()) {
+        for (Node node : venueTypeColumn1.getChildren()) {
             if (node instanceof CheckBox checkBox && checkBox.isSelected()) {
                 selectedEventTypes.add(checkBox.getText());
             }
         }
-
-        for (Node node : suitableForColumn2.getChildren()) {
+        for (Node node : venueTypeColumn2.getChildren()) {
             if (node instanceof CheckBox checkBox && checkBox.isSelected()) {
                 selectedEventTypes.add(checkBox.getText());
             }
         }
+        if (selectedEventTypes.isEmpty()) {
+            showAlert("Error", "Select at least one venue type!");
+            return;
+        }
+        // ✅ Create Venue object
+        Venue venue = new Venue(venueName, category, venueCapacity, pricePerHour);
 
-        // Print venue details
-        System.out.println("Adding venue: " + venueName.getText());
-        System.out.println("Capacity: " + capacity.getText());
-        System.out.println("Price per hour: " + pricePerHour.getText());
-        System.out.println("Venue Category: " + category);
-        System.out.println("Suitable for: " + selectedEventTypes);
+        // ✅ Save venue to database via VenueDAO
+        boolean success = VenueDAO.addVenue(venue, selectedEventTypes);
+
+        if (success) {
+            showAlert("Success", "Venue added successfully!");
+            SceneManager.switchScene("view-venue-details.fxml");
+        } else {
+            showAlert("Error", "Failed to add venue. Please try again.");
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void clearForm() {
+        venueNameField.clear();
+        venueCapacityField.clear();
+        pricePerHourField.clear();
+        categoryGroup.selectToggle(null); // Deselect category
+        venueTypeColumn1.getChildren().forEach(node -> {
+            if (node instanceof CheckBox checkBox) checkBox.setSelected(false);
+        });
+        venueTypeColumn2.getChildren().forEach(node -> {
+            if (node instanceof CheckBox checkBox) checkBox.setSelected(false);
+        });
     }
 
     @FXML
     private void goToMain() {
         SceneManager.switchScene("main-view.fxml");
     }
+
 }

@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-import dao.DatabaseHandler;
-import model.Venue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,16 +16,18 @@ import java.util.List;
 
 public class DatabaseHandler {
 
-	private static final String DB_URL = "jdbc:sqlite:src/main/resources/music_venue.db";
+	private static final String DB_URL = "jdbc:sqlite:db/music_venue.db";
 	private static Connection connection;
 
 	public static Connection getConnection() {
 		try {
-			return DriverManager.getConnection(DB_URL);
+			if (connection == null || connection.isClosed()) {
+				connection = DriverManager.getConnection(DB_URL);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
 		}
+		return connection;
 	}
 
 	// Close connection
@@ -42,36 +42,50 @@ public class DatabaseHandler {
 		}
 	}
 
-	// Execute schema.sql to create tables
-	private static void initialiseDatabase() {
-		String filePath = "src/main/resources/db/schema.sql"; // Path to SQL script
-		try (BufferedReader br = new BufferedReader(new FileReader(filePath));
-			 Statement stmt = connection.createStatement()) {
+	public static void initialiseDatabase() {
+		String filePath = "src/main/resources/db/schema.sql";
+		String checkTablesSQL = """
+        SELECT COUNT(*) AS count FROM sqlite_master
+        WHERE type='table' 
+        AND name IN ('clients', 'events', 'venues', 'venue_types', 'venue_types_venues', 'bookings', 'users');
+    """;
 
-			// Check if tables exist first
-			ResultSet rs = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='users';");
-			if (rs.next()) {
-				System.out.println("Database tables already exist. Skipping initialization.");
-				return; // Tables exist, skip execution
+		try (Connection checkConn = DriverManager.getConnection(DB_URL);
+			 Statement checkStmt = checkConn.createStatement()) {
+
+			// Check if tables exist before proceeding
+			ResultSet rs = checkStmt.executeQuery(checkTablesSQL);
+			if (rs.next() && rs.getInt("count") == 7) { // All tables exist
+				System.out.println("All database tables already exist. Skipping initialisation.");
+				return;
 			}
+		} catch (SQLException e) {
+			System.err.println("Error checking existing tables: " + e.getMessage());
+		}
+
+		// Now open a separate connection to execute schema.sql
+		try (Connection conn = getConnection();
+			 Statement stmt = conn.createStatement();
+			 BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+
+			System.out.println("Initialising database... Creating tables.");
 
 			StringBuilder sql = new StringBuilder();
 			String line;
 			while ((line = br.readLine()) != null) {
 				sql.append(line).append("\n");
-				if (line.trim().endsWith(";")) { // Execute SQL when encountering semicolon
+				if (line.trim().endsWith(";")) { // Executes only at the end of each statement
 					stmt.execute(sql.toString());
-					sql.setLength(0); // Clear the buffer
+					sql.setLength(0); // Clear buffer after executing
 				}
 			}
+
 			System.out.println("Database schema initialised successfully.");
 
 		} catch (IOException | SQLException e) {
 			System.err.println("Error executing schema.sql: " + e.getMessage());
 		}
 	}
-
-
 
 
 	/**

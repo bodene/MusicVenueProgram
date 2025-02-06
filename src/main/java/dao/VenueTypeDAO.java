@@ -3,27 +3,27 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SuitabilityDAO {
+public class VenueTypeDAO {
 
-    // Add suitable event type to venue
-    public void addSuitability(int venueId, int eventTypeId) {
-        String sql = "INSERT INTO venue_suitability (venue_id, event_type_id) VALUES (?, ?)";
+    // Add view type to venue
+    public void addViewType(int venueId, int venueTypeId) {
+        String sql = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setInt(1, venueId);
-            stmt.setInt(2, eventTypeId);
+            stmt.setInt(2, venueTypeId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Get all suitable event types for a venue
-    public List<Integer> getSuitableEventTypes(int venueId) {
-        List<Integer> eventTypeIds = new ArrayList<>();
-        String sql = "SELECT event_type_id FROM venue_suitability WHERE venue_id = ?";
+    // Get all venue types for a venue
+    public List<Integer> getAllVenueTypes(int venueId) {
+        List<Integer> venueTypeIds = new ArrayList<>();
+        String sql = "SELECT venue_type_id FROM venue_types_venues WHERE venue_id = ?";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -32,23 +32,23 @@ public class SuitabilityDAO {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                eventTypeIds.add(rs.getInt("event_type_id"));
+                venueTypeIds.add(rs.getInt("venue_type_id"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return eventTypeIds;
+        return venueTypeIds;
     }
 
     // Check if a venue is suitable for a given event type
-    public boolean isVenueSuitable(int venueId, int eventTypeId) {
-        String sql = "SELECT COUNT(*) FROM venue_suitability WHERE venue_id = ? AND event_type_id = ?";
+    public boolean isVenueSuitable(int venueId, int venueTypeId) {
+        String sql = "SELECT COUNT(*) FROM venue_types_venues WHERE venue_id = ? AND venue_type_id = ?";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setInt(1, venueId);
-            stmt.setInt(2, eventTypeId);
+            stmt.setInt(2, venueTypeId);
 
             ResultSet rs = stmt.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
@@ -59,21 +59,21 @@ public class SuitabilityDAO {
     }
 
     /**
-     * Finds or creates a suitability entry in the database.
-     * @param description Suitability type (e.g., "Concert", "Conference").
+     * Finds or creates a venueType entry in the database.
+     * @param description Venue type name.
      * @param conn Active database connection.
-     * @return suitabilityId
+     * @return venueTypeId
      * @throws SQLException
      */
-    public static int findOrCreateSuitabilityId(String description, Connection conn) throws SQLException {
-        String findSQL = "SELECT suitability_id FROM suitabilities WHERE suitable_description = ?";
-        String insertSQL = "INSERT INTO suitabilities (suitable_description) VALUES (?)";
+    public static int findOrCreateVenueTypeId(String description, Connection conn) throws SQLException {
+        String findSQL = "SELECT venue_type_id FROM venue_types WHERE venue_type = ?";
+        String insertSQL = "INSERT INTO venue_types (venue_type) VALUES (?)";
 
         try (PreparedStatement findStmt = conn.prepareStatement(findSQL)) {
             findStmt.setString(1, description);
             ResultSet rs = findStmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("suitability_id"); // Found existing ID
+                return rs.getInt("venue_type_id"); // Found existing ID
             }
         }
 
@@ -88,6 +88,6 @@ public class SuitabilityDAO {
             }
         }
 
-        throw new SQLException("Error: Could not insert or find Suitability for: " + description);
+        throw new SQLException("Error: Could not insert or find Venue Type for: " + description);
     }
 }
