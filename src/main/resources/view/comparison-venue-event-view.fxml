@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane prefHeight="615.0" prefWidth="776.0" styleClass="popup-background" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ComparisonVenueEventController">
+
+    <!-- Main Container -->
+    <AnchorPane prefHeight="706.0" prefWidth="774.0" style="-fx-background-color: rgba(255, 255, 255, 0.9); -fx-padding: 20px; -fx-background-radius: 10;">
+        <children>
+
+            <!-- BorderPane to structure layout -->
+            <BorderPane prefHeight="585.0" prefWidth="710.0">
+
+                <!-- Center Content -->
+                <center>
+                    <GridPane fx:id="comparisonGrid" alignment="CENTER" hgap="15" prefHeight="546.0" prefWidth="713.0" styleClass="grid-pane" stylesheets="@../css/styles.css" vgap="10">
+
+                        <!-- Column Constraints -->
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" prefWidth="250.0" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" prefWidth="250.0" />
+                        </columnConstraints>
+
+                        <!-- Row Constraints -->
+                        <rowConstraints>
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                            <RowConstraints minHeight="40.0" />
+                     <RowConstraints />
+                        </rowConstraints>
+
+                        <!-- Header Row -->
+                        <Label prefHeight="44.0" prefWidth="354.0" styleClass="bold-label" text="Event Details" underline="true" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label prefHeight="42.0" prefWidth="347.0" styleClass="bold-label" text="Venue Details" underline="true" GridPane.columnIndex="1">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+
+                        <!-- Event Name -->
+                        <Label prefHeight="44.0" prefWidth="90.0" styleClass="bold-label" text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="eventNameLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="38.0" prefWidth="344.0" snapToPixel="false" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin></Label>
+
+                        <Label prefHeight="40.0" prefWidth="143.0" styleClass="bold-label" text="Venue Name:" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venueNameLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="38.0" prefWidth="346.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <!-- Category -->
+                        <Label prefHeight="39.0" prefWidth="119.0" styleClass="bold-label" text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="eventCategoryLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="345.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+
+                        <Label prefHeight="42.0" prefWidth="188.0" styleClass="bold-label" text="Venue Category:" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venueCategoryLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="347.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <!-- Capacity -->
+                        <Label prefHeight="39.0" prefWidth="106.0" styleClass="bold-label" text="Capacity:" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="eventCapacityLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="38.0" prefWidth="346.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+
+                        <Label prefHeight="39.0" prefWidth="173.0" styleClass="bold-label" text="Venue Capacity:" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venueCapacityLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="40.0" prefWidth="346.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                        <!-- Event Type -->
+                        <Label prefHeight="39.0" prefWidth="130.0" styleClass="bold-label" text="Event Type:" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="eventTypeLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="351.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+
+                        <Label prefHeight="43.0" prefWidth="151.0" styleClass="bold-label" text="Venue Types:" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venueTypesLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="346.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                        <!-- Date & Time -->
+                        <Label prefHeight="42.0" prefWidth="126.0" styleClass="bold-label" text="Date/Time:" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="eventDateTimeLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="43.0" prefWidth="347.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+
+                        <Label prefHeight="44.0" prefWidth="153.0" styleClass="bold-label" text="Availability:" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venueAvailabilityLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="348.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                        <!-- Price -->
+                        <Label prefHeight="42.0" prefWidth="178.0" styleClass="bold-label" text="Price per Hour:" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                     <padding>
+                        <Insets left="3.0" />
+                     </padding></Label>
+                        <Label fx:id="venuePriceLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="42.0" prefWidth="345.0" styleClass="regular-label" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                    </GridPane>
+                </center>
+
+            </BorderPane>
+
+               <!-- Close Button -->
+               <Button layoutX="291.0" layoutY="597.0" onAction="#closeWindow" prefHeight="42.0" prefWidth="128.0" style="-fx-font-size: 16px; -fx-padding: 8px;" text="Close" />
+
+        </children>
+    </AnchorPane>
+</StackPane>

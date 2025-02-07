@@ -2,10 +2,11 @@ package service;
 
 import model.Staff;
 import model.Manager;
+import model.User;
 
 public class SessionManager {
     private static SessionManager instance;
-    private static Staff currentUser; // Can be Staff or Manager
+    private static User currentUser;
 
     // Private constructor (Singleton pattern)
     private SessionManager() {}
@@ -17,16 +18,13 @@ public class SessionManager {
         return instance;
     }
 
-    // Set the current user (Staff or Manager)
-    public void setCurrentUser(Staff user) {
-        this.currentUser = user;
-    }
-
-    // Retrieve the current user
-    public static Staff getCurrentUser() {
+    public static User getCurrentUser() {
         return currentUser;
     }
 
+    public static void setCurrentUser(User user) {
+        currentUser = user;
+    }
 
     // Get user role (Manager or Staff)
     public String getUserRole() {

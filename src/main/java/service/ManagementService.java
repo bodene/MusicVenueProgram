@@ -1,9 +1,12 @@
 package service;
 
+import dao.EventDAO;
+import dao.VenueDAO;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import model.Venue;
 import model.Event;
+import util.AlertUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,18 +36,18 @@ public class ManagementService {
                 List<Venue> venues = CSVHandler.importVenueDataCSV(selectedFile.getAbsolutePath());
 
                 if (!venues.isEmpty()) {
-                    CSVHandler.saveVenuesToDatabase(venues);
-                    showAlert("Success", "Venues imported successfully!", Alert.AlertType.INFORMATION);
+                    VenueDAO.saveVenues(venues);
+                    AlertUtils.showAlert("Success", "Venues imported successfully!", Alert.AlertType.INFORMATION);
                 } else {
-                    showAlert("Warning", "No venues found in the CSV file.", Alert.AlertType.WARNING);
+                    AlertUtils.showAlert("Warning", "No venues found in the CSV file.", Alert.AlertType.WARNING);
                 }
 
             } catch (SQLException | FileNotFoundException e) {
                 e.printStackTrace();
-                showAlert("Error", "Failed to import venues: " + e.getMessage(), Alert.AlertType.ERROR);
+                AlertUtils.showAlert("Error", "Failed to import venues: " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
-            showAlert("Warning", "No file selected.", Alert.AlertType.WARNING);
+            AlertUtils.showAlert("Warning", "No file selected.", Alert.AlertType.WARNING);
         }
     }
 
@@ -56,18 +59,18 @@ public class ManagementService {
                 List<Event> events = CSVHandler.importEventDataCSV(selectedFile.getAbsolutePath());
 
                 if (!events.isEmpty()) {
-                    CSVHandler.saveEventsToDatabase(events);
-                    showAlert("Success", "Events imported successfully!", Alert.AlertType.INFORMATION);
+                    EventDAO.saveEvents(events);
+                    AlertUtils.showAlert("Success", "Events imported successfully!", Alert.AlertType.INFORMATION);
                 } else {
-                    showAlert("Warning", "No events found in the CSV file.", Alert.AlertType.WARNING);
+                    AlertUtils.showAlert("Warning", "No events found in the CSV file.", Alert.AlertType.WARNING);
                 }
 
             } catch (SQLException e) {
                 e.printStackTrace();
-                showAlert("Error", "Failed to import events: " + e.getMessage(), Alert.AlertType.ERROR);
+                AlertUtils.showAlert("Error", "Failed to import events: " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
-            showAlert("Warning", "No file selected.", Alert.AlertType.WARNING);
+            AlertUtils.showAlert("Warning", "No file selected.", Alert.AlertType.WARNING);
         }
     }
 
@@ -77,14 +80,5 @@ public class ManagementService {
         fileChooser.setTitle(title);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         return fileChooser.showOpenDialog(null);
-    }
-
-    // Alert Helper Method
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

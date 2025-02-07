@@ -16,7 +16,7 @@ public class Event {
 	private int requiredCapacity;
 	private String eventType;
 	private VenueCategory eventCategory;
-	private String clientName;
+	private Client client;
 
 	/**
 	 *
@@ -27,9 +27,9 @@ public class Event {
 	 * @param eventTime
 	 * @param duration
 	 * @param eventType
-	 * @param clientName
+	 * @param client
 	 */
-	public Event(int eventId, String eventName, String artist, LocalDate eventDate, LocalTime eventTime, int duration, int requiredCapacity, String eventType, String eventCategory, String clientName) {
+	public Event(int eventId, String eventName, String artist, LocalDate eventDate, LocalTime eventTime, int duration, int requiredCapacity, String eventType, String eventCategory, Client client) {
 		this.eventId = eventId;
 		this.eventName = eventName;
 		this.artist = artist;
@@ -39,9 +39,7 @@ public class Event {
 		this.requiredCapacity = requiredCapacity;
 		this.eventType = eventType;
 		this.eventCategory = setCategory(eventCategory);
-		// Store client as String instead of Client object
-		Client client = ClientDAO.findOrCreateClient(clientName);
-		this.clientName = client.getClientName();
+		this.client = client;
 	}
 
 	public int getEventId() {
@@ -142,14 +140,17 @@ public class Event {
 		return eventCategory;
 	}
 
+	public int getClientId() {
+		return client.getClientId();
+	}
+
+	public Client getClient() {
+		return this.client;
+	}
+
 	public String getClientName() {
-		return this.clientName;
+		return client.getClientName();
 	}
-
-	public void setClientName(String clientName) {
-		this.clientName = clientName; //
-	}
-
 
 	@Override
 	public String toString() {
@@ -163,7 +164,7 @@ public class Event {
 				", requiredCapacity=" + requiredCapacity +
 				", eventType='" + eventType + '\'' +
 				", eventCategory=" + eventCategory +
-				", client=" + clientName;
+				", client=" + client;
 	}
 
 }

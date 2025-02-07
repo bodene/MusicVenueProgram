@@ -4,7 +4,7 @@ import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
-import model.Staff;
+import model.User;
 import service.SceneManager;
 import service.SessionManager;
 import service.UserService;
@@ -25,7 +25,7 @@ public class LoginController {
         String password = passwordField.getText().trim();
 
         // Authenticate user
-        Optional<Staff> authenticatedUser = UserService.authenticateUser(username, password);
+        Optional<User> authenticatedUser = UserService.authenticateUser(username, password);
 
         if (authenticatedUser.isPresent()) {
             // Store user in session

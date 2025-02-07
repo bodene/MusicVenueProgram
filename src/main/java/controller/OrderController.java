@@ -113,7 +113,7 @@ public class OrderController {
         totalCommissionColumn.setCellValueFactory(new PropertyValueFactory<>("totalCommission"));
 
         eventCommissionTable.setItems(getEventData());
-        clientCommissionTable.setItems(getClientCommissionData());
+       // clientCommissionTable.setItems(getClientCommissionData());
     }
 
     private ObservableList<Order> getEventData() {
@@ -171,9 +171,7 @@ class Order {
         return eventName;
     }
 
-    public String getClient() {
-        return client;
-    }
+
 
     public Double getCommission() {
         return commission;
@@ -192,13 +190,9 @@ static class ClientCommission {
         this.totalCommission = totalCommission;
     }
 
-    public Integer getClientId() {
-        return clientId;
-    }
 
-    public String getClientName() {
-        return clientName;
-    }
+
+
 
     public Double getTotalCommission() {
         return totalCommission;

@@ -39,7 +39,7 @@ public class EventDetailsController {
         eventCapacityLabel.setText(String.valueOf(event.getRequiredCapacity()));
         eventTypeLabel.setText(event.getEventType());
         eventCategoryLabel.setText(event.getCategory().toString());
-        eventClientLabel.setText(event.getClientName());
+        eventClientLabel.setText(event.getClient().getClientName());
     }
 
     public void initialize(URL location, ResourceBundle resources) {

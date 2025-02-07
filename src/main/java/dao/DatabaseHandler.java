@@ -22,14 +22,13 @@ public class DatabaseHandler {
 		if (connection != null) {
 			try {
 				connection.close();
-				System.out.println("Disconnected from SQLite database.");
 			} catch (SQLException e) {
 				System.err.println("Error closing the database connection: " + e.getMessage());
 			}
 		}
 	}
 
-	// Initialize database by checking & executing schema.sql
+	// Initialise database by checking & executing schema.sql
 	public static void initialiseDatabase() {
 		String filePath = "src/main/resources/db/schema.sql";
 		String checkTablesSQL = """
@@ -44,13 +43,10 @@ public class DatabaseHandler {
 			// Check if tables already exist
 			ResultSet rs = stmt.executeQuery(checkTablesSQL);
 			if (rs.next() && rs.getInt("count") == 7) {
-				System.out.println("All database tables exist. Skipping initialization.");
 				return;
 			}
 
 			// Execute schema.sql to create tables
-			System.out.println("Initializing database... Creating tables.");
-
 			try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
 				StringBuilder sql = new StringBuilder();
 				String line;
@@ -58,12 +54,10 @@ public class DatabaseHandler {
 					sql.append(line).append("\n");
 					if (line.trim().endsWith(";")) { // Execute when full statement is formed
 						stmt.execute(sql.toString());
-						sql.setLength(0); // Reset StringBuilder
+						sql.setLength(0);
 					}
 				}
-				System.out.println("Database schema initialized successfully.");
 			}
-
 		} catch (IOException | SQLException e) {
 			System.err.println("Error initializing database: " + e.getMessage());
 		}

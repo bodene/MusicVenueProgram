@@ -1,5 +1,5 @@
 package controller;
-
+//done
 import service.AuthService;
 import service.SceneManager;
 import javafx.fxml.FXML;
@@ -26,7 +26,6 @@ public class MainController {
 
         if (AuthService.validateManagerCode(code)) {
             managerCodePane.setVisible(false);
-            System.out.println("✅ Manager Code validated, proceeding to signup...");
             SceneManager.switchScene("add-user-view.fxml");
         } else {
             AlertUtils.showAlert("Invalid Code", "The manager code is incorrect. Please try again.", Alert.AlertType.ERROR);

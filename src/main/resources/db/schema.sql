@@ -6,14 +6,13 @@ CREATE TABLE IF NOT EXISTS clients (
 );
 
 -- Events Table
-DROP TABLE IF EXISTS events;
-
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
                         event_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         event_name VARCHAR(255) NOT NULL,
                         event_artist VARCHAR(255) NOT NULL,
-                        event_date TEXT NOT NULL,
+                        event_date DATE NOT NULL,
                         event_time TEXT NOT NULL,
+                        event_end_time TEXT NOT NULL,
                         event_duration INTEGER NOT NULL,
                         required_capacity INTEGER NOT NULL,
                         event_type VARCHAR(255) NOT NULL,
@@ -21,27 +20,26 @@ CREATE TABLE events (
                         client_id INTEGER NOT NULL,
                         FOREIGN KEY (client_id) REFERENCES clients(client_id)
 );
-DROP TABLE IF EXISTS venues;
 -- Venues Table
 CREATE TABLE IF NOT EXISTS venues (
-                                      venue_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                      venue_name VARCHAR(255) NOT NULL,
-                                        venue_category VARCHAR(50) NOT NULL,
-                                        venue_capacity INTEGER NOT NULL,
-                                        hire_price DECIMAL(10, 2) NOT NULL
+                                    venue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    venue_name VARCHAR(255) NOT NULL,
+                                    venue_category VARCHAR(50) NOT NULL,
+                                    venue_capacity INTEGER NOT NULL,
+                                    hire_price DECIMAL(10, 2) NOT NULL
     );
 
 -- Bookings Table
 CREATE TABLE IF NOT EXISTS bookings (
                                         booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                        booking_date DATE NOT NULL,
+                                        booking_date TEXT NOT NULL,
                                         booking_hire_price REAL NOT NULL,
-                                        booking_commission REAL NOT NULL,
+                                        booking_commission REAL,
                                         booking_status TEXT NOT NULL,
                                         event_id INTEGER NOT NULL,
                                         venue_id INTEGER NOT NULL,
                                         client_id INTEGER NOT NULL,
-                                        booked_by INTEGER NOT NULL,
+                                        booked_by VARCHAR(255) NOT NULL,
                                         FOREIGN KEY (event_id) REFERENCES events(event_id),
                                         FOREIGN KEY (venue_id) REFERENCES venues(venue_id),
                                         FOREIGN KEY (client_id) REFERENCES clients(client_id),
@@ -61,14 +59,14 @@ CREATE TABLE IF NOT EXISTS users (
 -- Suitabilities Table
 CREATE TABLE IF NOT EXISTS venue_types (
                                              venue_type_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                             venue_type TEXT NOT NULL
+                                             venue_type TEXT NOT NULL UNIQUE
 );
 
 -- Venue_Types_Venues (Mapping Table)
 CREATE TABLE IF NOT EXISTS venue_types_venues (
-                                                    venue_type_id INTEGER NOT NULL,
-                                                    venue_id INTEGER NOT NULL,
-                                                    PRIMARY KEY (venue_type_id, venue_id),
-                                                    FOREIGN KEY (venue_type_id) REFERENCES venue_types(venue_type_id),
-                                                    FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
+                                            venue_type_id INTEGER NOT NULL,
+                                            venue_id INTEGER NOT NULL,
+                                            PRIMARY KEY (venue_type_id, venue_id),
+                                            FOREIGN KEY (venue_type_id) REFERENCES venue_types(venue_type_id),
+                                            FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
     );

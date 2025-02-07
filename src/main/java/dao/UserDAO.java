@@ -1,130 +1,174 @@
 package dao;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+//done
 import model.Staff;
 import model.Manager;
+import model.User;
 import model.UserRole;
 import java.sql.*;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UserDAO {
 
-    public static Staff getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE user_name = ?";
+    // User Retrieval
+    public static Optional<User> findUserByUsername(String username) {
+        String sql = "SELECT user_id, user_first_name, user_last_name, user_name, user_password, user_role FROM users WHERE user_name = ?";
 
-        try (Connection connection = DatabaseHandler.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
 
-                pstmt.setString(1, username);
-                ResultSet rs = pstmt.executeQuery();
-
-                if (rs.next()) {
-                    int userId = rs.getInt("user_id");
-                    String firstName = rs.getString("user_first_name");
-                    String lastName = rs.getString("user_last_name");
-                    String password = rs.getString("user_password");
-                    String userRoleStr = rs.getString("user_role");
-
-                    // Convert role to enum
-                    UserRole role = UserRole.valueOf(userRoleStr.toUpperCase());
-
-                    // Return correct User role
-                    if (role == UserRole.MANAGER) {
-                        return new Manager(userId, firstName, lastName, username, password);
-                    } else {
-                        return new Staff(userId, firstName, lastName, username, password, role);
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (rs.next()) {
+                return Optional.of(mapUserFromResultSet(rs)); // Include password
             }
-        return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
     }
 
+    // User Authentication
+    public static Optional<User> authenticateUser(String username, String inputPassword) {
+        String sql = "SELECT * FROM users WHERE user_name = ? AND user_password = ?";
 
-    // Add User to database
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            stmt.setString(2, inputPassword); // Compare plaintext password
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(mapUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
+    // Add User
     public static boolean addUser(String firstName, String lastName, String username, String password, UserRole role) {
         String sql = "INSERT INTO users (user_first_name, user_last_name, user_name, user_password, user_role) VALUES (?, ?, ?, ?, ?)";
 
-        try {
-            Connection connection = DatabaseHandler.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(sql);
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
             pstmt.setString(3, username);
-            pstmt.setString(4, password);
+            pstmt.setString(4, password); // Storing plaintext password (as per your request)
             pstmt.setString(5, role.name().toLowerCase());
 
             return pstmt.executeUpdate() > 0;
-
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
+    // Check if User Exists
     public static boolean userExists(String username) throws SQLException {
         String sql = "SELECT COUNT(*) FROM users WHERE user_name = ?";
 
-        try(Connection connection = DatabaseHandler.getConnection();
-        PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
+            return rs.next() && rs.getInt(1) > 0;
         }
-        return false;
     }
-    public static UserAuthResult authenticateUser(String username, String password) {
-        String sql = "SELECT user_id, user_role FROM users WHERE user_name = ? AND user_password = ?";
+
+    // Update User Details
+    public static boolean updateUser(User user) throws SQLException {
+        String sql = "UPDATE users SET user_first_name = ?, user_last_name = ?, user_name = ?, user_role = ? WHERE user_id = ?";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            ResultSet rs = pstmt.executeQuery();
+            pstmt.setString(1, user.getFirstName());
+            pstmt.setString(2, user.getLastName());
+            pstmt.setString(3, user.getUsername());
+            pstmt.setString(4, user.getRole().name().toLowerCase());
+            pstmt.setInt(5, user.getUserId());
 
-            if (rs.next()) {
-                int userId = rs.getInt("user_id");
-                String role = rs.getString("user_role");
-                return new UserAuthResult(userId, role); // Return both values
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    // Update Password
+    public static boolean updatePassword(int userId, String newPassword) throws SQLException {
+        String sql = "UPDATE users SET user_password = ? WHERE user_id = ?";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newPassword); // Plaintext password update
+            pstmt.setInt(2, userId);
+
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    // Delete User
+    public static boolean deleteUser(int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    // Promote to Manager
+    public static boolean updateUserRole(int userId, UserRole newRole) throws SQLException {
+        String sql = "UPDATE users SET user_role = ? WHERE user_id = ?";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newRole.name().toLowerCase());
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    // Get All Users (Managers + Staff)
+    public static List<User> getAllUsers() {
+        List<User> userList = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                userList.add(mapUserFromResultSet(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // User not found
+
+        return userList;
     }
 
-    // Update User Details
-    public static boolean updateUser(Staff loggedInUser) throws SQLException {
-        String sql = "UPDATE users SET user_first_name = ?, user_last_name = ?, user_name = ?, user_password = ? WHERE user_id = ?";
+    // Helper Method - Mapping Users
+    private static User mapUserFromResultSet(ResultSet rs) throws SQLException {
+        int userId = rs.getInt("user_id");
+        String firstName = rs.getString("user_first_name");
+        String lastName = rs.getString("user_last_name");
+        String username = rs.getString("user_name");
+        String password = rs.getString("user_password"); // Keep as plaintext
+        UserRole role = UserRole.valueOf(rs.getString("user_role").toUpperCase());
 
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
-            pstmt.setString(1, loggedInUser.getFirstName());
-            pstmt.setString(2, loggedInUser.getLastName());
-            pstmt.setString(3, loggedInUser.getUsername());
-            pstmt.setString(4, loggedInUser.getPassword());
-
-            pstmt.setInt(5, loggedInUser.getUserId());
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
+        return role == UserRole.MANAGER
+                ? new Manager(userId, firstName, lastName, username, password)
+                : new Staff(userId, firstName, lastName, username, password);
     }
 
-    public static List<Staff> searchUsers(String query) {
-        List<Staff> staffList = new ArrayList<>();
+        public static List<User> searchUsers(String query) {
+        List<User> userList = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE user_first_name LIKE ? OR user_last_name LIKE ? OR user_name LIKE ?";
 
         try (Connection connection = DatabaseHandler.getConnection();
@@ -148,104 +192,19 @@ public class UserDAO {
 
                 UserRole role = UserRole.valueOf(userRoleStr.toUpperCase());
 
-                Staff user;
+                User user;
                 if (role == UserRole.MANAGER) {
                     user = new Manager(userId, firstName, lastName, username, password);
                 } else {
-                    user = new Staff(userId, firstName, lastName, username, password, role);
+                    user = new Staff(userId, firstName, lastName, username, password);
                 }
 
-                staffList.add(user);
+                userList.add(user);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return staffList;
+        return userList;
     }
-
-    // Delete User
-    public static boolean deleteUser(int userId) throws SQLException {
-        String sql = "DELETE FROM users WHERE user_id = ?";
-
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
-            pstmt.setInt(1, userId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    // Promote to Manager
-    public static boolean updateUserRole(int userId, UserRole newRole) throws SQLException {
-        String sql = "UPDATE users SET user_role = ? WHERE user_id = ?";
-
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
-            pstmt.setString(1, newRole.name().toLowerCase()); // Convert Enum to String
-            pstmt.setInt(2, userId);
-
-            int rowsUpdated = pstmt.executeUpdate();
-            return rowsUpdated > 0;
-        }
-    }
-
-    // Helper class to store user ID and role together
-    public static class UserAuthResult {
-        private final int userId;
-        private final String role;
-
-        public UserAuthResult(int userId, String role) {
-            this.userId = userId;
-            this.role = role;
-        }
-
-        public int getUserId() {
-            return userId;
-        }
-
-        public String getRole() {
-            return role;
-        }
-    }
-
-    // Management Options
-    public static ObservableList<Staff> getAllUsers() {
-        ObservableList<Staff> staffList = FXCollections.observableArrayList();
-        String sql = "SELECT * FROM users";
-
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                int userId = rs.getInt("user_id");
-                String firstName = rs.getString("user_first_name");
-                String lastName = rs.getString("user_last_name");
-                String username = rs.getString("user_name");
-                String password = rs.getString("user_password");
-                String userRoleStr = rs.getString("user_role");
-
-                UserRole role = UserRole.valueOf(userRoleStr.toUpperCase());
-
-                Staff user;
-                if (role == UserRole.MANAGER) {
-                    user = new Manager(userId, firstName, lastName, username, password);
-                } else {
-                    user = new Staff(userId, firstName, lastName, username, password, role);
-                }
-
-                staffList.add(user);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return staffList;
-    }
-
-
 }

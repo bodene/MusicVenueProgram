@@ -34,26 +34,20 @@ public class ManagerController {
     }
 
     // User Management
-    @FXML
-    private void staffManagement() {
-        SceneManager.switchScene("staff-management-view.fxml");
-    }
+    @FXML private void staffManagement() {SceneManager.switchScene("staff-management-view.fxml");}
 
     // View All Orders
-    @FXML
-    private void viewAllOrders() {
+    @FXML private void viewAllOrders() {
         SceneManager.switchScene("order-view.fxml");
     }
 
     // Import Venues CSV
-    @FXML
-    private void importVenuesCSV() {
+    @FXML private void importVenuesCSV() {
         managementService.importVenuesCSV();
     }
 
     // Import Events CSV
-    @FXML
-    private void importEventsCSV() {
+    @FXML private void importEventsCSV() {
         managementService.importEventsCSV();
     }
 
@@ -91,8 +85,6 @@ public class ManagerController {
 
     @FXML
     private void goToDashboard() {
-
         SceneManager.switchScene("dashboard.fxml");
     }
-
 }

@@ -4,14 +4,78 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class EventDAO {
+
+    // Add events to the database
+    public static void saveEvents(List<Event> events) throws SQLException {
+        String insertEventSQL = """
+            INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration, 
+                                event_end_time, required_capacity, event_type, event_category, client_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement eventStmt = connection.prepareStatement(insertEventSQL)) {
+
+            connection.setAutoCommit(false); // Disable auto-commit to batch inserts
+
+            for (Event event : events) {
+                try {
+                    int eventId = generateUniqueEventId(connection); // Generate unique event ID
+                    int clientId = ClientDAO.findOrCreateClientId(event.getClient().getClientName(), connection); // Ensure client exists
+
+                    // Handle invalid client ID
+                    if (clientId <= 0) {
+                        continue;
+                    }
+                    // Calculate event end time
+                    Time eventEndTime = Time.valueOf(event.getEventTime().plusHours(event.getDuration()));
+
+                    eventStmt.setInt(1, eventId);
+                    eventStmt.setString(2, event.getEventName());
+                    eventStmt.setString(3, event.getArtist());
+                    eventStmt.setDate(4, Date.valueOf(event.getEventDate()));
+                    eventStmt.setString(5, event.getEventTime().toString());
+                    eventStmt.setInt(6, event.getDuration());
+                    eventStmt.setString(7, eventEndTime.toString());
+                    eventStmt.setInt(8, event.getRequiredCapacity());
+                    eventStmt.setString(9, event.getEventType());
+                    eventStmt.setString(10, event.getCategory().name());
+                    eventStmt.setInt(11, clientId);
+
+                    eventStmt.executeUpdate();
+
+                } catch (SQLException e) {
+                    System.err.println("SQL Error inserting event: " + event.getEventName() + " | " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            connection.commit(); // Commit the batch insertions
+
+        } catch (SQLException e) {
+            System.err.println("Database Error: " + e.getMessage());
+            throw new RuntimeException("Error inserting events", e);
+        }
+    }
+
+    // Helper Method - Generate Unique event ID
+    private static int generateUniqueEventId(Connection connection) throws SQLException {
+        String query = "SELECT COALESCE(MAX(event_id), 0) + 1 FROM events";
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1); // Return the next available event_id
+            }
+        }
+        throw new SQLException("Error generating event ID");
+    }
+
 
     public static ObservableList<Event> getAllEvents() {
         ObservableList<Event> eventList = FXCollections.observableArrayList();
@@ -38,9 +102,8 @@ public class EventDAO {
                 String eventArtist = rs.getString("event_artist");
 
                 // Handle null dates safely
-                LocalDate eventDate = rs.getString("event_date") != null ? LocalDate.parse(rs.getString("event_date")) : null;
-                LocalTime eventTime = rs.getString("event_time") != null ? LocalTime.parse(rs.getString("event_time")) : null;
-
+                LocalDate eventDate = rs.getDate("event_date").toLocalDate();
+                LocalTime eventTime = LocalTime.parse(rs.getString("event_time"));
                 int eventDuration = rs.getInt("event_duration");
                 int eventCapacity = rs.getInt("required_capacity");
                 String eventType = rs.getString("event_type");
@@ -48,33 +111,25 @@ public class EventDAO {
                 String clientName = rs.getString("client_name");
 
                 // Create and add Event object
-                Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration, eventCapacity, eventType, eventCategory, clientName);
+                Client client = ClientDAO.findOrCreateClient(clientName);
+                Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration,
+                        eventCapacity, eventType, eventCategory, client);
                 eventList.add(event);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("❌ Error fetching events from database: " + e.getMessage());
+            System.err.println("Error fetching events from database: " + e.getMessage());
         } finally {
-            // ✅ Close resources properly
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
-                if (connection != null) connection.close(); // ✅ Ensures new connection each time
+                if (connection != null) connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
-                System.err.println("❌ Error closing resources: " + e.getMessage());
+                System.err.println("Error closing resources: " + e.getMessage());
             }
         }
-
-        // ✅ Print the results **after** the try-with-resources block
-        if (!eventList.isEmpty()) {
-            eventList.forEach(event -> System.out.println("✅ Loaded event: " + event.getEventName()));
-        } else {
-            System.out.println("❌ No events found in the database.");
-        }
-
         return eventList;
     }
-
 }

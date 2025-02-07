@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Staff;
+import model.User;
 
 import java.io.IOException;
 
@@ -40,7 +41,7 @@ public class SceneManager {
     }
 
     // Overloaded method to pass Staff object
-    public static void switchScene(String fxmlFile, Staff staff) {
+    public static void switchScene(String fxmlFile, User staff) {
         try {
             FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource("/view/" + fxmlFile));
             Parent root = loader.load();
@@ -54,7 +55,7 @@ public class SceneManager {
 
             // Get controller and pass the selected user details
             UserEditController controller = loader.getController();
-            controller.setUserDetails(staff); // Pass user data to controller
+            controller.setUserDetails(staff);
 
             primaryStage.setScene(scene);
             primaryStage.setMaximized(true);

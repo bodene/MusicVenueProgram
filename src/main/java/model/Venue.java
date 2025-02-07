@@ -18,6 +18,7 @@ public class Venue {
 	private double hirePricePerHour;
 	private List<VenueType> venueTypes;
 //	private boolean available;
+	private double compatibilityScore;
 	private Set<Booking> bookings;
 
 	/**
@@ -33,6 +34,7 @@ public class Venue {
 		this.capacity = capacity;
 		this.hirePricePerHour = price;
 		this.venueTypes = new ArrayList<>();
+		this.compatibilityScore = 0;
 	}
 
 	// Constructor for DB loading (fetching existing venue data)
@@ -42,6 +44,7 @@ public class Venue {
 		this.capacity = capacity;
 //		this.available = available;
 		this.venueTypes = venueTypes;
+		this.compatibilityScore = 0;
 	}
 
 	// Constructor for the database to table conversion
@@ -52,8 +55,8 @@ public class Venue {
 		this.capacity = venueCapacity;
 		this.hirePricePerHour = Double.parseDouble(hirePricePerHour); // Convert price from String to double
 		this.venueTypes = parseVenueTypes(venueTypes); // Convert CSV string to List<VenueTypes>
+		this.compatibilityScore = 0;
 	}
-
 
 	public int getVenueId() {
 		return this.venueId;
@@ -114,23 +117,23 @@ public class Venue {
 	//	this.available = availability;
 	//}
 
-	// Checks Venue Availability for specific date and time
-	public boolean checkAvailability(int venueId, LocalDate requestedDate, LocalTime requestedTime, int duration) {
-//		if(!available) {
-//			return false;
-//		}
-
-		// Convert hours to minutes and calculate the end time of event
-		int durationMinutes = duration * 60;
-		LocalTime endTime = requestedTime.plusMinutes(durationMinutes);
-
-		// Query bookings for conflicts for the specific venue
-		BookingDAO bookingDAO = new BookingDAO();
-		List<Booking> conflictingBookings = bookingDAO.getConflictingBookings(venueId, requestedDate, requestedTime, endTime);
-
-		// If no conflicting bookings, the venue is available
-		return conflictingBookings.isEmpty();
-	}
+//	// Checks Venue Availability for specific date and time
+//	public boolean checkAvailability(int venueId, LocalDate requestedDate, LocalTime requestedTime, int duration) {
+////		if(!available) {
+////			return false;
+////		}
+//
+//		// Convert hours to minutes and calculate the end time of event
+//		int durationMinutes = duration * 60;
+//		LocalTime endTime = requestedTime.plusMinutes(durationMinutes);
+//
+//		// Query bookings for conflicts for the specific venue
+//		BookingDAO bookingDAO = new BookingDAO();
+//		List<Booking> conflictingBookings = bookingDAO.getConflictingBookings(venueId, requestedDate, requestedTime, endTime);
+//
+//		// If no conflicting bookings, the venue is available
+//		return conflictingBookings.isEmpty();
+//	}
 
 	// Add a venueType manually (used when loading from CSV)
 	public void addVenueType(VenueType venueTypes) {
@@ -167,13 +170,23 @@ public class Venue {
 		return this.bookings;
 	}
 
-	/**
-	 * 
-	 * @param event
-	 */
-	public int calculateSuitabilityScore(Event event) {
-		// TODO - implement Venue.calculateSuitabilityScore
-		throw new UnsupportedOperationException();
+//	/**
+//	 *
+//	 * @param event
+//	 */
+//	public int calculateSuitabilityScore(Event event) {
+//		// TODO - implement Venue.calculateSuitabilityScore
+//		throw new UnsupportedOperationException();
+//	}
+
+	// Getter for compatibility score
+	public double getCompatibilityScore() {
+		return compatibilityScore;
+	}
+
+	// Setter for compatibility score
+	public void setCompatibilityScore(double compatibilityScore) {
+		this.compatibilityScore = compatibilityScore;
 	}
 
 	@Override

@@ -8,8 +8,52 @@ import java.sql.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dao.VenueTypeDAO.findOrCreateVenueTypeId;
+
 
 public class VenueDAO {
+
+    // Add Venues to database
+    public static void saveVenues(List<Venue> venues) throws SQLException {
+        String insertVenueSQL = "INSERT INTO venues (venue_name, venue_category, venue_capacity, hire_price) VALUES (?, ?, ?, ?)";
+        String insertVenueTypesSQL = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement venueStmt = connection.prepareStatement(insertVenueSQL, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement venueTypesStmt = connection.prepareStatement(insertVenueTypesSQL)) {
+
+            for (Venue venue : venues) {
+                try {
+                    // Insert venue into database
+                    venueStmt.setString(1, venue.getName());
+                    venueStmt.setString(2, venue.getCategory().name());
+                    venueStmt.setInt(3, venue.getCapacity());
+                    venueStmt.setDouble(4, venue.getHirePricePerHour());
+
+                    venueStmt.executeUpdate();
+
+                    // Retrieve generated venueId
+                    ResultSet rs = venueStmt.getGeneratedKeys();
+                    if (rs.next()) {
+                        int venueId = rs.getInt(1);
+
+                        // Insert venue type values
+                        for (VenueType venueType : venue.getVenueTypes()) {
+                            int venueTypeId = findOrCreateVenueTypeId(venueType.getVenueType(), connection);
+                            venueTypesStmt.setInt(1, venueId);
+                            venueTypesStmt.setInt(2, venueTypeId);
+                            venueTypesStmt.executeUpdate();
+                        }
+                    }
+
+                } catch (SQLException e) {
+                    System.err.println("Error inserting venue: " + venue.getName() + " | " + e.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while saving venues: " + e.getMessage(), e);
+        }
+    }
 
     // To get Venues for table
     public static ObservableList<Venue> getAllVenues() {
@@ -38,16 +82,11 @@ public class VenueDAO {
                 // Create and add Venue object
                 Venue venue = new Venue(venueId, venueName, venueCategory, venueCapacity, hirePricePerHour, venueTypes);
                 venueList.add(venue);
-                System.out.println("Loaded venue: " + venueName);
             }
-
-            System.out.println("🔎 Found " + venueList.size() + " venues in database.");
-
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("❌ Error fetching venues from database.");
+            System.out.println("Error fetching venues from database.");
         }
-
         return venueList;
     }
 
@@ -76,27 +115,21 @@ public class VenueDAO {
 
         int index = 1;
 
-        // ✅ Set Venue Name Parameter, using '%' wildcard for LIKE search
+        // Set Venue Name Parameter, using '%' wildcard for LIKE search
         if (searchText != null && !searchText.trim().isEmpty()) {
             pstmt.setString(index++, "%" + searchText + "%");
-            pstmt.setString(index++, searchText); // Pass second value for NULL check
+            pstmt.setString(index++, searchText);
         } else {
-            pstmt.setString(index++, "%"); // Match everything if empty
-            pstmt.setNull(index++, Types.VARCHAR); // Force NULL comparison
+            pstmt.setString(index++, "%");
+            pstmt.setNull(index++, Types.VARCHAR);
         }
 
-        // ✅ Set Category Parameters correctly
+        // Set Category Parameters
         if (categories != null) {
             for (String category : categories) {
                 pstmt.setString(index++, category);
             }
         }
-
-        // **🔍 Debugging Output**
-        System.out.println("Executing SQL Query: " + sql);
-        System.out.println("Parameters:");
-        System.out.println(" - Venue Name: " + searchText);
-        System.out.println(" - Categories: " + categories);
 
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
@@ -110,15 +143,11 @@ public class VenueDAO {
                 Venue venue = new Venue(venueId, venueNameResult, venueCategory, venueCapacity, hirePricePerHour, venueTypes);
                 venueList.add(venue);
             }
-
-            System.out.println("✅ Found " + venueList.size() + " venues matching search criteria.");
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("❌ Error searching venues: " + e.getMessage());
+            System.err.println("Error searching venues: " + e.getMessage());
         }
-
         return venueList;
-
     }
 
     // Add Venue to the database
@@ -130,7 +159,7 @@ public class VenueDAO {
         String insertVenueTypeSQL = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
 
         try (Connection connection = DatabaseHandler.getConnection()) {
-            connection.setAutoCommit(false); // 🔹 Start transaction
+            connection.setAutoCommit(false); // Start transaction
 
             // Insert Venue
             try (PreparedStatement venueStmt = connection.prepareStatement(insertVenueSQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -157,8 +186,7 @@ public class VenueDAO {
                     }
                 }
             }
-
-            connection.commit(); // 🔹 Commit transaction
+            connection.commit();
             return true;
 
         } catch (SQLException e) {
@@ -174,36 +202,30 @@ public class VenueDAO {
         String deleteVenueSQL = "DELETE FROM venues WHERE venue_id = ?";
 
         try (Connection connection = DatabaseHandler.getConnection()) {
-            connection.setAutoCommit(false); // 🔹 Start transaction
+            connection.setAutoCommit(false);
 
             // First, delete the links in venue_types_venues
             try (PreparedStatement venueTypeStmt = connection.prepareStatement(deleteVenueTypesSQL)) {
                 venueTypeStmt.setInt(1, venueId);
                 venueTypeStmt.executeUpdate();
             }
-
             // Then, delete the venue
             try (PreparedStatement venueStmt = connection.prepareStatement(deleteVenueSQL)) {
                 venueStmt.setInt(1, venueId);
                 int rowsAffected = venueStmt.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    connection.commit(); // 🔹 Commit transaction if successful
+                    connection.commit();
                     return true;
                 } else {
-                    connection.rollback(); // ❌ Rollback if venue deletion fails
+                    connection.rollback();
                     return false;
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("❌ Error deleting venue: " + e.getMessage());
+            System.err.println("Error deleting venue: " + e.getMessage());
             return false;
         }
     }
-
-
-
-
 }

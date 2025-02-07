@@ -87,7 +87,6 @@ public class VenueTypeDAO {
                 return rs.getInt(1); // Return newly inserted ID
             }
         }
-
         throw new SQLException("Error: Could not insert or find Venue Type for: " + description);
     }
 }

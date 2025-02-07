@@ -1,12 +1,12 @@
 package controller;
-
+//done
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import model.Staff;
+import model.User;
 import model.UserRole;
 import service.SceneManager;
 import service.UserService;
@@ -14,16 +14,16 @@ import util.AlertUtils;
 
 public class StaffManagementController {
 
-    @FXML private TableView<Staff> staffTable;
-    @FXML private TableColumn<Staff, Integer> staffIdColumn;
-    @FXML private TableColumn<Staff, String> firstNameColumn;
-    @FXML private TableColumn<Staff, String> lastNameColumn;
-    @FXML private TableColumn<Staff, String> usernameColumn;
-    @FXML private TableColumn<Staff, String> roleColumn;
+    @FXML private TableView<User> staffTable;
+    @FXML private TableColumn<User, Integer> staffIdColumn;
+    @FXML private TableColumn<User, String> firstNameColumn;
+    @FXML private TableColumn<User, String> lastNameColumn;
+    @FXML private TableColumn<User, String> usernameColumn;
+    @FXML private TableColumn<User, String> roleColumn;
     @FXML private TextField searchStaffField;
     @FXML private Button searchStaffButton, addStaffButton, updateStaffButton, deleteStaffButton, promoteToManagerButton, backButton;
 
-    private ObservableList<Staff> staffList = FXCollections.observableArrayList();
+    private ObservableList<User> staffList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -37,7 +37,7 @@ public class StaffManagementController {
         firstNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFirstName()));
         lastNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getLastName()));
         usernameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUsername()));
-        roleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUserRole().toString()));
+        roleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRole().toString()));
     }
 
     // Load staff data from the database into the TableView.
@@ -50,11 +50,7 @@ public class StaffManagementController {
     @FXML
     private void searchStaff() {
         String query = searchStaffField.getText().trim();
-        if (query.isEmpty()) {
-            loadStaffData();
-            return;
-        }
-        staffList.setAll(UserService.searchUsers(query));
+        staffList.setAll(query.isEmpty() ? UserService.getAllUsers() : UserService.searchUsers(query));
     }
 
     @FXML
@@ -66,7 +62,7 @@ public class StaffManagementController {
     // Open the Update User Form with selected user data
     @FXML
     private void updateStaff() {
-        Staff selectedUser = staffTable.getSelectionModel().getSelectedItem();
+        User selectedUser = staffTable.getSelectionModel().getSelectedItem();
         if (selectedUser == null) {
             AlertUtils.showAlert("Update Error", "Please select a staff member to update.", Alert.AlertType.WARNING);
             return;
@@ -78,7 +74,7 @@ public class StaffManagementController {
     // Delete selected staff
     @FXML
     private void deleteStaff() {
-        Staff selectedUser = staffTable.getSelectionModel().getSelectedItem();
+        User selectedUser = staffTable.getSelectionModel().getSelectedItem();
         if (selectedUser == null) {
             AlertUtils.showAlert("Delete Error", "Please select a staff member to delete.", Alert.AlertType.WARNING);
             return;
@@ -97,13 +93,13 @@ public class StaffManagementController {
     // Promote selected staff to manager.
     @FXML
     private void promoteToManager() {
-        Staff selectedUser = staffTable.getSelectionModel().getSelectedItem();
+        User selectedUser = staffTable.getSelectionModel().getSelectedItem();
         if (selectedUser == null) {
             AlertUtils.showAlert("Promotion Error", "Please select a staff member to promote.", Alert.AlertType.WARNING);
             return;
         }
 
-        if (selectedUser.getUserRole() == UserRole.MANAGER) {
+        if (selectedUser.getRole() == UserRole.MANAGER) {
             AlertUtils.showAlert("Already Manager", selectedUser.getUsername() + " is already a manager.", Alert.AlertType.INFORMATION);
             return;
         }

@@ -1,52 +1,46 @@
 package controller;
-
-import javafx.event.ActionEvent;
+//done
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.event.ActionEvent;
 import service.SessionManager;
-import dao.UserDAO;
-import model.Staff;
-import model.Manager;
-import model.UserRole;
+import service.UserService;
+import model.User;
 import util.AlertUtils;
-
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class UserEditController {
-    private Staff selectedUser;
+    private User selectedUser;
 
     @FXML private TextField firstNameField, lastNameField, usernameField, passwordField, confirmPasswordField;
     @FXML private Button updateUserDetailsButton, backButton;
 
     @FXML
     private void initialize() throws SQLException {
-        try {
-            if (selectedUser == null) { // Get the logged-in user if no selection
-                selectedUser = SessionManager.getInstance().getCurrentUser();
-            }
-            if (selectedUser != null) {
-                Staff userFromDB = UserService.getUserByUsername(selectedUser.getUsername());
-                if (userFromDB != null) {
-                    populateFields(userFromDB);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Get logged-in user if no selection
+        if (selectedUser == null) {
+            selectedUser = SessionManager.getInstance().getCurrentUser();
+        }
+
+        if (selectedUser != null) {
+            Optional<User> userFromDB = UserService.getUserByUsername(selectedUser.getUsername());
+            userFromDB.ifPresent(this::populateFields);
         }
     }
 
-    // Called when a manager selects a user to edit
-    public void setUserDetails(Staff staff) {
-        this.selectedUser = staff;
+    // Allow managers to edit other users
+    public void setUserDetails(User user) {
+        this.selectedUser = user;
+        populateFields(user);
     }
 
-    // Helper Method - Populate fields
-    private void populateFields(Staff user) {
+    // Populate UI fields
+    private void populateFields(User user) {
         firstNameField.setText(user.getFirstName());
-        lastNameField.setText(user.getLastName());
         usernameField.setText(user.getUsername());
+        lastNameField.setText(user.getLastName());
     }
 
     @FXML
@@ -67,16 +61,16 @@ public class UserEditController {
             return;
         }
 
-        // Check Passwords Match
         if (!password.isEmpty() && !password.equals(confirmPassword)) {
             AlertUtils.showAlert("Error", "Passwords do not match", Alert.AlertType.ERROR);
             return;
         }
 
-        // Update user details
+        // Update user fields
         selectedUser.setFirstName(firstName);
         selectedUser.setLastName(lastName);
         selectedUser.setUsername(username);
+
         if (!password.isEmpty()) {
             selectedUser.setPassword(password);
         }
@@ -84,13 +78,7 @@ public class UserEditController {
         boolean success = UserService.updateUser(selectedUser);
         if (success) {
             AlertUtils.showAlert("Success", "User details updated successfully!", Alert.AlertType.INFORMATION);
-
-            // Redirect user based on role
-            if (SessionManager.getInstance().isManager()) {
-                SceneManager.switchScene("staff-management-view.fxml");
-            } else {
-                SceneManager.switchScene("dashboard.fxml");
-            }
+            SceneManager.switchScene(SessionManager.getInstance().isManager() ? "staff-management-view.fxml" : "dashboard.fxml");
         } else {
             AlertUtils.showAlert("Error", "Failed to update profile", Alert.AlertType.ERROR);
         }
@@ -98,10 +86,6 @@ public class UserEditController {
 
     @FXML
     private void goToSettings() {
-        if (SessionManager.getInstance().isManager()) {
-            SceneManager.switchScene("manager-view.fxml");
-        } else {
-            SceneManager.switchScene("admin-view.fxml");
-        }
+        SceneManager.switchScene(SessionManager.getInstance().isManager() ? "manager-view.fxml" : "admin-view.fxml");
     }
 }

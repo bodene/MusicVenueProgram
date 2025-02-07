@@ -11,13 +11,12 @@
 .popup-background {
     -fx-background-image: url("../images/music-maker-background.jpg");
     -fx-background-size: cover;
-    -fx-background-color: rgba(255, 255, 255, 0.8); /* White overlay */
+    -fx-background-color: rgba(255, 255, 255, 0.75); /* White overlay */
     -fx-border-color: black;
     -fx-border-width: 1px;
-    -fx-border-radius: 5px;
+    /*-fx-border-radius: 5px;*/
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 2);
 }
-
 
 .label {
     -fx-font-family: "Montreal Regular";
@@ -41,4 +40,34 @@
     -fx-font-weight: bold;
     -fx-alignment: CENTER-LEFT;
     -fx-text-alignment: left;
+}
+
+/*.grid-pane {*/
+/*    -fx-border-color: #ccc;*/
+/*    -fx-border-width: 1px;*/
+/*}*/
+
+/*.grid-cell {*/
+/*    -fx-padding: 10px;*/
+/*    -fx-border-color: #ddd;*/
+/*    -fx-border-width: 0.5px;*/
+/*}*/
+
+.bold-label {
+    -fx-font-family: "Montreal Regular";
+    -fx-font-weight: bold;
+    -fx-font-size: 22px;
+}
+
+.regular-label {
+    -fx-font-family: "Montreal Regular";
+    -fx-font-weight: normal;
+    -fx-font-size: 20px;
+}
+
+.highlight-mismatch {
+    -fx-background-color: rgba(255, 102, 102, 0.3); /* Softer red */
+    -fx-text-fill: black;
+    -fx-padding: 8px;
+    -fx-border-radius: 4px;
 }

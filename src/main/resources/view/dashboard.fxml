@@ -157,16 +157,16 @@
                                  <Insets bottom="5.0" top="5.0" />
                               </padding>
                            </Button>
-                           <Label text="Current Bookings for tis Venue">
+                           <Label text="Venue Bookings">
                               <font>
                                  <Font name="Montreal Regular" size="14.0" />
                               </font>
                            </Label>
                            <TableView fx:id="currentBookingTable" prefHeight="143.0" prefWidth="227.0">
                              <columns>
-                               <TableColumn fx:id="bookingDateColumn" prefWidth="74.40002596378326" text="Date" />
-                               <TableColumn fx:id="bookingTimeColumn" prefWidth="71.19994354248047" text="Time" />
-                                 <TableColumn fx:id="bookingRequestColumn" prefWidth="82.4000244140625" text="Request No" />
+                               <TableColumn fx:id="eventDateColumn" prefWidth="74.40002596378326" text="Date" />
+                               <TableColumn fx:id="eventTimeColumn" prefWidth="71.19994354248047" text="Time" />
+                                 <TableColumn fx:id="bookingIdColumn" prefWidth="82.4000244140625" text="Request No" />
                              </columns>
                            </TableView>
                                 </children>

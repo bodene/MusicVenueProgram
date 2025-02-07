@@ -1,11 +1,9 @@
 package dao;
 
 import model.Client;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class ClientDAO {
     private static List<Client> clients = new ArrayList<>();
@@ -13,11 +11,11 @@ public class ClientDAO {
     public static Client findOrCreateClient(String clientName) {
         for (Client client : clients) {
             if (client.getClientName().equalsIgnoreCase(clientName)) {
-                return client; // ✅ Found existing client
+                return client;
             }
         }
 
-        try (Connection connection = DatabaseHandler.getConnection()) {  // ✅ Open connection
+        try (Connection connection = DatabaseHandler.getConnection()) {
             int newClientId = findOrCreateClientId(clientName, connection);
             Client newClient = new Client(newClientId, clientName, "unknown@contact.com");
             clients.add(newClient);
@@ -27,7 +25,6 @@ public class ClientDAO {
             return null;
         }
     }
-
 
     // For database importing
     public static int findOrCreateClientId(String clientName, Connection connection) throws SQLException {
@@ -50,7 +47,6 @@ public class ClientDAO {
                 return rs.getInt(1);
             }
         }
-
         throw new SQLException("Could not insert or find client: " + clientName);
     }
 
@@ -73,5 +69,4 @@ public class ClientDAO {
         }
         return null;
     }
-
 }

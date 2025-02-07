@@ -3,6 +3,7 @@ package service;
 import model.Event;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 public class EventService {
@@ -38,7 +39,14 @@ public class EventService {
                 event.getRequiredCapacity(),
                 event.getEventType(),
                 event.getCategory(),
-                event.getClientName()
+                event.getClient().getClientName()
         );
+    }
+
+
+    public static List<Event> getActiveEventsForStaff(int staffId) {
+    // TODO - implement Staff.listActiveEvents
+		throw new UnsupportedOperationException();
+        //return EventDAO.getActiveEventsForStaff(staffId);
     }
 }

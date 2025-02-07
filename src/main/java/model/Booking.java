@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class Booking {
 
@@ -25,6 +26,7 @@ public class Booking {
 		// TODO - implement Booking.Booking
 		throw new UnsupportedOperationException();
 	}
+
 
 	public int getBookingId() {
 		// TODO - implement Booking.getBookingId
