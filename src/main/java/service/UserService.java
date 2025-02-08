@@ -1,5 +1,5 @@
 package service;
-//done
+//DONE
 import dao.UserDAO;
 import java.sql.SQLException;
 import java.util.List;
@@ -12,37 +12,37 @@ import model.UserRole;
 
 public class UserService {
 
-    // Add User (Checks for Duplicate)
+    // ADD USER (CHECKS FOR DUPLICATES)
     public static boolean addUser(String firstName, String lastName, String username, String password, UserRole role) throws SQLException {
         if (UserDAO.userExists(username)) {
-            return false; // User already exists
+            return false;
         }
         return UserDAO.addUser(firstName, lastName, username, password, role);
     }
 
-    // Get User by Username
+    // GET USER BY USERNAME
     public static Optional<User> getUserByUsername(String username) throws SQLException {
         return UserDAO.findUserByUsername(username);
     }
 
-    // Authenticate User
+    // AUTHENTICATE USER
     public static Optional<User> authenticateUser(String username, String password) {
         if (username.isEmpty() || password.isEmpty()) return Optional.empty();
         return UserDAO.authenticateUser(username, password);
     }
 
-    // Get All Users
+    // GET ALL USERS
     public static ObservableList<User> getAllUsers() {
         List<User> userList = UserDAO.getAllUsers();
         return FXCollections.observableArrayList(userList);
     }
 
-    // Search Users
+    // SEARCH USERS
     public static List<User> searchUsers(String query) {
         return UserDAO.searchUsers(query);
     }
 
-    // Delete User
+    // DELETE USER
     public static boolean deleteUser(User user) {
         try {
             return UserDAO.deleteUser(user.getUserId());
@@ -52,7 +52,7 @@ public class UserService {
         }
     }
 
-    // Promote to Manager
+    // PROMOTE TO MANAGER
     public static boolean promoteToManager(User user) {
         try {
             return UserDAO.updateUserRole(user.getUserId(), UserRole.MANAGER);
@@ -62,7 +62,7 @@ public class UserService {
         }
     }
 
-    // Update User
+    // UPDATE USER
     public static boolean updateUser(User user) {
         try {
             return UserDAO.updateUser(user);
@@ -72,7 +72,7 @@ public class UserService {
         }
     }
 
-    // User Registration
+    // USER REGISTRATION
     public static boolean registerUser(String firstName, String lastName, String username,
                                        String password, String confirmPassword, UserRole role) throws SQLException {
         if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {

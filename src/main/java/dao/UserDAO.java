@@ -37,7 +37,7 @@ public class UserDAO {
         try (Connection conn = DatabaseHandler.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
-            stmt.setString(2, inputPassword); // Compare plaintext password
+            stmt.setString(2, inputPassword);
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -104,7 +104,7 @@ public class UserDAO {
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, newPassword); // Plaintext password update
+            pstmt.setString(1, newPassword);
             pstmt.setInt(2, userId);
 
             return pstmt.executeUpdate() > 0;
@@ -159,7 +159,7 @@ public class UserDAO {
         String firstName = rs.getString("user_first_name");
         String lastName = rs.getString("user_last_name");
         String username = rs.getString("user_name");
-        String password = rs.getString("user_password"); // Keep as plaintext
+        String password = rs.getString("user_password");
         UserRole role = UserRole.valueOf(rs.getString("user_role").toUpperCase());
 
         return role == UserRole.MANAGER

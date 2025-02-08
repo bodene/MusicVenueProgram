@@ -19,7 +19,7 @@ public class UserEditController {
 
     @FXML
     private void initialize() throws SQLException {
-        // Get logged-in user if no selection
+        // GET LOGGED-IN USER IF NO SELECTION
         if (selectedUser == null) {
             selectedUser = SessionManager.getInstance().getCurrentUser();
         }
@@ -30,19 +30,20 @@ public class UserEditController {
         }
     }
 
-    // Allow managers to edit other users
+    // ALLOW MANAGERS TO EDIT USERS
     public void setUserDetails(User user) {
         this.selectedUser = user;
         populateFields(user);
     }
 
-    // Populate UI fields
+    // POPULATE UI FIELDS
     private void populateFields(User user) {
         firstNameField.setText(user.getFirstName());
         usernameField.setText(user.getUsername());
         lastNameField.setText(user.getLastName());
     }
 
+    // SAVE CHANGES FOR USER DETAILS
     @FXML
     public void saveProfileChanges(ActionEvent actionEvent) {
         if (selectedUser == null) {
@@ -66,7 +67,7 @@ public class UserEditController {
             return;
         }
 
-        // Update user fields
+        // UPDATE USER FIELDS
         selectedUser.setFirstName(firstName);
         selectedUser.setLastName(lastName);
         selectedUser.setUsername(username);

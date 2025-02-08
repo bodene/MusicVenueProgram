@@ -1,5 +1,5 @@
 package controller;
-//done
+//DONE
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -31,7 +31,7 @@ public class StaffManagementController {
         loadStaffData();
     }
 
-    // Set up columns to match Staff object properties
+    // SET UP COLUMNS TO MATCH STAFF OBJECT PROPERTIES
     private void setupTableColumns() {
         staffIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getUserId()));
         firstNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFirstName()));
@@ -40,13 +40,13 @@ public class StaffManagementController {
         roleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRole().toString()));
     }
 
-    // Load staff data from the database into the TableView.
+    // LOAD STAFF DATA FROM THE DATABASE
     private void loadStaffData() {
         staffList.setAll(UserService.getAllUsers());
         staffTable.setItems(staffList);
     }
 
-    // Search staff by name or username
+    // SEARCH STAFF BY NAME OR USERNAME
     @FXML
     private void searchStaff() {
         String query = searchStaffField.getText().trim();
@@ -56,10 +56,10 @@ public class StaffManagementController {
     @FXML
     private void addStaff() {
         SceneManager.switchScene("add-user-view.fxml");
-        loadStaffData(); // Refresh after adding
+        loadStaffData(); // REFRESH AFTER ADDING
     }
 
-    // Open the Update User Form with selected user data
+    // OPEN THE UPDATE USER FORM WITH SELECTED USER DATA
     @FXML
     private void updateStaff() {
         User selectedUser = staffTable.getSelectionModel().getSelectedItem();
@@ -68,10 +68,10 @@ public class StaffManagementController {
             return;
         }
         SceneManager.switchScene("user-profile-edit-view.fxml", selectedUser);
-        loadStaffData(); // Refresh after updating
+        loadStaffData(); // REFRESH AFTER UPDATING
     }
 
-    // Delete selected staff
+    // DELETE SELECTED STAFF
     @FXML
     private void deleteStaff() {
         User selectedUser = staffTable.getSelectionModel().getSelectedItem();
@@ -90,7 +90,7 @@ public class StaffManagementController {
         }
     }
 
-    // Promote selected staff to manager.
+    // PROMOTE SELECTED STAFF TO MANAGER
     @FXML
     private void promoteToManager() {
         User selectedUser = staffTable.getSelectionModel().getSelectedItem();

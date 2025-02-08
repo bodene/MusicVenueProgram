@@ -8,6 +8,11 @@ public class Staff extends User {
 	}
 
 	@Override
+	public String getUserType() {
+		return "Staff";
+	}
+
+	@Override
 	public String toString() {
 		return "ID: " + getUserId() +
 				"\nFirst Name: " + getFirstName() +

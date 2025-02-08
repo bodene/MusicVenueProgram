@@ -1,6 +1,6 @@
 package model;
 //done
-public class User {
+public abstract class User {
     private int userId;
     private String firstName;
     private String lastName;
@@ -8,6 +8,7 @@ public class User {
     private String password;
     private UserRole role;
 
+    // CONSTRUCTOR
     public User(int userId, String firstName, String lastName, String username, String password, UserRole role) {
         this.userId = userId;
         this.firstName = firstName;
@@ -32,7 +33,9 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public void setRole(UserRole role) { this.role = role; }
 
-    // Role Check Methods
+    // ROLE CHECK MANAGER
     public boolean isManager() { return role == UserRole.MANAGER; }
     public boolean isStaff() { return role == UserRole.STAFF; }
+
+    public abstract String getUserType();
 }

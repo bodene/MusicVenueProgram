@@ -1,5 +1,5 @@
 package controller;
-
+//DONE
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -24,14 +24,14 @@ public class LoginController {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
 
-        // Authenticate user
+        // AUTHENTICATE USER
         Optional<User> authenticatedUser = UserService.authenticateUser(username, password);
 
         if (authenticatedUser.isPresent()) {
-            // Store user in session
+            // STORE USER IN SESSION
             SessionManager.getInstance().setCurrentUser(authenticatedUser.get());
 
-            // Redirect based on role
+            // REDIRECT BASED ON ROLE
             if (SessionManager.getInstance().isManager()) {
                 SceneManager.switchScene("manager-view.fxml");
             } else {

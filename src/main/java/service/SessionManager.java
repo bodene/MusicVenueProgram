@@ -1,6 +1,5 @@
 package service;
 
-import model.Staff;
 import model.Manager;
 import model.User;
 
@@ -8,7 +7,7 @@ public class SessionManager {
     private static SessionManager instance;
     private static User currentUser;
 
-    // Private constructor (Singleton pattern)
+    // PRIVATE CONSTRUCTOR (SINGLETON PATTERN)
     private SessionManager() {}
 
     public static SessionManager getInstance() {
@@ -18,15 +17,17 @@ public class SessionManager {
         return instance;
     }
 
+    // GETTER
     public static User getCurrentUser() {
         return currentUser;
     }
 
+    // SETTER
     public static void setCurrentUser(User user) {
         currentUser = user;
     }
 
-    // Get user role (Manager or Staff)
+    // GET USER ROLE(MANAGER OR STAFF)
     public String getUserRole() {
         if (currentUser instanceof Manager) {
             return "manager";
@@ -34,12 +35,12 @@ public class SessionManager {
         return "staff";
     }
 
-    // Check if the current user is a Manager
+    // CHECK IF THE CURRENT USER IS MANAGER
     public boolean isManager() {
         return currentUser instanceof Manager;
     }
 
-    // Clear session when logging out
+    // CLEAR SESSION WHEN LOGGING OUT
     public void clearSession() {
         this.currentUser = null;
     }
