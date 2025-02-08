@@ -1,8 +1,7 @@
 package controller;
-
+//DONE
 import java.util.*;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -11,8 +10,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.StringConverter;
 import model.Venue;
 import model.VenueType;
 import service.SceneManager;
@@ -30,10 +27,10 @@ public class VenuesController {
     @FXML private TableView<Venue> searchVenueTable;
     @FXML private TableColumn<Venue, Integer> venueIdColumn;
     @FXML private TableColumn<Venue, String> venueNameColumn;
-    @FXML private TableColumn<Venue, Integer> venueCapacityColumn;
+    @FXML private TableColumn<Venue, String> venueCapacityColumn;
     @FXML private TableColumn<Venue, String> venueTypesColumn;
     @FXML private TableColumn<Venue, String> venueCategoryColumn;
-    @FXML private TableColumn<Venue, Double> pricePerHourColumn;
+    @FXML private TableColumn<Venue, String> pricePerHourColumn;
     private ObservableList<Venue> venueList = FXCollections.observableArrayList();
 
     @FXML
@@ -41,19 +38,20 @@ public class VenuesController {
         setupTableColumns();
         Platform.runLater(this::loadData);
 
-        // Create ToggleGroup for category selection
+        // CREATE TOGGLE-GROUP
         categoryGroup = new ToggleGroup();
         indoorVenueRadio.setToggleGroup(categoryGroup);
         outdoorVenueRadio.setToggleGroup(categoryGroup);
         convertibleVenueRadio.setToggleGroup(categoryGroup);
 
-        // Allow deselection (by setting all to false if clicked again)
+        // ALLOW DE-SELECTION OF TOGGLES
         categoryGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
                 categoryGroup.getSelectedToggle().setSelected(false);
             }
         });
 
+        // SEARCH VENUES BUTTON
         searchVenuesButton.setOnAction(event -> {
             try {
                 searchVenues();
@@ -64,91 +62,40 @@ public class VenuesController {
         });
     }
 
-    // Set Up Venue Table Columns
+    // SET UP VENUE TABLE
     private void setupTableColumns() {
-        // Set up Venue Table
         venueIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getVenueId()));
         venueNameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getName()));
+        venueCapacityColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFormattedCapacity()));
+        venueCategoryColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getCategory()).asString());
+        pricePerHourColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFormattedPrice()));
 
-        // Adds a thousand separator to capacity
-        venueCapacityColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getCapacity()));
-        venueCapacityColumn.setCellFactory(column -> new TextFieldTableCell<>(new StringConverter<Integer>() {
-            private final NumberFormat format = NumberFormat.getInstance(Locale.US);
-            @Override
-            public String toString(Integer value) {
-                return value == null ? "" : format.format(value);
-            }
-            @Override
-            public Integer fromString(String string) {
-                try {
-                    return format.parse(string).intValue();
-                } catch (Exception e) {
-                    return 0;
-                }
-            }
-        }));
-
-        // Format Venue Types (Remove Brackets)
-        venueTypesColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getVenueTypes()).asString());
+        // FORMAT VENUE TYPES (REMOVE BRACKETS)
         venueTypesColumn.setCellValueFactory(cellData -> {
             List<VenueType> venueTypes = cellData.getValue().getVenueTypes();
             String formattedTypes = venueTypes.stream()
-                    .map(VenueType::getVenueType)
-                    .collect(Collectors.joining(", ")); // Joins types with commas
+                    .map(venueType -> venueType.getVenueType().trim())
+                    .collect(Collectors.joining(", "));
             return new SimpleStringProperty(formattedTypes);
         });
-
-        venueCategoryColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getCategory()).asString());
-
-        // Adds thousands separator and adds dollar sign
-        pricePerHourColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getHirePricePerHour()));
-        pricePerHourColumn.setCellFactory(column -> new TextFieldTableCell<>(new StringConverter<Double>() {
-            private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
-            @Override
-            public String toString(Double value) {
-                return value == null ? "" : currencyFormat.format(value);
-            }
-            @Override
-            public Double fromString(String string) {
-                try {
-                    return currencyFormat.parse(string).doubleValue();
-                } catch (Exception e) {
-                    return 0.0;
-                }
-            }
-        }));
     }
 
+    // LOAD TABLE DATA
     private void loadData() {
         searchVenueTable.setItems(VenueService.getAllVenues());
     }
 
-    // Search Venues form
+    // SEARCH VENUES FORM
     @FXML
     private void searchVenues() throws SQLException {
         String searchText = searchVenueNameField.getText().trim();
-        List<String> categories = new ArrayList<>();
+        String selectedCategory = categoryGroup.getSelectedToggle() != null ?
+                ((RadioButton) categoryGroup.getSelectedToggle()).getText().toUpperCase() : null;
 
-        // Determine category selected. If indoors include convertible, if outdoors include convertible
-        if (categoryGroup.getSelectedToggle() != null) {
-            String selectedCategory = ((RadioButton) categoryGroup.getSelectedToggle()).getText().toUpperCase();
-            if ("INDOOR".equals(selectedCategory)) {
-                categories.add("INDOOR");
-                categories.add("CONVERTIBLE");
-            } else if ("OUTDOOR".equals(selectedCategory)) {
-                categories.add("OUTDOOR");
-                categories.add("CONVERTIBLE");
-            } else if ("CONVERTIBLE".equals(selectedCategory)) {
-                categories.add("CONVERTIBLE");
-            }
-        }
-        searchVenueTable.setItems(VenueService.searchVenues(searchText, categories));
+        searchVenueTable.setItems(VenueService.searchVenues(searchText, selectedCategory));
     }
 
-    @FXML
-    private void addVenue() {SceneManager.switchScene("add-venue-view.fxml");}
-
-    // Delete Selected Venue
+    // DELETE VENUE
     @FXML
     private void deleteVenue() {
         Venue selectedVenue = searchVenueTable.getSelectionModel().getSelectedItem();
@@ -156,18 +103,18 @@ public class VenuesController {
             AlertUtils.showAlert("No Selection", "Select a venue to delete", Alert.AlertType.WARNING);
             return;
         }
-        // Confirm deletion
+        // CONFIRM DELETION
         if (AlertUtils.showConfirmation("Confirm Deletion", "Are you sure you want to delete this venue?\nVenue: " + selectedVenue.getName())) {
             if (VenueService.deleteVenue(selectedVenue.getVenueId())) {
-                venueList.remove(selectedVenue);
                 AlertUtils.showAlert("Success", "Venue deleted successfully", Alert.AlertType.INFORMATION);
+                searchVenueTable.setItems(VenueService.getAllVenues());
             } else {
                 AlertUtils.showAlert("Error", "Failed to delete the venue", Alert.AlertType.ERROR);
             }
         }
     }
 
-    // go to either manager or admin settings page
+    // GO TO SETTINGS (MANAGER OR STAFF)
     @FXML
     private void goToSettings() {
         if (SessionManager.getInstance().isManager()) {
@@ -175,6 +122,7 @@ public class VenuesController {
         } else {SceneManager.switchScene("admin-view.fxml");}
     }
 
+    @FXML private void addVenue() {SceneManager.switchScene("add-venue-view.fxml");}
     @FXML private void returnToDashboard() {SceneManager.switchScene("dashboard.fxml");}
     @FXML private void logout() { SceneManager.switchScene("main-view.fxml"); }
 }

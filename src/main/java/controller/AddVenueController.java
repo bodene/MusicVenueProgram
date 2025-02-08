@@ -1,18 +1,18 @@
 package controller;
-
-import model.Venue;
-import service.SceneManager;
+//DONE
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import service.SceneManager;
 import service.VenueService;
 import util.AlertUtils;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import util.InputValidationUtils;
 
 public class AddVenueController implements Initializable {
 
@@ -31,22 +31,22 @@ public class AddVenueController implements Initializable {
         initialiseCategoryGroup();
     }
 
-    // Assign a ToggleGroup to the RadioButtons
+    // ASSIGN A TOGGLE-GROUP TO RADIOBUTTONS
     private void initialiseCategoryGroup() {
         categoryGroup = new ToggleGroup();
         indoorCategory.setToggleGroup(categoryGroup);
         outdoorCategory.setToggleGroup(categoryGroup);
         convertibleCategory.setToggleGroup(categoryGroup);
 
-        // Increase font size for radio buttons
+        // INCREASE FONT SIZE FOR RADIO BUTTONS
         indoorCategory.setStyle("-fx-font-size: 16px;");
         outdoorCategory.setStyle("-fx-font-size: 16px;");
         convertibleCategory.setStyle("-fx-font-size: 16px;");
     }
 
-    // Populate the VBox with CheckBoxes for multiple selections
+    // POPULATE THE VBOX WITH CHECKBOXES
     private void initialiseEventTypes() {
-        // Clear previous checkboxes
+        // CLEAR PREVIOUS CHECKBOXES
         venueTypeColumn1.getChildren().clear();
         venueTypeColumn2.getChildren().clear();
         eventTypeCheckBoxes.clear();
@@ -56,7 +56,7 @@ public class AddVenueController implements Initializable {
             checkBox.setStyle("-fx-font-size: 16px;");
             eventTypeCheckBoxes.add(checkBox);
 
-            // Distribute checkboxes into two columns
+            // DISTRIBUTE CHECKBOXES INTO TWO COLUMNS
             if (i % 2 == 0) {
                 venueTypeColumn1.getChildren().add(checkBox);
             } else {
@@ -65,39 +65,38 @@ public class AddVenueController implements Initializable {
         }
     }
 
-    // Add new Venue
+    // ADD NEW VENUE
     @FXML
     private void addVenue() {
-        // Get the venue name
+        // GET VENUE NAME
         String venueName = venueNameField.getText().trim();
         if (venueName.isEmpty()) {
             AlertUtils.showAlert("Error", "Venue can not be empty", Alert.AlertType.ERROR);
             return;
         }
-        // Get Venue capacity and validate
-        int venueCapacity = validateIntegerInput(venueCapacityField.getText().trim(), "Invalid Venue Capacity, must be a positive number.");
+        // GET VENUE CAPACITY AND VALIDATE
+        int venueCapacity = InputValidationUtils.validateInteger(venueCapacityField.getText().trim(), "Invalid Venue Capacity");
         if (venueCapacity == -1) return;
 
-        // Get price per hour
-        double pricePerHour = validateDoubleInput(pricePerHourField.getText().trim(), "Invalid price, must be a positive number.");
+        // GET PRICE PER HOUR
+        double pricePerHour = InputValidationUtils.validateDouble(pricePerHourField.getText().trim(), "Invalid Price");
         if (pricePerHour == -1) return;
 
-        // Get selected category
+        // GET SELECTED CATEGORY
         RadioButton selectedCategory = (RadioButton) categoryGroup.getSelectedToggle();
         if (selectedCategory == null) {
             AlertUtils.showAlert("Error", "Please select a venue category!", Alert.AlertType.ERROR);
             return;
         }
-        String category = selectedCategory.getText().toUpperCase();
 
-        // Retrieve selected checkboxes from both columns
+        // RETRIEVE SELECTED CHECKBOXES FROM BOTH COLUMNS
         List<String> selectedVenueTypes = getSelectedVenueTypes();
         if (selectedVenueTypes.isEmpty()) {
             AlertUtils.showAlert("Error", "Select at least one venue type!", Alert.AlertType.ERROR);
             return;
         }
-        Venue venue = new Venue(venueName, category, venueCapacity, pricePerHour);
-        boolean success = VenueService.addVenue(venue, selectedVenueTypes);
+
+        boolean success = VenueService.addVenue(venueName, selectedCategory.getText().toUpperCase(), venueCapacity, pricePerHour, selectedVenueTypes);
 
         if (success) {
             AlertUtils.showAlert("Success", "Venue added successfully!", Alert.AlertType.INFORMATION);
@@ -107,31 +106,7 @@ public class AddVenueController implements Initializable {
         }
     }
 
-    // Helper Method - validate integer input
-    private int validateIntegerInput(String input, String errorMessage) {
-        try {
-            int value = Integer.parseInt(input);
-            if (value <= 0) throw new NumberFormatException();
-            return value;
-        } catch (NumberFormatException e) {
-            AlertUtils.showAlert("Error", errorMessage, Alert.AlertType.ERROR);
-            return -1;
-        }
-    }
-
-    // Helper Method - validate double input
-    private double validateDoubleInput(String input, String errorMessage) {
-        try {
-            double value = Double.parseDouble(input);
-            if (value <= 0.0) throw new NumberFormatException();
-            return value;
-        } catch (NumberFormatException e) {
-            AlertUtils.showAlert("Error", errorMessage, Alert.AlertType.ERROR);
-            return -1;
-        }
-    }
-
-    // Helper Method - get selected Venue types
+    // HELPER METHOD - GET SELECTED VENUE TYPES
     private List<String> getSelectedVenueTypes() {
         List<String> selectedVenueTypes = new ArrayList<>();
         for (CheckBox checkBox : eventTypeCheckBoxes) {
@@ -142,8 +117,32 @@ public class AddVenueController implements Initializable {
         return selectedVenueTypes;
     }
 
-    @FXML
-    private void goToMain() {
+    @FXML private void goToMain() {
         SceneManager.switchScene("main-view.fxml");
     }
 }
+
+
+//    // Helper Method - validate integer input
+//    private int validateIntegerInput(String input, String errorMessage) {
+//        try {
+//            int value = Integer.parseInt(input);
+//            if (value <= 0) throw new NumberFormatException();
+//            return value;
+//        } catch (NumberFormatException e) {
+//            AlertUtils.showAlert("Error", errorMessage, Alert.AlertType.ERROR);
+//            return -1;
+//        }
+//    }
+
+//    // Helper Method - validate double input
+//    private double validateDoubleInput(String input, String errorMessage) {
+//        try {
+//            double value = Double.parseDouble(input);
+//            if (value <= 0.0) throw new NumberFormatException();
+//            return value;
+//        } catch (NumberFormatException e) {
+//            AlertUtils.showAlert("Error", errorMessage, Alert.AlertType.ERROR);
+//            return -1;
+//        }
+//    }

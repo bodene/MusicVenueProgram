@@ -1,92 +1,98 @@
 package dao;
+//DONE
+import model.VenueType;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VenueTypeDAO {
 
-    // Add view type to venue
-    public void addViewType(int venueId, int venueTypeId) {
+    // SAVE VENUE TYPES FOR A GIVEN VENUE
+    public static void saveVenueTypes(int venueId, List<String> venueTypes, Connection conn) throws SQLException {
         String sql = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
-
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-
-            stmt.setInt(1, venueId);
-            stmt.setInt(2, venueTypeId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (String type : venueTypes) {
+                int typeId = findOrCreateVenueTypeId(type, conn);
+                stmt.setInt(1, venueId);
+                stmt.setInt(2, typeId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
         }
     }
 
-    // Get all venue types for a venue
-    public List<Integer> getAllVenueTypes(int venueId) {
-        List<Integer> venueTypeIds = new ArrayList<>();
-        String sql = "SELECT venue_type_id FROM venue_types_venues WHERE venue_id = ?";
+    // GET ALL VENUE TYPES FOR A VENUE
+    public static List<VenueType> getAllVenueTypes(int venueId) {
+        List<VenueType> venueTypes = new ArrayList<>();
+        String sql = """
+            SELECT vt.venue_type_id, vt.venue_type
+            FROM venue_types_venues vtv
+            JOIN venue_types vt ON vtv.venue_type_id = vt.venue_type_id
+            WHERE vtv.venue_id = ?
+        """;
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setInt(1, venueId);
             ResultSet rs = stmt.executeQuery();
-
             while (rs.next()) {
-                venueTypeIds.add(rs.getInt("venue_type_id"));
+                venueTypes.add(new VenueType(rs.getInt("venue_type_id"), rs.getString("venue_type")));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error retrieving venue types for venue " + venueId, e);
         }
-        return venueTypeIds;
+        return venueTypes;
     }
 
-    // Check if a venue is suitable for a given event type
-    public boolean isVenueSuitable(int venueId, int venueTypeId) {
-        String sql = "SELECT COUNT(*) FROM venue_types_venues WHERE venue_id = ? AND venue_type_id = ?";
+    // CHECK IF A VENUE IS SUITABLE FOR A GIVEN EVENT TYPE
+    public static boolean isVenueSuitable(int venueId, int venueTypeId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM venue_types_venues WHERE venue_id = ? AND venue_type_id = ?)";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
-
             stmt.setInt(1, venueId);
             stmt.setInt(2, venueTypeId);
-
             ResultSet rs = stmt.executeQuery();
-            return rs.next() && rs.getInt(1) > 0;
+            return rs.next() && rs.getInt(1) == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error checking suitability for venue " + venueId, e);
         }
-        return false;
     }
 
-    /**
-     * Finds or creates a venueType entry in the database.
-     * @param description Venue type name.
-     * @param conn Active database connection.
-     * @return venueTypeId
-     * @throws SQLException
-     */
+    // FIND OR CREATE VENUE TYPE
     public static int findOrCreateVenueTypeId(String description, Connection conn) throws SQLException {
-        String findSQL = "SELECT venue_type_id FROM venue_types WHERE venue_type = ?";
-        String insertSQL = "INSERT INTO venue_types (venue_type) VALUES (?)";
+        int venueTypeId = findVenueTypeId(description, conn);
+        if (venueTypeId == -1) {
+            venueTypeId = createVenueType(description, conn);
+        }
+        return venueTypeId;
+    }
 
-        try (PreparedStatement findStmt = conn.prepareStatement(findSQL)) {
-            findStmt.setString(1, description);
-            ResultSet rs = findStmt.executeQuery();
+    // GET VENUE TYPE ID
+    public static int findVenueTypeId(String description, Connection conn) throws SQLException {
+        String sql = "SELECT venue_type_id FROM venue_types WHERE LOWER(venue_type) = LOWER(?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, description);
+            ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("venue_type_id"); // Found existing ID
+                return rs.getInt("venue_type_id");
             }
         }
+        return -1;
+    }
 
-        // If not found, insert and return new ID
-        try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
-            insertStmt.setString(1, description);
-            insertStmt.executeUpdate();
-
-            ResultSet rs = insertStmt.getGeneratedKeys();
+    // CREATE VENUE TYPE
+    public static int createVenueType(String description, Connection conn) throws SQLException {
+        String sql = "INSERT INTO venue_types (venue_type) VALUES (?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, description);
+            stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                return rs.getInt(1); // Return newly inserted ID
+                return rs.getInt(1);
             }
         }
-        throw new SQLException("Error: Could not insert or find Venue Type for: " + description);
+        throw new SQLException("Error inserting venue type: " + description);
     }
 }

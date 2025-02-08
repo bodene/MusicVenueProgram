@@ -6,12 +6,14 @@ import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import model.Venue;
 import model.Event;
+import model.VenueType;
 import util.AlertUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ManagementService {
 
@@ -28,7 +30,7 @@ public class ManagementService {
         return instance;
     }
 
-    // Import Venues from CSV
+    // IMPORT VENUES FROM CSV
     public void importVenuesCSV() {
         File selectedFile = selectCSVFile("Choose Venues CSV File to Import");
         if (selectedFile != null) {
@@ -36,7 +38,14 @@ public class ManagementService {
                 List<Venue> venues = CSVHandler.importVenueDataCSV(selectedFile.getAbsolutePath());
 
                 if (!venues.isEmpty()) {
-                    VenueDAO.saveVenues(venues);
+                    for (Venue venue : venues) {
+                        boolean success = VenueDAO.addVenue(venue, venue.getVenueTypes().stream()
+                                .map(VenueType::getVenueType)
+                                .collect(Collectors.toList()));
+                        if (!success) {
+                            AlertUtils.showAlert("Error", "Failed to add venue: " + venue.getName(), Alert.AlertType.ERROR);
+                        }
+                    }
                     AlertUtils.showAlert("Success", "Venues imported successfully!", Alert.AlertType.INFORMATION);
                 } else {
                     AlertUtils.showAlert("Warning", "No venues found in the CSV file.", Alert.AlertType.WARNING);

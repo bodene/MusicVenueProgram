@@ -1,18 +1,37 @@
 package model;
-
+//DONE
 public class VenueType {
-	private String venueType;  // E.g., "Gig", "Festival", "Live Concert"
+	private int venueTypeId;
+	private String venueType;
 
+	// CONSTRUCTORS
 	public VenueType(String venueType) {
 		this.venueType = venueType;
 	}
 
+	public VenueType(int venueTypeId, String venueType) {
+		this.venueTypeId = venueTypeId;
+		this.venueType = venueType;
+	}
+
+	// GETTERS
+	public int getVenueTypeId() {
+		return venueTypeId;
+	}
 	public String getVenueType() {
 		return venueType;
 	}
 
+	// SETTERS
+	public void setVenueTypeId(int venueTypeId) {
+		this.venueTypeId = venueTypeId;
+	}
+	public void setVenueType(String venueType) {
+		this.venueType = venueType;
+	}
+
 	@Override
 	public String toString() {
-		return venueType;  // Just return the event type name
+		return "VenueType{id=" + venueTypeId + ", type='" + venueType + "'}";
 	}
 }
