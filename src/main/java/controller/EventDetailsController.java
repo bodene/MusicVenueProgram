@@ -1,16 +1,16 @@
 package controller;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Event;
-import service.EventService;
 import util.AlertUtils;
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import util.DateUtils;
 
 public class EventDetailsController {
 
@@ -24,22 +24,26 @@ public class EventDetailsController {
     @FXML private Label eventCategoryLabel;
     @FXML private Label eventClientLabel;
 
-    // Shows Full event details in a popup screen
+    // SHOW FULL EVENT DETAILS ON POPUP SCREEN
     public void setEventDetails(Event event) {
         if (event == null) {
-            AlertUtils.showAlert("Error", "No event data available!", javafx.scene.control.Alert.AlertType.ERROR);
+            AlertUtils.showAlert("Error", "No event data available!", Alert.AlertType.ERROR);
             return;
         }
 
-        eventNameLabel.setText(event.getEventName());
-        eventArtistLabel.setText(event.getArtist());
-        eventDateLabel.setText(EventService.formatDate(Optional.ofNullable(event.getEventDate().toString())));
-        eventTimeLabel.setText(EventService.formatTime(Optional.ofNullable(event.getEventTime().toString())));
-        eventDurationLabel.setText(event.getDuration() + " hours");
-        eventCapacityLabel.setText(String.valueOf(event.getRequiredCapacity()));
-        eventTypeLabel.setText(event.getEventType());
-        eventCategoryLabel.setText(event.getCategory().toString());
-        eventClientLabel.setText(event.getClient().getClientName());
+        updateLabel(eventNameLabel, event.getEventName(), "N/A");
+        updateLabel(eventArtistLabel, event.getArtist(), "N/A");
+        updateLabel(eventDateLabel, DateUtils.formatDate(event.getEventDate()), "N/A");
+        updateLabel(eventTimeLabel, DateUtils.formatTime(event.getEventTime()), "N/A");
+        updateLabel(eventDurationLabel, event.getDuration() + " hours", "N/A");
+        updateLabel(eventCapacityLabel, String.valueOf(event.getRequiredCapacity()), "N/A");
+        updateLabel(eventTypeLabel, event.getEventType(), "N/A");
+        updateLabel(eventCategoryLabel, event.getCategory().toString(), "N/A");
+        updateLabel(eventClientLabel, event.getClient() != null ? event.getClient().getClientName() : "N/A", "N/A");
+    }
+
+    private void updateLabel(Label label, String value, String defaultValue) {
+        label.setText(value != null ? value : defaultValue);
     }
 
     public void initialize(URL location, ResourceBundle resources) {
@@ -52,12 +56,10 @@ public class EventDetailsController {
     @FXML
     private void closeWindow() {
         Stage stage = (Stage) eventNameLabel.getScene().getWindow();
-
         FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
         fadeOut.setFromValue(1);
         fadeOut.setToValue(0);
         fadeOut.setOnFinished(event -> stage.close());
-
         fadeOut.play();
     }
 }

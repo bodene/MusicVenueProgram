@@ -9,8 +9,8 @@ public class ManagerController {
     private final ManagementService managementService = ManagementService.getInstance();
 
     @FXML
-    private Button viewVenuesButton, viewOrdersButton, calculateCommissionButton, staffManagementButton, viewAllOrdersButon,
-            importVenuesCSVButton, importEventsCSVButton, backupDataButton, masterBackupButton, transactionBackupButton, importTransactionButton, importMasterBackupButton, backButton1;
+    private Button viewVenuesButton, viewBookingsButton, staffManagementButton, managerSummaryButton,
+            importVenuesCSVButton, importEventsCSVButton, backupDataButton, masterBackupButton, transactionBackupButton, importTransactionButton, importMasterBackupButton, dashboardButton;
 
     // View Venues Page
     @FXML
@@ -20,25 +20,14 @@ public class ManagerController {
 
     // View Orders Page
     @FXML
-    private void viewOrders() {
-        System.out.println("Staff View Orders Clicked");
-        // TODO Implement Staff Order view
-
-    }
-
-    // Calculate Commission
-    @FXML
-    private void calculateCommission() {
-        System.out.println("Calculating Commission Clicked");
-        // TODO Implement Calculate Commision
-    }
+    private void viewBookings() {SceneManager.switchScene("bookings-view.fxml");}
 
     // User Management
     @FXML private void staffManagement() {SceneManager.switchScene("staff-management-view.fxml");}
 
-    // View All Orders
+    // View Management Summary
     @FXML private void viewAllOrders() {
-        SceneManager.switchScene("order-view.fxml");
+        SceneManager.switchScene("management-summary.fxml");
     }
 
     // Import Venues CSV

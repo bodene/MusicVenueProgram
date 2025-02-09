@@ -1,13 +1,14 @@
 package controller;
-
+//DONE
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import model.Event;
 import model.Venue;
-
-import java.text.NumberFormat;
-import java.util.Locale;
+import model.VenueType;
+import util.NumberUtils;
 
 public class ComparisonVenueEventController {
 
@@ -22,51 +23,41 @@ public class ComparisonVenueEventController {
     private Venue selectedVenue;
     private boolean isAvailable;
 
-    // Helper Method - to pass data from DashboardController
+    // HELPER METHOD - PASSES DETAILS FROM DASHBOARD
     public void setVenueAndEvent(Venue venue, Event event, boolean available) {
         this.selectedEvent = event;
         this.selectedVenue = venue;
         this.isAvailable = available;
-
         updateUI();
     }
 
-    @FXML
-    public void initialize() {
-        // Ensure UI is populated when loaded
-        if (selectedEvent != null && selectedVenue != null) {
-            updateUI();
-        }
-    }
-
+    // POPULATE LABELS FOR FORMATTED DATA
     private void updateUI() {
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
+        if (selectedEvent == null || selectedVenue == null) return;
 
-        // Populate labels
-        eventNameLabel.setText(selectedEvent.getEventName());
-        venueNameLabel.setText(selectedVenue.getName());
+        eventNameLabel.setText(safeString(selectedEvent.getEventName()));
+        venueNameLabel.setText(safeString(selectedVenue.getName()));
 
-        eventCategoryLabel.setText(selectedEvent.getCategory().toString());
-        venueCategoryLabel.setText(selectedVenue.getCategory().toString());
+        eventCategoryLabel.setText(safeString(selectedEvent.getCategory().toString()));
+        venueCategoryLabel.setText(safeString(selectedVenue.getCategory().toString()));
 
-        eventCapacityLabel.setText(numberFormat.format(selectedEvent.getRequiredCapacity()));
-        venueCapacityLabel.setText(numberFormat.format(selectedVenue.getCapacity()));
+        eventCapacityLabel.setText(NumberUtils.formatNumber(selectedEvent.getRequiredCapacity()));
+        venueCapacityLabel.setText(NumberUtils.formatNumber(selectedVenue.getCapacity()));
 
-        eventTypeLabel.setText(selectedEvent.getEventType());
-        venueTypesLabel.setText(selectedVenue.getVenueTypes().toString());
+        eventTypeLabel.setText(safeString(selectedEvent.getEventType()));
+        venueTypesLabel.setText(formatVenueTypes(selectedVenue.getVenueTypes()));
 
         eventDateTimeLabel.setText(selectedEvent.getEventDate() + " " + selectedEvent.getEventTime());
         venueAvailabilityLabel.setText(isAvailable ? "✅ Available" : "❌ Not Available");
 
-        venuePriceLabel.setText(currencyFormat.format(selectedVenue.getHirePricePerHour()));
+        venuePriceLabel.setText(NumberUtils.formatCurrency(selectedVenue.getHirePricePerHour()));
 
-        // Highlight mismatches
         highlightMismatch(eventCategoryLabel, venueCategoryLabel, !selectedEvent.getCategory().equals(selectedVenue.getCategory()));
         highlightMismatch(eventCapacityLabel, venueCapacityLabel, selectedVenue.getCapacity() < selectedEvent.getRequiredCapacity());
-        highlightMismatch(eventTypeLabel, venueTypesLabel, !selectedVenue.getVenueTypes().contains(selectedEvent.getEventType()));
+        highlightMismatch(eventTypeLabel, venueTypesLabel, !hasMatchingVenueType(selectedEvent.getEventType(), selectedVenue.getVenueTypes()));
     }
 
+    // HELPER METHOD - HIGHLIGHT MISMATCHES
     private void highlightMismatch(Label eventLabel, Label venueLabel, boolean mismatch) {
         if (mismatch) {
             eventLabel.getStyleClass().add("highlight-mismatch");
@@ -74,8 +65,27 @@ public class ComparisonVenueEventController {
         }
     }
 
-    @FXML
-    private void closeWindow() {
+    private boolean hasMatchingVenueType(String eventType, List<VenueType> venueTypes) {
+        List<String> venueTypeNames = venueTypes.stream()
+                .map(VenueType::getVenueType)
+                .map(String::toLowerCase) // Convert to lowercase for case-insensitive comparison
+                .collect(Collectors.toList());
+
+        return venueTypeNames.contains(eventType.toLowerCase());
+    }
+
+    private String formatVenueTypes(List<VenueType> venueTypes) {
+        if (venueTypes == null || venueTypes.isEmpty()) return "N/A";
+        return venueTypes.stream()
+                .map(VenueType::getVenueType)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String safeString(String value) {
+        return value != null ? value : "N/A";
+    }
+
+    @FXML private void closeWindow() {
         ((Stage) eventNameLabel.getScene().getWindow()).close();
     }
 }

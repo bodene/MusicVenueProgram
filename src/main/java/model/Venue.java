@@ -49,6 +49,10 @@ public class Venue {
 		this.compatibilityScore = 0;
 	}
 
+	public Venue(String name) {
+		this.name = name;
+	}
+
 	// GETTERS
 	public int getVenueId() {
 		return this.venueId;

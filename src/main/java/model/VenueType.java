@@ -32,6 +32,6 @@ public class VenueType {
 
 	@Override
 	public String toString() {
-		return "VenueType{id=" + venueTypeId + ", type='" + venueType + "'}";
+		return venueType;
 	}
 }

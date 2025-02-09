@@ -42,6 +42,15 @@ public class Event {
 		this.client = client;
 	}
 
+	public Event(String eventName, LocalDate eventDate) {
+		this.eventName = eventName;
+		this.eventDate = eventDate;
+	}
+
+	public Event(String eventName) {
+		this.eventName = eventName;
+	}
+
 	public int getEventId() {
 		return this.eventId;
 	}

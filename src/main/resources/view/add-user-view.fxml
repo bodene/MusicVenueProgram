@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AddUserController">
+<StackPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AddUserController">
 
     <!-- Background Image (Set via CSS) -->
     <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
@@ -24,144 +24,129 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="499.0" prefWidth="766.0">
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="499.0" prefWidth="950.0">
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.26700367647058826" opacity="0.79" orientation="VERTICAL" prefHeight="462.0" prefWidth="766.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="100.0" prefWidth="160.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Add User for Live Music Venue Matchmaker" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="950.0" styleClass="main-header" text="Add User for Live Music Venue Matchmaker" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="352.0" prefWidth="765.0">
                         <children>
-                            <SplitPane prefHeight="291.0" prefWidth="772.0">
-                                <items>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="257.0" prefWidth="770.0">
-                                        <children>
-                                 <VBox prefHeight="248.0" prefWidth="310.0" AnchorPane.rightAnchor="88.0">
-                                    <children>
-                                       <TextField fx:id="firstNameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Your First Name">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="10.0" left="10.0" top="10.0" />
-                                          </padding>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </TextField>
-                                       <TextField fx:id="lastNameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Your Last Name">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="10.0" left="10.0" top="10.0" />
-                                          </padding>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </TextField>
-                                       <TextField fx:id="usernameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter A Username">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="10.0" left="10.0" top="10.0" />
-                                          </padding>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </TextField>
-                                       <PasswordField fx:id="passwordField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Password">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </PasswordField>
-                                       <PasswordField fx:id="confirmPasswordField" prefHeight="58.0" prefWidth="310.0" promptText="Confirm Password">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </PasswordField>
-                                    </children>
-                                 </VBox>
-                                 <VBox alignment="TOP_CENTER" prefHeight="286.0" prefWidth="326.0" AnchorPane.leftAnchor="0.0">
-                                    <children>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="49.0" prefWidth="386.0" text="First Name:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="49.0" prefWidth="368.0" text="Last Name:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="49.0" prefWidth="350.0" text="Username:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="49.0" prefWidth="330.0" text="Password:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="49.0" prefWidth="403.0" text="Confirm Password:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                       <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="50.0" prefWidth="402.0" text="User Role:">
-                                          <font>
-                                             <Font name="Montreal Regular" size="24.0" />
-                                          </font>
-                                          <padding>
-                                             <Insets bottom="5.0" top="5.0" />
-                                          </padding>
-                                       </Label>
-                                    </children>
-                                 </VBox>
-                                 <RadioButton fx:id="staffRadioButton" layoutX="372.0" layoutY="252.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="108.0" text="Staff">
-                                    <font>
-                                       <Font name="Montreal Regular" size="20.0" />
-                                    </font>
-                                 </RadioButton>
-                                 <RadioButton fx:id="managerRadioButton" layoutX="512.0" layoutY="252.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="172.0" text="Manager">
-                                    <font>
-                                       <Font name="Montreal Regular" size="20.0" />
-                                    </font>
-                                 </RadioButton>
-                                        </children>
-                                    </AnchorPane>
-                                </items>
-                            </SplitPane>
-                     <ButtonBar layoutX="186.0" layoutY="304.0" prefHeight="44.0" prefWidth="399.0">
+                     <VBox alignment="TOP_CENTER" prefHeight="286.0" prefWidth="397.0" AnchorPane.leftAnchor="0.0">
+                        <children>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="First Name:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                              <VBox.margin>
+                                 <Insets />
+                              </VBox.margin>
+                           </Label>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="Last Name:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                           </Label>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="Username:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                           </Label>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="Password:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                           </Label>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="Confirm Password:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                           </Label>
+                           <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="58.0" prefWidth="310.0" text="User Role:">
+                              <font>
+                                 <Font name="Montreal Regular" size="24.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </padding>
+                           </Label>
+                        </children>
+                     </VBox>
+                     <VBox prefHeight="240.0" prefWidth="466.0" AnchorPane.rightAnchor="88.0">
+                        <children>
+                           <TextField fx:id="firstNameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Your First Name">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" top="10.0" />
+                              </padding>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" top="5.0" />
+                              </VBox.margin>
+                           </TextField>
+                           <TextField fx:id="lastNameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Your Last Name">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" top="10.0" />
+                              </padding>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" />
+                              </VBox.margin>
+                           </TextField>
+                           <TextField fx:id="usernameField" prefHeight="58.0" prefWidth="310.0" promptText="Enter A Username">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" top="10.0" />
+                              </padding>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" />
+                              </VBox.margin>
+                           </TextField>
+                           <PasswordField fx:id="passwordField" prefHeight="58.0" prefWidth="310.0" promptText="Enter Password">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" />
+                              </VBox.margin>
+                           </PasswordField>
+                           <PasswordField fx:id="confirmPasswordField" prefHeight="58.0" prefWidth="310.0" promptText="Confirm Password">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" />
+                              </VBox.margin>
+                           </PasswordField>
+                        </children>
+                     </VBox>
+                     <ButtonBar layoutX="145.0" layoutY="296.0" prefHeight="51.0" prefWidth="616.0">
                        <buttons>
-                                      <Button fx:id="confirmUserButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#confirmUser" text="Confirm" translateX="-150.0">
+                                      <Button fx:id="confirmUserButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#confirmUser" prefHeight="38.0" prefWidth="208.0" style="-fx-background-color: green;" text="Confirm" textFill="WHITE" translateX="-150.0">
                                           <font>
                                               <Font name="Montreal Regular" size="24.0" />
                                           </font>
@@ -169,7 +154,7 @@
                                  <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
                               </padding>
                                       </Button>
-                           <Button fx:id="backButton1" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToMain" text="Back">
+                           <Button fx:id="backButton1" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToMain" prefHeight="38.0" prefWidth="208.0" style="-fx-background-color: blue;" text="Back" textFill="WHITE">
                               <font>
                                  <Font name="Montreal Regular" size="24.0" />
                               </font>
@@ -179,6 +164,16 @@
                            </Button>
                        </buttons>
                      </ButtonBar>
+                     <RadioButton fx:id="staffRadioButton" layoutX="403.0" layoutY="248.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="172.0" text="Staff">
+                        <font>
+                           <Font name="Montreal Regular" size="20.0" />
+                        </font>
+                     </RadioButton>
+                     <RadioButton fx:id="managerRadioButton" layoutX="615.0" layoutY="248.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="172.0" text="Manager">
+                        <font>
+                           <Font name="Montreal Regular" size="20.0" />
+                        </font>
+                     </RadioButton>
                         </children>
                     </AnchorPane>
                 </items>

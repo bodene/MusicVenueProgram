@@ -1,5 +1,7 @@
 package dao;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import model.Client;
 import java.sql.*;
 import java.util.ArrayList;
@@ -68,5 +70,60 @@ public class ClientDAO {
             }
         }
         return null;
+    }
+
+    // GET ALL CLIENT SUMMARIES FOR CLIENT COMMISSIONS
+    public static List<Client> getAllClientSummaries() {
+        String sql = """
+                SELECT c.client_id, c.client_name, c.total_jobs, c.total_commission, c.total_amount_spent 
+                FROM clients c
+            """;
+
+        List<Client> clientList = new ArrayList<>();
+
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("client_name");
+                int totalJobs = rs.getInt("total_jobs");
+                double totalCommission = rs.getDouble("total_commission");
+                double totalAmountSpent = rs.getDouble("total_amount_spent");
+
+                Client client = new Client(clientId, clientName, totalJobs, totalCommission, totalAmountSpent);
+                clientList.add(client);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return clientList;
+    }
+
+    public static ObservableList<Client> getAllClients() {
+        ObservableList<Client> clientList = FXCollections.observableArrayList();
+        String sql = "SELECT client_id, client_name, contact_info FROM clients";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("client_name");
+                String contactInfo = rs.getString("contact_info");
+
+                Client client = new Client(clientId, clientName, contactInfo);
+                clientList.add(client);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error fetching clients: " + e.getMessage());
+        }
+
+        return clientList;
     }
 }

@@ -71,3 +71,22 @@
     -fx-padding: 8px;
     -fx-border-radius: 4px;
 }
+
+.button {
+    -fx-padding: 5px;
+    -fx-font-family: "Montreal Regular";
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+/*.VBox {*/
+/*    -fx-padding: 5px 10px, 5px 10px;*/
+/*}*/
+
+.TextField {
+    -fx-padding: 10px;
+}
+
+.adminHeading {
+    -fx-font-size: 26px;
+}

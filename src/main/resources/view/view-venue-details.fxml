@@ -26,26 +26,26 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="566.0" prefWidth="766.0">
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="950.0" stylesheets="@../css/styles.css">
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.2062314540059347" opacity="0.9" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Manage Venues" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="950.0" styleClass="main-header" text="Manage Venues" textAlignment="CENTER">
                             </Label>
-                            <Button fx:id="logoutButton" layoutX="717.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout">
+                            <Button fx:id="logoutButton" layoutX="885.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout" prefHeight="60.0" prefWidth="60.0">
                                 <graphic>
-                                    <ImageView fitHeight="41.0" fitWidth="39.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="45.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                         <image>
-                                            <Image url="@../images/logout-man.jpg" />
+                                            <Image url="@../images/logout-door.png" />
                                         </image>
                                     </ImageView>
                                 </graphic>
                             </Button>
-                            <Button fx:id="settingsButton" layoutX="657.0" layoutY="4.0" mnemonicParsing="false" onAction="#goToSettings" prefHeight="47.0" prefWidth="54.0">
+                            <Button fx:id="settingsButton" layoutX="820.0" layoutY="4.0" mnemonicParsing="false" onAction="#goToSettings" prefHeight="60.0" prefWidth="60.0">
                                 <graphic>
-                                    <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="45.0" fitWidth="41.0" pickOnBounds="true" preserveRatio="true">
                                         <image>
                                             <Image url="@../images/admin-icon.jpg" />
                                         </image>
@@ -56,64 +56,67 @@
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
                         <children>
-                            <VBox layoutY="2.0" prefHeight="158.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
+                            <VBox layoutY="2.0" prefHeight="191.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
                                 <children>
-                                    <Button fx:id="addVenueButton" onAction="#addVenue" prefHeight="30.0" prefWidth="230.0" text="Add Venue">
+                                    <Button fx:id="addVenueButton" onAction="#addVenue" prefHeight="40.0" prefWidth="230.0" text="Add Venue">
                               <font>
                                  <Font name="Montreal Regular" size="18.0" />
                               </font>
                               <VBox.margin>
-                                 <Insets bottom="5.0" />
+                                 <Insets bottom="10.0" top="10.0" />
                               </VBox.margin></Button>
-                                    <Button fx:id="deleteVenueButton" onAction="#deleteVenue" prefHeight="30.0" prefWidth="228.0" text="Delete Venue">
+                                    <Button fx:id="deleteVenueButton" onAction="#deleteVenue" prefHeight="40.0" prefWidth="230.0" style="-fx-background-color: red;" text="Delete Venue" textFill="WHITE">
                               <VBox.margin>
-                                 <Insets bottom="5.0" />
+                                 <Insets bottom="10.0" top="10.0" />
                               </VBox.margin>
                               <font>
                                  <Font name="Montreal Regular" size="18.0" />
                               </font></Button>
-                                    <Button fx:id="returnToDashboardButton" onAction="#returnToDashboard" prefHeight="30.0" prefWidth="233.0" style="-fx-background-color: blue;" text="Return To Dashboard" textFill="WHITE">
+                                    <Button fx:id="returnToDashboardButton" onAction="#returnToDashboard" prefHeight="40.0" prefWidth="230.0" style="-fx-background-color: blue;" text="Return To Dashboard" textFill="WHITE">
                               <font>
                                  <Font name="Montreal Regular" size="18.0" />
-                              </font></Button>
+                              </font>
+                              <VBox.margin>
+                                 <Insets bottom="5.0" top="10.0" />
+                              </VBox.margin></Button>
                                 </children>
                             </VBox>
-                            <TableView fx:id="searchVenueTable" layoutX="14.0" layoutY="167.0" prefHeight="243.0" prefWidth="750.0">
+                            <TableView fx:id="searchVenueTable" layoutX="7.0" layoutY="196.0" prefHeight="270.0" prefWidth="937.0">
                                 <columns>
                                     <TableColumn fx:id="venueIdColumn" prefWidth="55.20000648498535" text="No." />
-                                    <TableColumn fx:id="venueNameColumn" prefWidth="205.60003662109375" text="Venue Name" />
-                                    <TableColumn fx:id="venueCapacityColumn" prefWidth="83.20001220703125" text="Capacity" />
-                                    <TableColumn fx:id="venueTypesColumn" prefWidth="195.20001220703125" text="Venue Type" />
-                                    <TableColumn fx:id="venueCategoryColumn" prefWidth="98.4000244140625" text="Category" />
-                                    <TableColumn fx:id="pricePerHourColumn" prefWidth="116.79998779296875" text="Price/hr" />
+                                    <TableColumn fx:id="venueNameColumn" prefWidth="227.99999618530273" text="Venue Name" />
+                                    <TableColumn fx:id="venueCapacityColumn" prefWidth="112.79998779296875" text="Capacity" />
+                                    <TableColumn fx:id="venueTypesColumn" prefWidth="188.0" text="Venue Type" />
+                                    <TableColumn fx:id="venueCategoryColumn" prefWidth="184.7999267578125" text="Category" />
+                                    <TableColumn fx:id="pricePerHourColumn" prefWidth="165.60009765625" text="Price/hr" />
                                 </columns>
                             </TableView>
-                     <TextField fx:id="searchVenueNameField" layoutX="29.0" layoutY="37.0" promptText="Venue Name">
+                     <TextField fx:id="searchVenueNameField" layoutX="35.0" layoutY="50.0" prefHeight="36.0" prefWidth="274.0" promptText="Venue Name">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>
                      </TextField>
-                     <Label layoutX="14.0" layoutY="6.0" prefHeight="31.0" prefWidth="231.0" text="Search for Venue:">
+                     <Label layoutX="14.0" layoutY="6.0" prefHeight="31.0" prefWidth="231.0" styleClass="adminHeading" text="Search for Venue:">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>
                      </Label>
-                     <RadioButton fx:id="indoorVenueRadio" layoutX="29.0" layoutY="77.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="107.0" text="Indoor">
+                     <RadioButton fx:id="indoorVenueRadio" layoutX="41.0" layoutY="98.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="107.0" text="Indoor">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>
                      </RadioButton>
-                     <RadioButton fx:id="outdoorVenueRadio" layoutX="177.0" layoutY="77.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="107.0" text="Outdoor">
+                     <RadioButton fx:id="outdoorVenueRadio" layoutX="180.0" layoutY="98.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="107.0" text="Outdoor">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>
                      </RadioButton>
-                     <RadioButton fx:id="convertibleVenueRadio" layoutX="328.0" layoutY="77.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="153.0" text="Convertible">
+                     <RadioButton fx:id="convertibleVenueRadio" layoutX="327.0" layoutY="98.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="153.0" text="Convertible">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>
                      </RadioButton>
-                              <Button fx:id="searchVenuesButton" layoutX="287.0" layoutY="119.0" onAction="#searchVenues" prefHeight="30.0" prefWidth="236.0" style="-fx-background-color: green;" text="Search Venues" textFill="WHITE">
+                              <Button fx:id="searchVenuesButton" layoutX="464.0" layoutY="134.0" onAction="#searchVenues" prefHeight="40.0" prefWidth="230.0" style="-fx-background-color: green;" text="Search Venues" textFill="WHITE">
                         <font>
                            <Font name="Montreal Regular" size="18.0" />
                         </font>

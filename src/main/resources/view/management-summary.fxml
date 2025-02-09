@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="563.0" prefWidth="766.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ManagementSummaryController">
+
+    <!-- Background Image (Set via CSS) -->
+    <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
+
+    <!-- Whitewash Effect (Semi-transparent White Overlay) -->
+    <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
+
+    <!-- Main UI -->
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="688.0" prefWidth="950.0">
+        <center>
+            <SplitPane id="backgroundImg" dividerPositions="0.17948717948717946" opacity="0.9" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                <items>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
+                        <children>
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="950.0" styleClass="main-header" text="Management Summary" textAlignment="CENTER">
+                            </Label>
+                            <Button fx:id="logoutButton" layoutX="885.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout" prefHeight="60.0" prefWidth="60.0">
+                                <graphic>
+                                    <ImageView fitHeight="41.0" fitWidth="39.0" pickOnBounds="true" preserveRatio="true">
+                                        <image>
+                                            <Image url="@../images/logout-door.png" />
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+                            <Button fx:id="settingsButton" layoutX="820.0" layoutY="4.0" mnemonicParsing="false" onAction="#goToSettings" prefHeight="60.0" prefWidth="60.0">
+                                <graphic>
+                                    <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
+                                        <image>
+                                            <Image url="@../images/admin-icon.jpg" />
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+                        </children>
+                    </AnchorPane>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
+                        <children>
+                            <VBox prefHeight="560.0" prefWidth="382.0" AnchorPane.rightAnchor="3.0">
+                                <children>
+                                    <PieChart fx:id="venueUtilisationChart" legendSide="LEFT" prefHeight="242.0" prefWidth="382.0" title="Venue Utilisation" />
+                                    <BarChart fx:id="incomeCommissionChart" prefHeight="319.0" prefWidth="382.0" title="Income vs Commission per Order">
+                                        <xAxis>
+                                            <CategoryAxis side="BOTTOM" />
+                                        </xAxis>
+                                        <yAxis>
+                                            <NumberAxis side="LEFT" />
+                                        </yAxis>
+                                    </BarChart>
+                                </children>
+                            </VBox>
+                     <Label text="Event Confirmed Bookings" underline="true" AnchorPane.leftAnchor="5.0" />
+                            <TableView fx:id="managementEventCommissionTable" layoutX="7.2" layoutY="30.0" prefHeight="266.0" prefWidth="559.0" AnchorPane.leftAnchor="7.0">
+                                <columns>
+                                    <TableColumn fx:id="bookingNoColumn" prefWidth="50.399995386600494" text="No." />
+                                    <TableColumn fx:id="eventNameColumn" prefWidth="135.99999237060547" text="Event Name" />
+                                    <TableColumn fx:id="venueNameColumn" prefWidth="155.20004272460938" text="Venue" />
+                                    <TableColumn fx:id="bookingCommissionColumn" prefWidth="115.20001220703125" text="Commission" />
+                                    <TableColumn fx:id="bookedByUserColumn" prefWidth="104.0" text="Booked By" />
+                                </columns>
+                            </TableView>
+                     <Label layoutX="14.0" layoutY="296.0" text="Client Summary" underline="true" AnchorPane.leftAnchor="5.0" />
+                            <TableView fx:id="clientCommissionTable" layoutY="324.0" prefHeight="236.0" prefWidth="561.0" AnchorPane.leftAnchor="5.0">
+                                <columns>
+                                    <TableColumn fx:id="clientIdColumn" prefWidth="64.79998934268951" text="ID" />
+                                    <TableColumn fx:id="clientNameColumn" prefWidth="213.6000213623047" text="Client Name" />
+                                    <TableColumn fx:id="noOfJobsColumn" prefWidth="58.4000244140625" text="Jobs" />
+                                    <TableColumn fx:id="totalCommissionColumn" prefWidth="113.5999755859375" text="Commission" />
+                                    <TableColumn fx:id="totalClientCostColumn" prefWidth="105.60003662109375" text="Total Spend" />
+                                </columns>
+                            </TableView>
+                        </children>
+                    </AnchorPane>
+                </items>
+            </SplitPane>
+        </center>
+    </BorderPane>
+</StackPane>

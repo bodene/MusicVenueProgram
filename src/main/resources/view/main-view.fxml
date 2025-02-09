@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+<StackPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
 
     <!-- Background Image (Set via CSS) -->
     <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
@@ -23,29 +22,36 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="462.0" prefWidth="766.0">
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="462.0" prefWidth="950.0">
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.314" opacity="0.79" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="100.0" prefWidth="160.0">
                         <children>
-                            <Label styleClass="main-header" alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" text="Welcome to Live Music Venue Matchmaker" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="950.0" styleClass="main-header" text="Welcome to Live Music Venue Matchmaker" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <HBox prefHeight="100.0" prefWidth="200.0">
+                  <children>
+                     <VBox prefHeight="263.0" prefWidth="470.0">
                         <children>
-                            <SplitPane dividerPositions="0.479" prefHeight="154.0" prefWidth="772.0">
-                                <items>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="414.0">
                                         <children>
-                                            <Button fx:id="addNewUserButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToAddNewUser" text="Add New User" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="15.0">
+                                            <Button fx:id="addNewUserButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToAddNewUser" prefHeight="44.0" prefWidth="198.0" text="Add New User" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="15.0">
                                                 <font>
                                                     <Font name="Montreal Regular" size="24.0" />
                                                 </font>
                                             </Button>
                                         </children>
                                     </AnchorPane>
+                        </children>
+                        <HBox.margin>
+                           <Insets top="50.0" />
+                        </HBox.margin>
+                     </VBox>
+                     <VBox prefHeight="314.0" prefWidth="470.0">
+                        <children>
                                     <AnchorPane prefHeight="146.0" prefWidth="458.0">
                                         <children>
                                             <Button fx:id="loginButton" mnemonicParsing="false" onAction="#goToLogin" prefHeight="44.0" prefWidth="191.0" text="Login" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="15.0">
@@ -54,11 +60,14 @@
                                                 </font>
                                             </Button>
                                         </children>
+                              <VBox.margin>
+                                 <Insets top="50.0" />
+                              </VBox.margin>
                                     </AnchorPane>
-                                </items>
-                            </SplitPane>
                         </children>
-                    </AnchorPane>
+                     </VBox>
+                  </children>
+               </HBox>
                 </items>
             </SplitPane>
         </center>

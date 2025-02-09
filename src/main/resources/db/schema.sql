@@ -2,7 +2,10 @@
 CREATE TABLE IF NOT EXISTS clients (
                                        client_id INTEGER PRIMARY KEY AUTOINCREMENT,
                                        client_name TEXT NOT NULL,
-                                       contact_info TEXT
+                                       contact_info TEXT,
+                                       total_jobs INTEGER DEFAULT 0,
+                                       total_amount_spent DECIMAL(10, 2) DEFAULT 0.00,
+                                       total_commission DECIMAL(10, 2) DEFAULT 0.00
 );
 
 -- Events Table
@@ -10,7 +13,7 @@ CREATE TABLE IF NOT EXISTS events (
                         event_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         event_name VARCHAR(255) NOT NULL,
                         event_artist VARCHAR(255) NOT NULL,
-                        event_date DATE NOT NULL,
+                        event_date TEXT NOT NULL,
                         event_time TEXT NOT NULL,
                         event_end_time TEXT NOT NULL,
                         event_duration INTEGER NOT NULL,
@@ -18,8 +21,9 @@ CREATE TABLE IF NOT EXISTS events (
                         event_type VARCHAR(255) NOT NULL,
                         event_category VARCHAR(50) NOT NULL,
                         client_id INTEGER NOT NULL,
-                        FOREIGN KEY (client_id) REFERENCES clients(client_id)
+                        FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE
 );
+
 -- Venues Table
 CREATE TABLE IF NOT EXISTS venues (
                                     venue_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,24 +31,24 @@ CREATE TABLE IF NOT EXISTS venues (
                                     venue_category VARCHAR(50) NOT NULL,
                                     venue_capacity INTEGER NOT NULL,
                                     hire_price DECIMAL(10, 2) NOT NULL
-    );
+);
 
 -- Bookings Table
 CREATE TABLE IF NOT EXISTS bookings (
                                         booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
                                         booking_date TEXT NOT NULL,
-                                        booking_hire_price REAL NOT NULL,
-                                        booking_commission REAL,
-                                        booking_status TEXT NOT NULL,
+                                        booking_hire_price DECIMAL(10, 2) NOT NULL,
+                                        booking_commission DECIMAL(10, 2),
+                                        booking_status VARCHAR(50) NOT NULL CHECK (booking_status IN ('CONFIRMED', 'CANCELLED', 'PENDING')),
                                         event_id INTEGER NOT NULL,
                                         venue_id INTEGER NOT NULL,
                                         client_id INTEGER NOT NULL,
-                                        booked_by VARCHAR(255) NOT NULL,
-                                        FOREIGN KEY (event_id) REFERENCES events(event_id),
-                                        FOREIGN KEY (venue_id) REFERENCES venues(venue_id),
-                                        FOREIGN KEY (client_id) REFERENCES clients(client_id),
+                                        booked_by INTEGER NOT NULL,
+                                        FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+                                        FOREIGN KEY (venue_id) REFERENCES venues(venue_id) ON DELETE CASCADE,
+                                        FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
                                         FOREIGN KEY (booked_by) REFERENCES users(user_id)
-    );
+);
 
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
@@ -56,7 +60,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      user_role VARCHAR(50) NOT NULL CHECK (user_role IN ('staff', 'manager'))
 );
 
--- Suitabilities Table
+-- Venue_Types Table
 CREATE TABLE IF NOT EXISTS venue_types (
                                              venue_type_id INTEGER PRIMARY KEY AUTOINCREMENT,
                                              venue_type TEXT NOT NULL UNIQUE
@@ -69,4 +73,4 @@ CREATE TABLE IF NOT EXISTS venue_types_venues (
                                             PRIMARY KEY (venue_type_id, venue_id),
                                             FOREIGN KEY (venue_type_id) REFERENCES venue_types(venue_type_id),
                                             FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
-    );
+);

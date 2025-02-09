@@ -11,12 +11,13 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DashboardController">
+<StackPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DashboardController">
 
     <!-- Background Image (Set via CSS) -->
     <Pane prefHeight="462.0" prefWidth="766.0" styleClass="root" stylesheets="@../css/styles.css" />
@@ -25,25 +26,25 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.4);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="632.0" prefWidth="766.0">
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="950.0">
 
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.2062314540059347" opacity="0.9" orientation="VERTICAL" prefHeight="594.0" prefWidth="766.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.93" prefHeight="132.0" prefWidth="765.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Dashboard" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="950.0" styleClass="main-header" text="Dashboard" textAlignment="CENTER">
                             </Label>
-                     <Button fx:id="logoutButton" layoutX="717.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout">
+                     <Button fx:id="logoutButton" layoutX="885.0" layoutY="4.0" mnemonicParsing="false" onAction="#logout" prefHeight="60.0" prefWidth="60.0">
                         <graphic>
                            <ImageView fitHeight="41.0" fitWidth="39.0" pickOnBounds="true" preserveRatio="true">
                               <image>
-                                 <Image url="@../images/logout-man.jpg" />
+                                 <Image url="@../images/logout-door.png" />
                               </image>
                            </ImageView>
                         </graphic>
                      </Button>
-                     <Button fx:id="settingsButton" layoutX="657.0" layoutY="4.0" mnemonicParsing="false" onAction="#goToSettings" prefHeight="47.0" prefWidth="54.0">
+                     <Button fx:id="settingsButton" layoutX="819.0" layoutY="4.0" mnemonicParsing="false" onAction="#goToSettings" prefHeight="60.0" prefWidth="60.0">
                         <graphic>
                            <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
                               <image>
@@ -56,141 +57,159 @@
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
                         <children>
-                            <VBox prefHeight="494.0" prefWidth="227.0" AnchorPane.rightAnchor="8.0">
-                                <children>
-                           <Button fx:id="showEventDetailsButton" onAction="#showEventDetails" prefHeight="30.0" prefWidth="236.0" text="Show Event Details">
+                     <VBox prefHeight="550.0" prefWidth="950.0">
+                        <children>
+                           <Label prefHeight="35.0" prefWidth="246.0" text="Upcoming Event Requests" underline="true">
                               <font>
-                                 <Font name="Montreal Regular" size="16.0" />
+                                 <Font name="Montreal Regular" size="18.0" />
                               </font>
                               <VBox.margin>
-                                 <Insets bottom="3.0" top="5.0" />
+                                 <Insets left="5.0" />
                               </VBox.margin>
-                              <padding>
-                                 <Insets bottom="5.0" top="5.0" />
-                              </padding>
-                           </Button>
-                           <CheckBox fx:id="availableCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Available">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="2.0" top="2.0" />
-                              </padding>
-                           </CheckBox>
-                           <CheckBox fx:id="sufficientCapacityCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Sufficient Capacity">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="2.0" top="2.0" />
-                              </padding>
-                           </CheckBox>
-                           <CheckBox fx:id="eventTypeCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Event Type">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="2.0" top="2.0" />
-                              </padding>
-                           </CheckBox>
-                           <CheckBox fx:id="venueCategoryCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Venue Category">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="2.0" top="2.0" />
-                              </padding>
-                           </CheckBox>
-                                    <Button fx:id="filterVenuesButton" onAction="#filterVenues" prefHeight="30.0" prefWidth="230.0" text="Filter Venues">
-                                        <font>
-                                            <Font name="Montreal Regular" size="16.0" />
-                                        </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="5.0" top="5.0" />
-                              </padding>
-                                    </Button>
-                                    <Button fx:id="autoMatchButton" onAction="#autoMatch" prefHeight="30.0" prefWidth="228.0" text="Auto Match">
-                                        <font>
-                                            <Font name="Montreal Regular" size="16.0" />
-                                        </font>
-                              <VBox.margin>
-                                 <Insets bottom="35.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="5.0" top="5.0" />
-                              </padding>
-                                    </Button>
-                           <Button fx:id="showVenueDetailsButton" onAction="#showVenueDetails" prefHeight="30.0" prefWidth="230.0" text="Show Venue Details">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="5.0" top="5.0" />
-                              </padding>
-                           </Button>
-                           <Button fx:id="bookVenueButton" onAction="#bookVenue" prefHeight="30.0" prefWidth="233.0" style="-fx-background-color: green;" text="Book Venue" textFill="WHITE">
-                              <font>
-                                 <Font name="Montreal Regular" size="16.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets bottom="3.0" />
-                              </VBox.margin>
-                              <padding>
-                                 <Insets bottom="5.0" top="5.0" />
-                              </padding>
-                           </Button>
-                           <Label text="Venue Bookings">
-                              <font>
-                                 <Font name="Montreal Regular" size="14.0" />
-                              </font>
                            </Label>
-                           <TableView fx:id="currentBookingTable" prefHeight="143.0" prefWidth="227.0">
-                             <columns>
-                               <TableColumn fx:id="eventDateColumn" prefWidth="74.40002596378326" text="Date" />
-                               <TableColumn fx:id="eventTimeColumn" prefWidth="71.19994354248047" text="Time" />
-                                 <TableColumn fx:id="bookingIdColumn" prefWidth="82.4000244140625" text="Request No" />
-                             </columns>
-                           </TableView>
-                                </children>
-                            </VBox>
-                     <TableView fx:id="eventTable" layoutY="25.0" prefHeight="200.0" prefWidth="512.0">
-                       <columns>
-                           <TableColumn fx:id="eventIdColumn" prefWidth="84.80001217126846" text="RequestNo" />
-                           <TableColumn fx:id="eventNameColumn" prefWidth="152.8000030517578" text="Event Name" />
-                           <TableColumn fx:id="eventArtistColumn" prefWidth="138.40003967285156" text="Artist" />
-                           <TableColumn fx:id="eventClientColumn" prefWidth="136.79998779296875" text="Client" />
-                       </columns>
-                     </TableView>
-                     <TableView fx:id="venueTable" layoutY="258.0" prefHeight="233.0" prefWidth="512.0">
-                        <columns>
-                           <TableColumn fx:id="venueNoColumn" prefWidth="82.39998775720596" text="Venue No" />
-                           <TableColumn fx:id="venueNameColumn" prefWidth="274.4000549316406" text="Venue Name" />
-                           <TableColumn fx:id="compatibilityScoreColumn" prefWidth="154.39996337890625" text="Compatibility Score" />
-                        </columns>
-                     </TableView>
-                     <Label layoutX="14.0" layoutY="2.0" text="Upcoming Event Requests">
-                        <font>
-                           <Font name="Montreal Regular" size="18.0" />
-                        </font>
-                     </Label>
+                           <HBox fillHeight="false" prefHeight="227.0" prefWidth="950.0" VBox.vgrow="NEVER">
+                              <children>
+                                 <TableView fx:id="eventTable" prefHeight="228.0" prefWidth="694.0">
+                                   <columns>
+                                       <TableColumn fx:id="eventIdColumn" prefWidth="84.80001217126846" text="No." />
+                                       <TableColumn fx:id="eventNameColumn" prefWidth="208.00003051757812" text="Event Name" />
+                                       <TableColumn fx:id="eventArtistColumn" prefWidth="188.800048828125" text="Artist" />
+                                       <TableColumn fx:id="eventClientColumn" prefWidth="213.5999755859375" text="Client" />
+                                   </columns>
+                                    <HBox.margin>
+                                       <Insets left="5.0" right="10.0" />
+                                    </HBox.margin>
+                                 </TableView>
+                                 <VBox prefHeight="222.0" prefWidth="232.0">
+                                    <children>
+                                       <Button fx:id="showEventDetailsButton" onAction="#showEventDetails" prefHeight="40.0" prefWidth="227.0" text="Show Event Details">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <CheckBox fx:id="availableCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Available">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <padding>
+                                             <Insets bottom="2.0" top="2.0" />
+                                          </padding>
+                                       </CheckBox>
+                                       <CheckBox fx:id="sufficientCapacityCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Sufficient Capacity">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <padding>
+                                             <Insets bottom="2.0" top="2.0" />
+                                          </padding>
+                                       </CheckBox>
+                                       <CheckBox fx:id="eventTypeCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Event Type">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <padding>
+                                             <Insets bottom="2.0" top="2.0" />
+                                          </padding>
+                                       </CheckBox>
+                                       <CheckBox fx:id="venueCategoryCheckbox" mnemonicParsing="false" prefHeight="25.0" prefWidth="193.0" text="Venue Category">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets bottom="3.0" />
+                                          </VBox.margin>
+                                          <padding>
+                                             <Insets bottom="2.0" top="2.0" />
+                                          </padding>
+                                       </CheckBox>
+                                                <Button fx:id="filterVenuesButton" maxHeight="51.0" onAction="#filterVenues" prefHeight="51.0" prefWidth="227.0" text="Filter Venues">
+                                                    <font>
+                                                        <Font name="Montreal Regular" size="16.0" />
+                                                    </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" />
+                                          </VBox.margin>
+                                                </Button>
+                                                <Button fx:id="autoMatchButton" onAction="#autoMatch" prefHeight="19.0" prefWidth="227.0" text="Auto Match" VBox.vgrow="NEVER">
+                                                    <font>
+                                                        <Font name="Montreal Regular" size="16.0" />
+                                                    </font>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" />
+                                          </VBox.margin>
+                                          <padding>
+                                             <Insets bottom="5.0" top="5.0" />
+                                          </padding>
+                                                </Button>
+                                    </children>
+                                 </VBox>
+                              </children>
+                           </HBox>
+                           <Label prefHeight="30.0" prefWidth="198.0" text="Venue Details" underline="true">
+                              <font>
+                                 <Font name="Montreal Regular" size="18.0" />
+                              </font>
+                              <VBox.margin>
+                                 <Insets left="5.0" />
+                              </VBox.margin>
+                           </Label>
+                           <HBox prefHeight="244.0" prefWidth="950.0">
+                              <children>
+                                 <TableView fx:id="venueTable" prefHeight="210.0" prefWidth="694.0">
+                                    <columns>
+                                       <TableColumn fx:id="venueNoColumn" prefWidth="82.39998775720596" text="No." />
+                                       <TableColumn fx:id="venueNameColumn" prefWidth="300.8000183105469" text="Venue Name" />
+                                       <TableColumn fx:id="compatibilityScoreColumn" prefWidth="310.4000244140625" text="Compatibility Score" />
+                                    </columns>
+                                    <HBox.margin>
+                                       <Insets left="5.0" right="10.0" />
+                                    </HBox.margin>
+                                 </TableView>
+                                        <VBox>
+                                            <children>
+                                       <Button fx:id="showVenueDetailsButton" onAction="#showVenueDetails" prefHeight="36.0" prefWidth="227.0" text="Show Venue Details">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <padding>
+                                             <Insets bottom="5.0" top="5.0" />
+                                          </padding>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Button fx:id="bookVenueButton" onAction="#bookVenue" prefHeight="30.0" prefWidth="227.0" style="-fx-background-color: green;" text="Book Venue" textFill="WHITE">
+                                          <font>
+                                             <Font name="Montreal Regular" size="16.0" />
+                                          </font>
+                                          <padding>
+                                             <Insets bottom="5.0" top="5.0" />
+                                          </padding>
+                                          <VBox.margin>
+                                             <Insets bottom="5.0" />
+                                          </VBox.margin>
+                                       </Button>
+                                       <Label prefHeight="30.0" prefWidth="185.0" text="Venue Bookings" underline="true">
+                                          <font>
+                                             <Font name="Montreal Regular" size="14.0" />
+                                          </font>
+                                       </Label>
+                                       <TableView fx:id="currentBookingTable" prefHeight="130.0" prefWidth="227.0">
+                                         <columns>
+                                           <TableColumn fx:id="eventDateColumn" prefWidth="80.79992830753326" text="Date" />
+                                           <TableColumn fx:id="eventTimeColumn" prefWidth="82.39989471435547" text="Time" />
+                                             <TableColumn fx:id="bookingIdColumn" prefWidth="67.2000732421875" text="No." />
+                                         </columns>
+                                       </TableView>
+                                            </children>
+                                        </VBox>
+                              </children>
+                           </HBox>
+                        </children>
+                     </VBox>
                         </children>
                     </AnchorPane>
                 </items>

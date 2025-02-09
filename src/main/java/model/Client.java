@@ -1,45 +1,84 @@
 package model;
 
 public class Client {
-
 	private int clientId;
 	private String clientName;
 	private String contactInfo;
+	private int totalJobs;
+	private double totalAmountSpent;
+	private double totalCommission;
 
-	/**
-	 * @param clientName
-	 * @param contactInfo
-	 */
 	public Client(int clientId, String clientName, String contactInfo) {
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.contactInfo = contactInfo;
+		this.totalJobs = 0;
+		this.totalAmountSpent = 0.0;
+		this.totalCommission = 0.0;
 	}
 
+	public Client(int clientId, String clientName, int totalJobs, double totalCommission, double totalAmountSpent) {
+		this.clientId = clientId;
+		this.clientName = clientName;
+		this.totalJobs = totalJobs;
+		this.totalCommission = totalCommission;
+		this.totalAmountSpent = totalAmountSpent;
+	}
+
+	// GETTERS
 	public int getClientId() {
-		return this.clientId;
+		return clientId;
 	}
 
 	public String getClientName() {
-		return this.clientName;
-	}
-
-	/**
-	 * @param clientName
-	 */
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
+		return clientName;
 	}
 
 	public String getContactInfo() {
-		return this.contactInfo;
+		return contactInfo;
 	}
 
-	/**
-	 * @param contactInfo
-	 */
+	public int getTotalJobs() {
+		return totalJobs;
+	}
+
+	public double getTotalAmountSpent() {
+		return totalAmountSpent;
+	}
+
+	public double getTotalCommission() {
+		return totalCommission;
+	}
+
+	// SETTERS
 	public void setContactInfo(String contactInfo) {
 		this.contactInfo = contactInfo;
+	}
+
+	public void setTotalJobs(int totalJobs) {
+		this.totalJobs = totalJobs;
+	}
+
+	public void setTotalAmountSpent(double totalAmountSpent) {
+		this.totalAmountSpent = totalAmountSpent;
+	}
+
+	public void setTotalCommission(double totalCommission) {
+		this.totalCommission = totalCommission;
+	}
+
+	// METHOD TO CALCULATE COMMISSION
+	public double calculateCommission() {
+		if (totalJobs > 1) {
+			return totalAmountSpent * 0.09;  // 9% COMMISSION FOR MULTIPLE JOBS
+		} else {
+			return totalAmountSpent * 0.10;  // 10% COMMISSION FOR A SINGLE JOB
+		}
+	}
+
+	// METHOD TO UPDATE TOTAL COMMISSION
+	public void updateCommission() {
+		this.totalCommission = calculateCommission();
 	}
 
 	@Override
@@ -47,7 +86,9 @@ public class Client {
 		return "Client{" +
 				"clientId=" + clientId +
 				", clientName='" + clientName + '\'' +
-				", contactInfo='" + contactInfo + '\'' +
+				", totalJobs=" + totalJobs +
+				", totalAmountSpent=" + totalAmountSpent +
+				", totalCommission=" + totalCommission +
 				'}';
 	}
 }

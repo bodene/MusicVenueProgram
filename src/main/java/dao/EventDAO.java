@@ -39,7 +39,7 @@ public class EventDAO {
                     eventStmt.setInt(1, eventId);
                     eventStmt.setString(2, event.getEventName());
                     eventStmt.setString(3, event.getArtist());
-                    eventStmt.setDate(4, Date.valueOf(event.getEventDate()));
+                    eventStmt.setString(4, String.valueOf(event.getEventDate().toEpochDay()));
                     eventStmt.setString(5, event.getEventTime().toString());
                     eventStmt.setInt(6, event.getDuration());
                     eventStmt.setString(7, eventEndTime.toString());
@@ -102,7 +102,8 @@ public class EventDAO {
                 String eventArtist = rs.getString("event_artist");
 
                 // Handle null dates safely
-                LocalDate eventDate = rs.getDate("event_date").toLocalDate();
+                long epochDays = rs.getLong("event_date");
+                LocalDate eventDate = LocalDate.ofEpochDay(epochDays);
                 LocalTime eventTime = LocalTime.parse(rs.getString("event_time"));
                 int eventDuration = rs.getInt("event_duration");
                 int eventCapacity = rs.getInt("required_capacity");
@@ -131,5 +132,22 @@ public class EventDAO {
             }
         }
         return eventList;
+    }
+
+    public static boolean updateEvent(Event event) throws SQLException {
+        String sql = """
+        UPDATE events
+        SET event_date = ?, event_time = ?, event_artist = ?
+        WHERE event_id = ?
+    """;
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(4, String.valueOf(event.getEventDate().toEpochDay()));
+            pstmt.setString(2, event.getEventTime().toString());
+            pstmt.setString(3, event.getArtist());
+            pstmt.setInt(4, event.getEventId());
+            return pstmt.executeUpdate() > 0;
+        }
     }
 }
