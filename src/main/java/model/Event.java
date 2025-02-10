@@ -1,6 +1,7 @@
 package model;
 
-import dao.ClientDAO;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -42,9 +43,13 @@ public class Event {
 		this.client = client;
 	}
 
-	public Event(String eventName, LocalDate eventDate) {
+	public Event(int eventId, String eventName, LocalDate eventDate, LocalTime eventTime, int eventDuration, String eventArtist) {
+		this.eventId = eventId;
 		this.eventName = eventName;
+		this.eventTime = eventTime;
 		this.eventDate = eventDate;
+		this.duration = eventDuration;
+		this.artist = eventArtist;
 	}
 
 	public Event(String eventName) {
@@ -59,10 +64,6 @@ public class Event {
 		return this.eventName;
 	}
 
-	/**
-	 * 
-	 * @param eventName
-	 */
 	public void setEventName(String eventName) {
 		this.eventName = eventName;
 	}
@@ -71,10 +72,6 @@ public class Event {
 		return this.artist;
 	}
 
-	/**
-	 * 
-	 * @param artist
-	 */
 	public void setArtist(String artist) {
 		this.artist = artist;
 	}
@@ -83,10 +80,7 @@ public class Event {
 		return this.eventDate;
 	}
 
-	/**
-	 * 
-	 * @param eventDate
-	 */
+
 	public void setEventDate(LocalDate eventDate) {
 		this.eventDate = eventDate;
 	}
@@ -95,10 +89,16 @@ public class Event {
 		return this.eventTime;
 	}
 
-	/**
-	 * 
-	 * @param eventTime
-	 */
+	// Property for event name
+	public StringProperty eventNameProperty() {
+		return new SimpleStringProperty(eventName);
+	}
+
+	// Property for event date (as string for UI)
+	public StringProperty eventDateProperty() {
+		return new SimpleStringProperty(eventDate != null ? eventDate.toString() : "");
+	}
+
 	public void setEventTime(LocalTime eventTime) {
 		this.eventTime = eventTime;
 	}

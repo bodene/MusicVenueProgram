@@ -1,9 +1,13 @@
 package controller;
 
 import dao.BookingDAO;
+import dao.ClientDAO;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,62 +19,74 @@ import model.*;
 import service.SceneManager;
 import service.SessionManager;
 import util.AlertUtils;
+import util.NumberUtils;
+import javafx.collections.transformation.FilteredList;
 
 import java.sql.SQLException;
+import java.util.List;
 
 
 public class BookingsController {
 
     @FXML private TableView<Booking> bookingOrderSummaryTable;
     @FXML private TableColumn<Booking, Integer> requestIdColumn;
-    @FXML private TableColumn<Client, String> clientNameColumn;
-    @FXML private TableColumn<Event, String> eventDateColumn;
-    @FXML private TableColumn<Event, String> eventNameColumn;
-    @FXML private TableColumn<Venue, String> venueNameColumn;
-    @FXML private TableColumn<Booking, Double> eventCostColumn;
-    @FXML private TableColumn<Booking, Double> eventCommissionColumn;
-    @FXML private TableColumn<Booking, Double> bookingTotalColumn;
+    @FXML private TableColumn<Booking, String> eventDateColumn;
+    @FXML private TableColumn<Booking, String> eventNameColumn;
+    @FXML private TableColumn<Booking, String> venueNameColumn;
+    @FXML private TableColumn<Booking, String> bookingCostColumn;
+    @FXML private TableColumn<Booking, String> bookingCommissionColumn;
+    @FXML private TableColumn<Booking, String> bookingTotalColumn;
     @FXML private TableColumn<Booking, String> statusColumn;
 
     @FXML private TableView<Client> clientOrderSummaryTable;
     @FXML private TableColumn<Client, Integer> clientIdColumn;
+    @FXML private TableColumn<Client, String> clientNameColumn;
     @FXML private TableColumn<Client, Integer> totalJobsColumn;
-    @FXML private TableColumn<Client, Integer> totalEventSpendColumn;
-    @FXML private TableColumn<Client, Double> clientCommissionColumn;
-    @FXML private TableColumn<Client, Double> totalClientSpendColumn;
+    @FXML private TableColumn<Client, String> totalEventSpendColumn;
+    @FXML private TableColumn<Client, String> clientCommissionColumn;
+    @FXML private TableColumn<Client, String> totalClientSpendColumn;
 
     @FXML private Button updateBookingButton, cancelBookingButton, dashboardButton;
     @FXML private Button logoutButton;
     @FXML private Button adminButton;
     @FXML private ToggleButton filterConfirmedOnlyToggle;
+    private ObservableList<Booking> originalBookingList;
+    private FilteredList<Booking> filteredBookingList;
 
     @FXML
     private void initialize() {
         setupTables();
+        setupToggleButton();
     }
 
     private void setupTables() {
-        // BOOKING ORDER SUMMARY TABLE SETUP
+        // Initialize Booking Table
         requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
-        clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
-        eventDateColumn.setCellValueFactory(new PropertyValueFactory<>("eventDate"));
-        eventNameColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
-        venueNameColumn.setCellValueFactory(new PropertyValueFactory<>("venueName"));
-        eventCostColumn.setCellValueFactory(new PropertyValueFactory<>("eventCost"));
-        eventCommissionColumn.setCellValueFactory(new PropertyValueFactory<>("eventCommission"));
-        bookingTotalColumn.setCellValueFactory(new PropertyValueFactory<>("bookingTotal"));
-        statusColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStatus().toString()));
+        eventDateColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventDateProperty());
+        eventNameColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventNameProperty());
+        venueNameColumn.setCellValueFactory(cellData -> cellData.getValue().getVenue().venueNameProperty());
+        bookingCostColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingHirePriceProperty());
+        bookingCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingEventCommissionProperty());
+        bookingTotalColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingTotalProperty());
+        statusColumn.setCellValueFactory(cellData -> cellData.getValue().getStatusProperty());
 
-        // CLIENT ORDER SUMMARY TABLE SETUP
+        // Load Booking data once
+        originalBookingList = BookingDAO.getBookingOrderSummary();
+        filteredBookingList = new FilteredList<>(originalBookingList, p -> true);
+        bookingOrderSummaryTable.setItems(filteredBookingList);
+
+        // Initialize Client Table
         clientIdColumn.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
-        totalJobsColumn.setCellValueFactory(new PropertyValueFactory<>("totalJobs"));
-        totalEventSpendColumn.setCellValueFactory(new PropertyValueFactory<>("totalEventSpend"));
-        clientCommissionColumn.setCellValueFactory(new PropertyValueFactory<>("clientCommission"));
-        totalClientSpendColumn.setCellValueFactory(new PropertyValueFactory<>("totalClientSpend"));
+        totalJobsColumn.setCellValueFactory(cellData -> cellData.getValue().confirmedJobCountProperty().asObject());
+        totalEventSpendColumn.setCellValueFactory(cellData -> cellData.getValue().getClientTotalHireProperty());
+        clientCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getTotalCommissionProperty());
+        totalClientSpendColumn.setCellValueFactory(cellData -> cellData.getValue().getClientBookingTotalProperty());
 
-        bookingOrderSummaryTable.setItems(getBookingOrderSummaryData());
-        clientOrderSummaryTable.setItems(getClientOrderSummaryData());
+        // Load Client data
+        List<Client> clientList = ClientDAO.getAllClientSummaries();
+        ObservableList<Client> observableClientList = FXCollections.observableArrayList(clientList);
+        clientOrderSummaryTable.setItems(observableClientList);
     }
 
     private ObservableList<Client> getClientOrderSummaryData() {
@@ -78,20 +94,19 @@ public class BookingsController {
         return data != null ? data : FXCollections.observableArrayList();
     }
 
-    private ObservableList<Booking> getBookingOrderSummaryData() {
-        ObservableList<Booking> data = BookingDAO.getBookingOrderSummary();
-        return data != null ? data : FXCollections.observableArrayList();
+
+    private void setupToggleButton() {
+        filterConfirmedOnlyToggle.setOnAction(event -> {
+            if (filterConfirmedOnlyToggle.isSelected()) {
+                filterConfirmedOnlyToggle.setText("Show All Bookings");
+                filteredBookingList.setPredicate(booking -> booking.getStatus() == BookingStatus.CONFIRMED);
+            } else {
+                filterConfirmedOnlyToggle.setText("Confirmed Bookings Only");
+                filteredBookingList.setPredicate(booking -> true);
+            }
+        });
     }
 
-    @FXML
-    private void toggleConfirmedOnly() {
-        if (filterConfirmedOnlyToggle.isSelected()) {
-            ObservableList<Booking> confirmedBookings = bookingOrderSummaryTable.getItems().filtered(b -> b.getStatus() == BookingStatus.CONFIRMED);
-            bookingOrderSummaryTable.setItems(confirmedBookings);
-        } else {
-            refreshBookingData();
-        }
-    }
 
     // UPDATE A BOOKING FROM USER SELECTION
     @FXML
@@ -103,7 +118,7 @@ public class BookingsController {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/booking-edit-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/update-booking-details.fxml"));
             Parent root = loader.load();
 
             UpdateBookingDetailsController controller = loader.getController();
@@ -135,29 +150,47 @@ public class BookingsController {
 
         boolean confirmed = AlertUtils.showConfirmation("Confirm Cancellation", "Are you sure you want to cancel this booking? This action cannot be undone.");
         if (confirmed) {
-            try {
-                boolean success = BookingDAO.cancelBooking(selectedBooking.getBookingId());
+            Task<Boolean> cancelTask = new Task<>() {
+                @Override
+                protected Boolean call() throws SQLException {
+                    return BookingDAO.cancelBooking(selectedBooking.getBookingId());
+                }
+            };
+
+            cancelTask.setOnSucceeded(event -> {
+                boolean success = cancelTask.getValue();
                 if (success) {
                     AlertUtils.showAlert("Success", "Booking canceled successfully.", Alert.AlertType.INFORMATION);
-                    bookingOrderSummaryTable.getItems().remove(selectedBooking);
                     refreshBookingData();
                 } else {
                     AlertUtils.showAlert("Error", "Failed to cancel the booking. Please try again.", Alert.AlertType.ERROR);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                AlertUtils.showAlert("Database Error", "Error canceling booking: " + e.getMessage(), Alert.AlertType.ERROR);
-            }
+            });
+
+            cancelTask.setOnFailed(event -> {
+                AlertUtils.showAlert("Database Error", "An unexpected error occurred while canceling the booking. Please try again later.", Alert.AlertType.ERROR);
+                cancelTask.getException().printStackTrace();
+            });
+
+            new Thread(cancelTask).start();
         }
     }
 
-    // REFRESH BOOKINGS TABLE
     private void refreshBookingData() {
-        ObservableList<Booking> updatedBookings = BookingDAO.getBookingOrderSummary();
-        bookingOrderSummaryTable.setItems(updatedBookings);
-        ObservableList<Client> updatedCommissions = BookingDAO.getAllCommissionSummaries();
-        clientOrderSummaryTable.setItems(updatedCommissions);
+        // Refresh Booking Data
+        List<Booking> updatedBookings = BookingDAO.getBookingOrderSummary();
+        originalBookingList.setAll(updatedBookings);
+        filteredBookingList.setPredicate(filterConfirmedOnlyToggle.isSelected()
+                ? booking -> booking.getStatus() == BookingStatus.CONFIRMED
+                : booking -> true);
+        bookingOrderSummaryTable.setItems(filteredBookingList);
+
+        // Refresh Client Summary Data
+        List<Client> updatedClients = ClientDAO.getAllClientSummaries(); // Ensure this method recalculates totals and commissions
+        clientOrderSummaryTable.setItems(FXCollections.observableArrayList(updatedClients));
     }
+
+
 
 
     @FXML private void goToDashboard() {SceneManager.switchScene("dashboard.fxml");}

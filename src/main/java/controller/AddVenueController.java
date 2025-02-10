@@ -21,6 +21,7 @@ public class AddVenueController implements Initializable {
     @FXML private VBox venueTypeColumn1, venueTypeColumn2;
     @FXML private ToggleGroup categoryGroup;
     @FXML private RadioButton indoorCategory, outdoorCategory, convertibleCategory;
+    @FXML private Button addVenueButton, cancelButton;
 
     private final String[] eventTypes = {"Gig", "Disco", "Live Concert", "Festival", "Large Live Concert"};
     private final List<CheckBox> eventTypeCheckBoxes = new ArrayList<>();
@@ -117,8 +118,8 @@ public class AddVenueController implements Initializable {
         return selectedVenueTypes;
     }
 
-    @FXML private void goToMain() {
-        SceneManager.switchScene("main-view.fxml");
+    @FXML private void goBack() {
+        SceneManager.switchScene("view-venue-details.fxml");
     }
 }
 

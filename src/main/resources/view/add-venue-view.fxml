@@ -25,14 +25,14 @@
     <Pane prefHeight="462.0" prefWidth="766.0" style="-fx-background-color: rgba(255, 255, 255, 0.6);" />
 
     <!-- Main UI -->
-    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="518.0" prefWidth="816.0">
+    <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="518.0" prefWidth="816.0" stylesheets="@../css/styles.css">
 
         <center>
             <SplitPane id="backgroundImg" dividerPositions="0.26700367647058826" opacity="0.79" orientation="VERTICAL" prefHeight="510.0" prefWidth="832.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" opacity="0.95" prefHeight="127.0" prefWidth="814.0">
                         <children>
-                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="0.0" prefWidth="766.0" styleClass="main-header" text="Add a New Venue" textAlignment="CENTER">
+                            <Label alignment="CENTER" contentDisplay="CENTER" layoutY="44.0" prefHeight="54.0" prefWidth="816.0" styleClass="main-header" text="Add a New Venue" textAlignment="CENTER">
                             </Label>
                         </children>
                     </AnchorPane>
@@ -44,7 +44,7 @@
                                         <children>
                                             <VBox prefHeight="294.0" prefWidth="455.0" AnchorPane.rightAnchor="28.0">
                                                 <children>
-                                                    <TextField fx:id="venueNameField" prefHeight="41.0" prefWidth="310.0" promptText="Venue Name" style="-fx-border-color: black; -fx-background-image: #FFFFFF;">
+                                                    <TextField fx:id="venueNameField" prefHeight="41.0" prefWidth="310.0" promptText="Venue Name" style="-fx-border-color: black;">
                                                         <font>
                                                             <Font name="Montreal Regular" size="18.0" />
                                                         </font>
@@ -53,7 +53,7 @@
                                                         </VBox.margin>
                                                     </TextField>
 
-                                                    <TextField fx:id="venueCapacityField" prefHeight="42.0" prefWidth="310.0" promptText="Capacity" style="-fx-border-color: black; -fx-background-image: #FFFFFF;">
+                                                    <TextField fx:id="venueCapacityField" prefHeight="42.0" prefWidth="310.0" promptText="Capacity" style="-fx-border-color: black;">
                                                         <font>
                                                             <Font name="Montreal Regular" size="18.0" />
                                                         </font>
@@ -101,8 +101,7 @@
                                              <Insets top="5.0" />
                                           </padding>
                                        </HBox>
-
-                                                    <TextField fx:id="pricePerHourField" prefHeight="38.0" prefWidth="310.0" promptText="Price per hour" style="-fx-border-color: black; -fx-background-image: #FFFFFF;">
+                                                    <TextField fx:id="pricePerHourField" prefHeight="38.0" prefWidth="310.0" promptText="Price per hour" style="-fx-border-color: black;">
                                                         <font>
                                                             <Font name="Montreal Regular" size="18.0" />
                                                         </font>
@@ -112,7 +111,6 @@
                                                     </TextField>
                                                 </children>
                                             </VBox>
-
                                             <VBox alignment="TOP_CENTER" prefHeight="290.0" prefWidth="312.0" AnchorPane.leftAnchor="0.0">
                                                 <children>
                                                     <Label alignment="CENTER_RIGHT" prefHeight="45.0" prefWidth="302.0" text="Venue Name:" textAlignment="RIGHT">
@@ -146,9 +144,9 @@
                                                         <VBox.margin>
                                                             <Insets bottom="5.0" top="5.0" />
                                                         </VBox.margin>
-                                          <padding>
-                                             <Insets top="10.0" />
-                                          </padding>
+                                                      <padding>
+                                                         <Insets top="10.0" />
+                                                      </padding>
                                                     </Label>
                                                     <Label alignment="CENTER_RIGHT" prefHeight="49.0" prefWidth="308.0" text="Booking Price / Hour:">
                                                         <font>
@@ -164,14 +162,14 @@
                                     </AnchorPane>
                                 </items>
                             </SplitPane>
-                            <ButtonBar layoutX="154.0" layoutY="292.0" prefHeight="70.0" prefWidth="430.0">
+                            <ButtonBar layoutX="192.0" layoutY="296.0" prefHeight="70.0" prefWidth="430.0">
                                 <buttons>
                                     <Button fx:id="addVenueButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#addVenue" prefHeight="45.0" prefWidth="219.0" style="-fx-background-color: green;" text="Add Venue" textFill="WHITE">
                                         <font>
                                             <Font name="Montreal Regular" size="24.0" />
                                         </font>
                                     </Button>
-                                    <Button fx:id="backButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goToMain" prefHeight="46.0" style="-fx-background-color: BLUE;" text="Back" textFill="WHITE">
+                                    <Button fx:id="backButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#goBack" prefHeight="46.0" style="-fx-background-color: BLUE;" text="Back" textFill="WHITE">
                                         <font>
                                             <Font name="Montreal Regular" size="24.0" />
                                         </font>

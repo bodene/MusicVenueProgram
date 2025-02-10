@@ -4,10 +4,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Booking;
 import model.Client;
+import model.Event;
+import model.Venue;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +22,8 @@ public class BookingDAO {
     // CHECKS FOR CONFLICTING BOOKING
     public static boolean checkAvailability(int venueId, LocalDate eventDate, LocalTime eventTime, int duration) throws SQLException {
         // CONVERTS EVENT START & END DATE TO TEXT
-        String startTimeStr = eventTime.toString(); // Format: "HH:MM:SS"
-        String endTimeStr = eventTime.plusHours(duration).toString(); // CALCULATE EVENT END DATE
+        String startTimeStr = eventTime.toString();
+        String endTimeStr = eventTime.plusHours(duration).toString();
 
         String sql = """
             SELECT COUNT(*) AS count
@@ -52,24 +55,22 @@ public class BookingDAO {
     }
 
     // BOOKS EVENT INTO DB
-    public static boolean bookVenue(LocalDate bookingDate, double hirePrice, String bookingStatus,
-                                    int eventId, int venueId, int clientId, String bookedBy) throws SQLException {
+    public static boolean bookVenue(LocalDate bookingDate, String bookingStatus, int eventId, int venueId, int clientId, String bookedBy) throws SQLException {
         String sql = """
-        INSERT INTO bookings (booking_date, booking_hire_price, booking_status, event_id, venue_id, client_id, booked_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """;
+                        
+                INSERT INTO bookings (booking_date, booking_status, event_id, venue_id, client_id, booked_by)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """;
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, String.valueOf(bookingDate.toEpochDay()));
-            pstmt.setDouble(2, hirePrice);
-            pstmt.setString(3, bookingStatus);
-            pstmt.setInt(4, eventId);
-            pstmt.setInt(5, venueId);
-            pstmt.setInt(6, clientId);
-            pstmt.setString(7, bookedBy);
-
+            pstmt.setString(2, bookingStatus);
+            pstmt.setInt(3, eventId);
+            pstmt.setInt(4, venueId);
+            pstmt.setInt(5, clientId);
+            pstmt.setString(6, bookedBy);
             return pstmt.executeUpdate() > 0;
         }
     }
@@ -78,19 +79,7 @@ public class BookingDAO {
     public static ObservableList<Client> getAllCommissionSummaries() {
         ObservableList<Client> clientList = FXCollections.observableArrayList();
 
-        String sql = """
-        SELECT c.client_id, c.client_name, c.contact_info,
-               COUNT(b.booking_id) AS total_jobs,
-               SUM(b.booking_hire_price) AS total_event_spend,
-               CASE 
-                   WHEN COUNT(b.booking_id) > 1 THEN SUM(b.booking_hire_price) * 0.09
-                   ELSE SUM(b.booking_hire_price) * 0.10 
-               END AS client_commission,
-               SUM(b.booking_hire_price) AS total_client_spend
-        FROM clients c
-        LEFT JOIN bookings b ON c.client_id = b.client_id AND b.booking_status = 'CONFIRMED'
-        GROUP BY c.client_id, c.client_name, c.contact_info
-    """;
+        String sql = "SELECT c.client_id, c.client_name, c.contact_info FROM clients c";
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql);
@@ -100,15 +89,10 @@ public class BookingDAO {
                 int clientId = rs.getInt("client_id");
                 String clientName = rs.getString("client_name");
                 String contactInfo = rs.getString("contact_info");
-                int totalJobs = rs.getInt("total_jobs");
-                double totalEventSpend = rs.getDouble("total_event_spend");
-                double clientCommission = rs.getDouble("client_commission");
-                double totalClientSpend = rs.getDouble("total_client_spend");
 
                 Client client = new Client(clientId, clientName, contactInfo);
-                client.setTotalJobs(totalJobs);
-                client.setTotalAmountSpent(totalEventSpend);
-                client.setTotalCommission(clientCommission);
+                client.setBookings(getBookingsByClientId(clientId));  // Fetch all bookings for the client
+
                 clientList.add(client);
             }
 
@@ -116,25 +100,26 @@ public class BookingDAO {
             e.printStackTrace();
             System.err.println("Error fetching client commission summaries: " + e.getMessage());
         }
+        return
 
-        return clientList;
+
+    clientList;
     }
 
+
+
+    //
     public static ObservableList<Booking> getBookingOrderSummary() {
         ObservableList<Booking> bookingList = FXCollections.observableArrayList();
 
         String sql = """
-                        SELECT b.booking_id, e.event_name, e.event_date, v.venue_name, 
-                               b.booking_hire_price, 
-                               CASE 
-                                   WHEN c.total_jobs > 1 THEN b.booking_hire_price * 0.09 
-                                   ELSE b.booking_hire_price * 0.10 
-                               END AS event_commission,
-                               b.booking_hire_price AS booking_total,
-                               b.booking_status
+                        SELECT b.booking_id, e.event_id, e.event_name, e.event_date, e.event_time, e.
+                                event_duration, e.event_artist, 
+                               v.venue_id, v.venue_name, v.hire_price, c.client_id, c.
+                                client_name, b.booking_status, b.booked_by
                         FROM bookings b
-                        JOIN events e ON b.event_id = e.event_id
-                        JOIN venues v ON b.venue_id = v.venue_id
+                                       JOIN events e ON b.event_id = e.event_id
+                                       JOIN venues v ON b.venue_id = v.venue_id
                         JOIN clients c ON b.client_id = c.client_id
                     """;
 
@@ -144,16 +129,22 @@ public class BookingDAO {
 
             while (rs.next()) {
                 int bookingId = rs.getInt("booking_id");
+                int eventId = rs.getInt("event_id");
                 String eventName = rs.getString("event_name");
-                long epochDays = rs.getLong("event_date");
-                LocalDate eventDate = LocalDate.ofEpochDay(epochDays);
+                LocalDate eventDate = LocalDate.ofEpochDay(rs.getLong("event_date"));
+                LocalTime eventTime = LocalTime.parse(rs.getString("event_time"));
+                int eventDuration = rs.getInt("event_duration");
+                String eventArtist = rs.getString("event_artist");
+                int venueId = rs.getInt("venue_id");
                 String venueName = rs.getString("venue_name");
-                double eventCost = rs.getDouble("booking_hire_price");
-                double eventCommission = rs.getDouble("event_commission");
-                double bookingTotal = rs.getDouble("booking_total");
+                double hirePrice = rs.getDouble("hire_price");
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("client_name");
                 String bookingStatus = rs.getString("booking_status");
+                String bookedBy = rs.getString("booked_by");
 
-                Booking booking = new Booking(bookingId, eventName, eventDate, venueName, eventCost, eventCommission, bookingTotal, bookingStatus);
+                Booking booking = new Booking(bookingId, eventId, eventName, eventDate, eventTime, eventDuration, eventArtist, venueId, venueName, hirePrice, clientId, clientName, bookingStatus, bookedBy);
+
                 bookingList.add(booking);
             }
 
@@ -165,15 +156,17 @@ public class BookingDAO {
         return bookingList;
     }
 
+
     // Get Venue Utilisation (Number of times each venue has been booked)
     public static Map<String, Integer> getVenueUtilisation() {
         String sql = """
-                    SELECT v.venue_name, COUNT(b.booking_id) AS utilisation_count
-                    FROM bookings b
-                    JOIN venues v ON b.venue_id = v.venue_id
-                    WHERE b.booking_status = 'CONFIRMED'
-                    GROUP BY v.venue_name
-                    """;
+                        SELECT v.venue_name,
+                        COUNT(b.booking_id) AS u
+                        FROM bookings b
+                        JOIN venues v ON b.venue_id = v.venue_id
+                        WHERE b.booking_status = 'CONFIRMED'
+                        GROUP BY v.venue_name
+                        """;
         Map<String, Integer> utilisationData = new HashMap<>();
 
         try (Connection conn = DatabaseHandler.getConnection();
@@ -195,134 +188,103 @@ public class BookingDAO {
 
     // GET VENUE INCOME
     public static Map<String, Double> getVenueIncome() {
-        String sql = """
-                        SELECT v.venue_name, SUM(b.booking_hire_price) AS total_income
-                        FROM bookings b
-                        JOIN venues v ON b.venue_id = v.venue_id
-                        WHERE b.booking_status = 'CONFIRMED'
-                        GROUP BY v.venue_name
-                    """;
         Map<String, Double> incomeData = new HashMap<>();
 
-        try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String venueName = rs.getString("venue_name");
-                double totalIncome = rs.getDouble("total_income");
-                incomeData.put(venueName, totalIncome);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        List<Booking> bookings = getBookingOrderSummary();
+        for (Booking booking : bookings) {
+            String venueName = booking.getVenue().getName();
+            double hirePrice = booking.getBookingHirePrice();
+            incomeData.put(venueName, incomeData.getOrDefault(venueName, 0.0) + hirePrice);
         }
-
         return incomeData;
     }
 
-    // GET VENUE COMMISSION
-    public static Map<String, Double> getVenueCommission() {
-        String sql = """
-                        SELECT v.venue_name, SUM(b.booking_commission) AS total_commission
-                        FROM bookings b
-                        JOIN venues v ON b.venue_id = v.venue_id
-                        WHERE b.booking_status = 'CONFIRMED'
-                        GROUP BY v.venue_name
-                    """;
-        Map<String, Double> commissionData = new HashMap<>();
-
-        try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String venueName = rs.getString("venue_name");
-                double totalCommission = rs.getDouble("total_commission");
-                commissionData.put(venueName, totalCommission);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return commissionData;
-    }
-
-    // GET ALL BOOKING SUMMARIES FOR MANAGEMENT EVENT COMMISSION TABLE
-    public static List<Booking> getAllBookingSummaries() {
-        String sql = """
-                        SELECT b.booking_id, e.event_name, v.venue_name, b.booking_commission, b.booked_by 
-                        FROM bookings b 
-                        JOIN events e ON b.event_id = e.event_id 
-                        JOIN venues v ON b.venue_id = v.venue_id
-                        WHERE b.booking_status = 'CONFIRMED'
-                    """;
-
-        List<Booking> bookingList = new ArrayList<>();
-
-        try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                int bookingId = rs.getInt("booking_id");
-                String eventName = rs.getString("event_name");
-                String venueName = rs.getString("venue_name");
-                double bookingCommission = rs.getDouble("booking_commission");
-                String bookedBy = rs.getString("booked_by");
-
-                Booking booking = new Booking(bookingId, eventName, venueName, bookingCommission, bookedBy);
-                bookingList.add(booking);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return bookingList;
-    }
-
-    // CANCEL BOOKING & UPDATE TOTALS TO ZERO
+    // CANCEL BOOKING
     public static boolean cancelBooking(int bookingId) throws SQLException {
         String sql = """
-        UPDATE bookings
-        SET booking_status = 'CANCELLED',
-            booking_hire_price = 0.00,
-            booking_commission = 0.00
-        WHERE booking_id = ?
-    """;
+                        UPDATE bookings
+                        SET booking_status = 'CANCELLED'
+                        WHERE booking_id = ?
+                    """;
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, bookingId);
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new SQLException("Error canceling booking with ID " + bookingId, e);
+                pstmt.setInt(1, bookingId);
+                int rowsAffected = pstmt.executeUpdate();
+                return rowsAffected > 0;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw new SQLException("Error canceling booking with Booking ID: " + bookingId, e);
         }
     }
 
+    public static List<Booking> getBookingsByClientId(int clientId) {
+        String sql =
+                """
+                    SELECT b.booking_id, b.booking_date, e.
+                            event_id, e.event_name,
+                            e.event_date, e.event_time, e.event_duration, e.event_artist, 
+                           v.venue_id, v.
+                            venue_name, v.hire_price 
+                    FROM bookings b
+                    JOIN events e ON b.event_id = e.event_id
+                    JOIN venues v ON b.venue_id = v.venue_id
+                    WHERE b.client_id = ? AND b.booking_status = 'CONFIRMED'
+                """;
+
+        List<Booking> bookings = new ArrayList<>();
+        Client client = ClientDAO.getClientById(clientId);
+
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, clientId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                long bookingDateEpochDays = rs.getLong("booking_date");
+                LocalDate bookingDate = LocalDate.ofEpochDay(bookingDateEpochDays);
+
+                long eventDateEpochDays = rs.getLong("event_date");
+                LocalDate eventDate = LocalDate.ofEpochDay(eventDateEpochDays);
+
+                LocalTime eventTime = LocalTime.parse(rs.getString("event_time"), DateTimeFormatter.ofPattern("HH:mm"));
+
+                Event event = new Event(rs.getInt("event_id"), rs.getString("event_name"), eventDate, eventTime, rs.getInt("event_duration"), rs.getString("event_artist"));
+                Venue venue = new Venue(rs.getInt("venue_id"), rs.getString("venue_name"), rs.getDouble("hire_price"));
+
+                Booking booking = new Booking(rs.getInt("booking_id"), event, venue, client, bookingDate);
+
+                bookings.add(booking);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return bookings;
+    }
     // UPDATE BOOKING
     public static boolean updateBooking(Booking booking) throws SQLException {
-        String sql = """
-        UPDATE bookings 
-        SET booking_date = ?, 
-            event_id = ?, 
-            venue_id = ?, 
-            client_id = ?
-        WHERE booking_id = ?
-    """;
+            String sql = """
+                            UPDATE bookings 
+                            SET booking_date = ?, 
+                                event_id = ?, 
+                                venue_id = ?, 
+                                client_id = ?
+                            WHERE booking_id = ?
+                        """;
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(booking.getBookingDate().toEpochDay()));// Update booking date
-            pstmt.setInt(2, booking.getEvent().getEventId());        // Update event ID
-            pstmt.setInt(3, booking.getVenue().getVenueId());        // Update venue ID
-            pstmt.setInt(4, booking.getClient().getClientId());      // Update client ID
-            pstmt.setInt(5, booking.getBookingId());                 // WHERE condition to match booking ID
+            // Set the booking_date to the current date
+            LocalDate currentDate = LocalDate.now();
+            pstmt.setString(1, String.valueOf(currentDate.toEpochDay()));
+            pstmt.setInt(2, booking.getEvent().getEventId());
+            pstmt.setInt(3, booking.getVenue().getVenueId());
+            pstmt.setInt(4, booking.getClient().getClientId());
+            pstmt.setInt(5, booking.getBookingId());
 
             int rowsUpdated = pstmt.executeUpdate();
             return rowsUpdated > 0;
@@ -331,7 +293,4 @@ public class BookingDAO {
             throw new SQLException("Error updating booking with ID " + booking.getBookingId(), e);
         }
     }
-
-
-
 }

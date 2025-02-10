@@ -2,10 +2,7 @@
 CREATE TABLE IF NOT EXISTS clients (
                                        client_id INTEGER PRIMARY KEY AUTOINCREMENT,
                                        client_name TEXT NOT NULL,
-                                       contact_info TEXT,
-                                       total_jobs INTEGER DEFAULT 0,
-                                       total_amount_spent DECIMAL(10, 2) DEFAULT 0.00,
-                                       total_commission DECIMAL(10, 2) DEFAULT 0.00
+                                       contact_info TEXT
 );
 
 -- Events Table
@@ -37,8 +34,6 @@ CREATE TABLE IF NOT EXISTS venues (
 CREATE TABLE IF NOT EXISTS bookings (
                                         booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
                                         booking_date TEXT NOT NULL,
-                                        booking_hire_price DECIMAL(10, 2) NOT NULL,
-                                        booking_commission DECIMAL(10, 2),
                                         booking_status VARCHAR(50) NOT NULL CHECK (booking_status IN ('CONFIRMED', 'CANCELLED', 'PENDING')),
                                         event_id INTEGER NOT NULL,
                                         venue_id INTEGER NOT NULL,

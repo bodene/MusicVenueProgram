@@ -350,7 +350,6 @@ public class DashboardController {
             // Insert the booking into the database
             boolean success = BookingDAO.bookVenue(
                     bookingDate,
-                    hirePrice,
                     bookingStatus,
                     selectedEvent.getEventId(),
                     selectedVenue.getVenueId(),

@@ -62,14 +62,13 @@
                                  <TableView fx:id="bookingOrderSummaryTable" prefHeight="222.0" prefWidth="950.0">
                                     <columns>
                                        <TableColumn fx:id="requestIdColumn" prefWidth="64.79998934268951" text="No" />
-                                       <TableColumn fx:id="clientNameColumn" prefWidth="127.199951171875" text="Client Name" />
                                        <TableColumn fx:id="eventDateColumn" prefWidth="83.20001220703125" text="Date" />
-                                       <TableColumn fx:id="eventNameColumn" prefWidth="144.0" text="Event Name" />
-                                       <TableColumn fx:id="venueNameColumn" prefWidth="150.39996337890625" text="Venue" />
-                                       <TableColumn fx:id="eventCostColumn" prefWidth="106.4000244140625" text="Event Cost" />
-                                       <TableColumn fx:id="eventCommissionColumn" prefWidth="120.79998779296875" text="Commission" />
-                                       <TableColumn fx:id="bookingTotalColumn" prefWidth="84.0" text="Total" />
-                                       <TableColumn fx:id="statusColumn" prefWidth="64.79998934268951" text="Status" />
+                                       <TableColumn fx:id="eventNameColumn" prefWidth="192.80003356933594" text="Event Name" />
+                                       <TableColumn fx:id="venueNameColumn" prefWidth="168.00006103515625" text="Venue" />
+                                       <TableColumn fx:id="bookingCostColumn" prefWidth="108.79998779296875" text="Event Cost" />
+                                       <TableColumn fx:id="bookingCommissionColumn" prefWidth="111.20001220703125" text="Commission" />
+                                       <TableColumn fx:id="bookingTotalColumn" prefWidth="121.60003662109375" text="Total" />
+                                       <TableColumn fx:id="statusColumn" prefWidth="88.7999267578125" text="Status" />
                                     </columns>
                                     <HBox.margin>
                                        <Insets left="5.0" right="5.0" />
@@ -77,6 +76,15 @@
                                  </TableView>
                               </children>
                            </HBox>
+                            <HBox alignment="CENTER">
+                                <ToggleButton fx:id="filterConfirmedOnlyToggle" contentDisplay="CENTER" mnemonicParsing="false"
+                                              prefHeight="39.0" prefWidth="180.0" style="-fx-background-color: green;"
+                                              text="Confirmed Bookings Only" textAlignment="CENTER" textFill="WHITE">
+                                    <HBox.margin>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                    </HBox.margin>
+                                </ToggleButton>
+                            </HBox>
                            <Label prefHeight="30.0" prefWidth="173.0" text="Client Overview" underline="true">
                               <VBox.margin>
                                  <Insets left="5.0" />
@@ -96,13 +104,8 @@
                                        <Insets bottom="5.0" left="5.0" />
                                     </HBox.margin>
                                  </TableView>
-                                        <VBox prefHeight="232.0" prefWidth="191.0" styleClass="VBox" stylesheets="@../css/styles.css">
+                                        <VBox prefHeight="242.0" prefWidth="190.0" styleClass="VBox" stylesheets="@../css/styles.css">
                                     <children>
-                                       <ToggleButton fx:id="filterConfirmedOnlyToggle" mnemonicParsing="false" prefHeight="26.0" prefWidth="196.0" text="Confirmed Bookings Only">
-                                          <VBox.margin>
-                                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                          </VBox.margin>
-                                       </ToggleButton>
                                        <Button fx:id="updateBookingButton" mnemonicParsing="false" onAction="#updateBooking" prefHeight="44.0" prefWidth="188.0" text="Update Booking">
                                           <VBox.margin>
                                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

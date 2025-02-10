@@ -2,6 +2,7 @@ package dao;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import model.Booking;
 import model.Client;
 import java.sql.*;
 import java.util.ArrayList;
@@ -52,33 +53,31 @@ public class ClientDAO {
         throw new SQLException("Could not insert or find client: " + clientName);
     }
 
-    public static Client getClientById(int clientId) throws SQLException {
-        String sql = "SELECT * FROM clients WHERE client_id = ?";
+    public static Client getClientById(int clientId) {
+        String sql = "SELECT client_id, client_name, contact_info FROM clients WHERE client_id = ?";
 
-        try (Connection connection = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, clientId);
-            ResultSet rs = pstmt.executeQuery();
+            stmt.setInt(1, clientId);
+            ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new Client(
-                        rs.getInt("client_id"),
+                return new Client(rs.getInt("client_id"),
                         rs.getString("client_name"),
-                        rs.getString("contact_info")
-                );
+                        rs.getString("contact_info"));
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         return null;
     }
 
     // GET ALL CLIENT SUMMARIES FOR CLIENT COMMISSIONS
     public static List<Client> getAllClientSummaries() {
-        String sql = """
-                SELECT c.client_id, c.client_name, c.total_jobs, c.total_commission, c.total_amount_spent 
-                FROM clients c
-            """;
-
+        String sql = "SELECT client_id, client_name, contact_info FROM clients";
         List<Client> clientList = new ArrayList<>();
 
         try (Connection conn = DatabaseHandler.getConnection();
@@ -88,11 +87,18 @@ public class ClientDAO {
             while (rs.next()) {
                 int clientId = rs.getInt("client_id");
                 String clientName = rs.getString("client_name");
-                int totalJobs = rs.getInt("total_jobs");
-                double totalCommission = rs.getDouble("total_commission");
-                double totalAmountSpent = rs.getDouble("total_amount_spent");
+                String contactInfo = rs.getString("contact_info");
 
-                Client client = new Client(clientId, clientName, totalJobs, totalCommission, totalAmountSpent);
+                // Create the Client object
+                Client client = new Client(clientId, clientName, contactInfo);
+
+                List<Booking> bookings = BookingDAO.getBookingsByClientId(clientId);
+                if (bookings == null) {
+                    bookings = new ArrayList<>();
+                }
+                client.setBookings(bookings);
+
+                // Attach dynamically calculated values
                 clientList.add(client);
             }
 

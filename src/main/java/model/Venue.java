@@ -1,5 +1,9 @@
 package model;
-//DONE
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import service.VenueService;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +53,14 @@ public class Venue {
 		this.compatibilityScore = 0;
 	}
 
-	public Venue(String name) {
+	public Venue(int venueId, String name, double hirePricePerHour) {
+		this.venueId = venueId;
 		this.name = name;
+		this.hirePricePerHour = hirePricePerHour;
+	}
+
+	public Venue(String venueName) {
+		this.name = venueName;
 	}
 
 	// GETTERS
@@ -109,6 +119,16 @@ public class Venue {
 	// ADD VENUE-TYPE MANUALLY (FROM CSV)
 	public void addVenueType(VenueType venueTypes) {
 		this.venueTypes.add(venueTypes);
+	}
+
+	// Property for venue name
+	public StringProperty venueNameProperty() {
+		return new SimpleStringProperty(name);
+	}
+
+	// Property for hire price
+	public DoubleProperty hirePricePerHourProperty() {
+		return new SimpleDoubleProperty(hirePricePerHour);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ public class ManagerController {
 
     @FXML
     private Button viewVenuesButton, viewBookingsButton, staffManagementButton, managerSummaryButton,
-            importVenuesCSVButton, importEventsCSVButton, backupDataButton, masterBackupButton, transactionBackupButton, importTransactionButton, importMasterBackupButton, dashboardButton;
+            importVenuesCSVButton, importEventsCSVButton, backupDataButton, masterBackupButton, transactionBackupButton, importTransactionButton, importMasterBackupButton, dashboardButton, logoutButton;
 
     // View Venues Page
     @FXML
@@ -26,7 +26,7 @@ public class ManagerController {
     @FXML private void staffManagement() {SceneManager.switchScene("staff-management-view.fxml");}
 
     // View Management Summary
-    @FXML private void viewAllOrders() {
+    @FXML private void managerSummary() {
         SceneManager.switchScene("management-summary.fxml");
     }
 
@@ -76,4 +76,6 @@ public class ManagerController {
     private void goToDashboard() {
         SceneManager.switchScene("dashboard.fxml");
     }
+
+    @FXML private void logout() {SceneManager.switchScene("main-view.fxml");}
 }

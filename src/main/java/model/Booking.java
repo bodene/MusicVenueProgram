@@ -1,8 +1,14 @@
 package model;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Locale;
+
+import static util.NumberUtils.formatCurrency;
 
 public class Booking {
 
@@ -11,8 +17,6 @@ public class Booking {
 	private Venue venue;
 	private Client client;
 	private LocalDate bookingDate;
-	private double hirePrice;
-	private double commission;
 	private BookingStatus status;
 	private String bookedBy;
 
@@ -23,35 +27,31 @@ public class Booking {
 	 * @param venue
 	 * @param client
 	 * @param bookingDate
-	 * @param hirePrice
 	 */
 	// CONSTRUCTORS
-	public Booking(int bookingId, Event event, Venue venue, Client client, LocalDate bookingDate, double hirePrice) {
+	public Booking(int bookingId, Event event, Venue venue, Client client, LocalDate bookingDate) {
 		this.bookingId = bookingId;
 		this.event = event;
 		this.venue = venue;
 		this.client = client;
 		this.bookingDate = bookingDate;
-		this.hirePrice = hirePrice;
-		this.commission = calculateCommission();
 		this.status = BookingStatus.CONFIRMED;
 	}
 
 	// CONSTRUCTOR FOR UI BASED OBJECT CREATION
-	public Booking(int bookingId, String eventName, LocalDate eventDate, String venueName, double eventCost, double eventCommission, double bookingTotal, String bookingStatus) {
+	public Booking(int bookingId, int eventId, String eventName, LocalDate eventDate, LocalTime eventTime, int eventDuration, String eventArtist, int venueId, String venueName, double hirePrice, int clientId, String clientName, String bookingStatus, String bookedBy) {
 		this.bookingId = bookingId;
-		this.event = new Event(eventName, eventDate);  // Event can be a simplified constructor
-		this.venue = new Venue(venueName);
-		this.hirePrice = eventCost;
-		this.commission = eventCommission;
-		this.status = BookingStatus.valueOf(bookingStatus.toUpperCase());
+		this.event = new Event(eventId, eventName, eventDate, eventTime, eventDuration, eventArtist);  // Event can be a simplified constructor
+		this.venue = new Venue(venueId, venueName, hirePrice);
+		this.client = new Client(clientId, clientName);
+		this.status = parseBookingStatus(bookingStatus);
+		this.bookedBy = bookedBy;
 	}
 
-	public Booking(int bookingId, String eventName, String venueName, double bookingCommission, String bookedBy) {
+	public Booking(int bookingId, String eventName, String venueName, String bookedBy) {
 		this.bookingId = bookingId;
 		this.event = new Event(eventName);
 		this.venue = new Venue(venueName);
-		this.commission = bookingCommission;
 		this.bookedBy = bookedBy;
 		this.status = BookingStatus.CONFIRMED;
 	}
@@ -64,41 +64,16 @@ public class Booking {
 	public Event getEvent() {
 		return event;
 	}
-
-	public String getEventName() {
-		return event != null ? event.getEventName() : "";
-	}
-
-	public String getEventDate() {
-		return event != null ? event.getEventDate().toString() : "";
-	}
-
 	public Venue getVenue() {
 		return venue;
-	}
-
-	public String getVenueName() {
-		return venue != null ? venue.getName() : "";
 	}
 
 	public Client getClient() {
 		return client;
 	}
 
-	public String getClientName() {
-		return client != null ? client.getClientName() : "";
-	}
-
 	public LocalDate getBookingDate() {
 		return bookingDate;
-	}
-
-	public double getHirePrice() {
-		return hirePrice;
-	}
-
-	public double getCommission() {
-		return commission;
 	}
 
 	public BookingStatus getStatus() {
@@ -109,62 +84,82 @@ public class Booking {
 		return bookedBy;
 	}
 
-	public String getFormattedHirePrice() {
-		return NumberFormat.getCurrencyInstance(Locale.US).format(hirePrice);
+	// Calculate event cost dynamically based on venue's base price and event duration
+	public double getBookingHirePrice() {
+		if (venue == null || event == null) return 0;
+		double basePrice = venue.getHirePricePerHour();
+		int duration = event.getDuration();
+		return basePrice * duration;
 	}
 
-	public String getFormattedCommission() {
-		return NumberFormat.getCurrencyInstance(Locale.US).format(commission);
+	// Calculate commission dynamically based on the client’s commission rate
+	public double getBookingEventCommission() {
+		if (this.client == null) {
+			return 0;
+		}
+		double eventCost = getBookingHirePrice();
+		double commissionRate = client.getCommissionRate();
+		return eventCost * commissionRate;
 	}
 
-	public String getFormattedBookingTotal() {
-		return NumberFormat.getCurrencyInstance(Locale.US).format(getBookingTotal());
+	public double getBookingTotal() {
+		return getBookingHirePrice() + getBookingEventCommission();
 	}
 
-	// SETTERS
 	public void setStatus(BookingStatus status) {
 		this.status = status;
 	}
 
-	public void setCommission(double commission) {
-		this.commission = commission;
-	}
-
-	public void setHirePrice(double hirePrice) {
-		this.hirePrice = hirePrice;
-		this.commission = calculateCommission();
+	// HELPER METHOD - PARSE BOOKING STATUS
+	private BookingStatus parseBookingStatus(String status) {
+		try {
+			return BookingStatus.valueOf(status.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return BookingStatus.PENDING;  // Default status if parsing fails
+		}
 	}
 
 	public void setClient(Client client) {
 		this.client = client;
-		this.commission = calculateCommission();
 	}
 
 	public void setVenue(Venue venue) {
 		this.venue = venue;
 	}
 
-	// CALCULATE COMMISSION BASED ON CLIENT JOB COUNT
-	public double calculateCommission() {
-		int totalJobs = client != null ? client.getTotalJobs() : 1;
-		double rate = totalJobs > 1 ? 0.09 : 0.10;
-		return hirePrice * rate;
+	// Add this method for the status property
+	public StringProperty getStatusProperty() {
+		return new SimpleStringProperty(status.toString());
 	}
 
-	public double getBookingTotal() {
-		return hirePrice + commission;
+	public StringProperty getBookedByProperty() {
+		return new SimpleStringProperty(bookedBy.toString());
+	}
+
+	public StringProperty getBookingHirePriceProperty() {
+		return new SimpleStringProperty(String.format("%.2f", getBookingHirePrice()));
+	}
+
+	// Example for booking event commission
+	public StringProperty getBookingEventCommissionProperty() {
+		return new SimpleStringProperty(String.format("%.2f", getBookingEventCommission()));
+	}
+
+	public StringProperty getBookingTotalProperty() {
+		return new SimpleStringProperty(String.format("%.2f", getBookingTotal()));
 	}
 
 	@Override
 	public String toString() {
 		return "Booking{" +
 				"bookingId=" + bookingId +
-				", eventName='" + getEventName() + '\'' +
-				", venueName='" + getVenueName() + '\'' +
-				", clientName='" + getClientName() + '\'' +
+				", eventName='" + (event != null ? event.getEventName() : "") + '\'' +
+				", venueName='" + (venue != null ? venue.getName() : "") + '\'' +
+				", clientName='" + (client != null ? client.getClientName() : "") + '\'' +
 				", bookingDate=" + bookingDate +
-				", hirePrice=" + hirePrice +
-				", commission=" + commission +
+				", eventCost=" + getBookingHirePrice() +
+				", commission=" + getBookingEventCommission() +
+				", Booking Total: " + getBookingTotal() +
 				", status=" + status +
 				'}';
 	}

@@ -143,7 +143,7 @@ public class EventDAO {
 
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(4, String.valueOf(event.getEventDate().toEpochDay()));
+            pstmt.setString(1, String.valueOf(event.getEventDate().toEpochDay()));
             pstmt.setString(2, event.getEventTime().toString());
             pstmt.setString(3, event.getArtist());
             pstmt.setInt(4, event.getEventId());

@@ -2,8 +2,10 @@ package controller;
 
 import dao.BookingDAO;
 import dao.ClientDAO;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import model.Booking;
+import model.BookingStatus;
 import model.Client;
 import service.SceneManager;
 import javafx.collections.FXCollections;
@@ -19,6 +21,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,18 +34,18 @@ public class ManagementSummaryController {
     @FXML private TableColumn<Booking, Integer> bookingNoColumn;
     @FXML private TableColumn<Booking, String> eventNameColumn;
     @FXML private TableColumn<Booking, String> venueNameColumn;
-    @FXML private TableColumn<Booking, Double> bookingCommissionColumn;
+    @FXML private TableColumn<Booking, String> bookingCommissionColumn;
     @FXML private TableColumn<Booking, String> bookedByUserColumn;
 
     @FXML private TableView<Client> clientCommissionTable;
     @FXML private TableColumn<Client, Integer> clientIdColumn;
     @FXML private TableColumn<Client, String> clientNameColumn;
     @FXML private TableColumn<Client, Integer> noOfJobsColumn;
-    @FXML private TableColumn<Client, Double> totalCommissionColumn;
-    @FXML private TableColumn<Client, Double> totalClientCostColumn;
+    @FXML private TableColumn<Client, String> totalCommissionColumn;
+    @FXML private TableColumn<Client, String> totalClientCostColumn;
 
     @FXML private Button logoutButton;
-    @FXML private Button adminButton;
+    @FXML private Button settingsButton;
 
     @FXML
     private void initialize() {
@@ -65,58 +68,67 @@ public class ManagementSummaryController {
 
     // SETUP BAR-CHART
     private void setupBarChart() {
-        Map<String, Double> venueIncomeData = BookingDAO.getVenueIncome();
-        Map<String, Double> venueCommissionData = BookingDAO.getVenueCommission();
+//        Map<String, Double> venueIncomeData = BookingDAO.getVenueIncome();
+//        Map<String, Double> venueCommissionData = BookingDAO.getVenueCommission();
+//
+//        CategoryAxis xAxis = (CategoryAxis) incomeCommissionChart.getXAxis();
+//        NumberAxis yAxis = (NumberAxis) incomeCommissionChart.getYAxis();
+//        xAxis.setLabel("Venue");
+//        yAxis.setLabel("Amount ($)");
+//
+//        XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
+//        incomeSeries.setName("Income");
+//
+//        XYChart.Series<String, Number> commissionSeries = new XYChart.Series<>();
+//        commissionSeries.setName("Commission");
+//
+//        for (String venue : venueIncomeData.keySet()) {
+//            incomeSeries.getData().add(new XYChart.Data<>(venue, venueIncomeData.get(venue)));
+//            commissionSeries.getData().add(new XYChart.Data<>(venue, venueCommissionData.getOrDefault(venue, 0.0)));
+//        }
+//
+//        incomeCommissionChart.getData().addAll(incomeSeries, commissionSeries);
+    }
+    private void setupTables() {
+            // BOOKING ORDER SUMMARY TABLE SETUP
+            bookingNoColumn.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
+            eventNameColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventNameProperty());
+            venueNameColumn.setCellValueFactory(cellData -> cellData.getValue().getVenue().venueNameProperty());
+            bookingCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingEventCommissionProperty());
+            bookedByUserColumn.setCellValueFactory(cellData -> cellData.getValue().getBookedByProperty());
 
-        CategoryAxis xAxis = (CategoryAxis) incomeCommissionChart.getXAxis();
-        NumberAxis yAxis = (NumberAxis) incomeCommissionChart.getYAxis();
-        xAxis.setLabel("Venue");
-        yAxis.setLabel("Amount ($)");
+            // Get all bookings and filter to keep only confirmed ones
+            List<Booking> bookingList = BookingDAO.getBookingOrderSummary();
+            List<Booking> confirmedBookings = bookingList.stream()
+                    .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)  // Replace BookingStatus.CONFIRMED with your actual status check logic
+                    .toList();
 
-        XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
-        incomeSeries.setName("Income");
+            ObservableList<Booking> bookingObservableList = FXCollections.observableArrayList(confirmedBookings);
+            managementEventCommissionTable.setItems(bookingObservableList);
 
-        XYChart.Series<String, Number> commissionSeries = new XYChart.Series<>();
-        commissionSeries.setName("Commission");
+            // CLIENT COMMISSION TABLE SETUP
+            clientIdColumn.setCellValueFactory(new PropertyValueFactory<>("clientId"));
+            clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
+            noOfJobsColumn.setCellValueFactory(cellData -> cellData.getValue().confirmedJobCountProperty().asObject());
+            totalCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getTotalCommissionProperty());
+            totalClientCostColumn.setCellValueFactory(cellData -> cellData.getValue().getClientBookingTotalProperty());
 
-        for (String venue : venueIncomeData.keySet()) {
-            incomeSeries.getData().add(new XYChart.Data<>(venue, venueIncomeData.get(venue)));
-            commissionSeries.getData().add(new XYChart.Data<>(venue, venueCommissionData.getOrDefault(venue, 0.0)));
+            List<Client> clientList = ClientDAO.getAllClientSummaries();
+            ObservableList<Client> observableClientList = FXCollections.observableArrayList(clientList);
+            clientCommissionTable.setItems(observableClientList);
         }
 
-        incomeCommissionChart.getData().addAll(incomeSeries, commissionSeries);
-    }
-
-    // SETUP TABLES
-    private void setupTables() {
-        // BOOKING ORDER SUMMARY TABLE SETUP
-        bookingNoColumn.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
-        eventNameColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
-        venueNameColumn.setCellValueFactory(new PropertyValueFactory<>("venueName"));
-        bookingCommissionColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCommission"));
-        bookedByUserColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-
-        // CLIENT COMMISSION TABLE SETUP
-        clientIdColumn.setCellValueFactory(new PropertyValueFactory<>("clientId"));
-        clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
-        noOfJobsColumn.setCellValueFactory(new PropertyValueFactory<>("noOfJobs"));
-        totalCommissionColumn.setCellValueFactory(new PropertyValueFactory<>("totalCommission"));
-        totalClientCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalClientCost"));
-
-        managementEventCommissionTable.setItems(getManagementEventCommissionData());
-        clientCommissionTable.setItems(getClientCommissionData());
-    }
-
-    private ObservableList<Booking> getManagementEventCommissionData() {
-        return FXCollections.observableArrayList(BookingDAO.getAllBookingSummaries());
-    }
-
-    private ObservableList<Client> getClientCommissionData() {
-        return FXCollections.observableArrayList(ClientDAO.getAllClientSummaries());
-    }
+//    private ObservableList<Booking> getManagementEventCommissionData() {
+//        return FXCollections.observableArrayList(BookingDAO.getBookingOrderSummary());
+//    }
+//
+//    private ObservableList<Client> getClientCommissionData() {
+//        return FXCollections.observableArrayList(ClientDAO.getAllClientSummaries());
+//    }
 
 
-    @FXML public void goToSettings() {SceneManager.switchScene("manager-view");}
+
+    @FXML public void goToSettings() {SceneManager.switchScene("manager-view.fxml");}
     @FXML private void logout() {SceneManager.switchScene("main-view.fxml");}
 
 }
