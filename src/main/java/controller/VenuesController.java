@@ -20,9 +20,12 @@ import util.AlertUtils;
 
 public class VenuesController {
 
-    @FXML private Button logoutButton, settingsButton, addVenueButton, deleteVenueButton, returnToDashboardButton, searchVenuesButton;
-    @FXML private RadioButton indoorVenueRadio, outdoorVenueRadio, convertibleVenueRadio;
+    @FXML private Button searchVenuesButton;
+    @FXML private RadioButton indoorVenueRadio;
+    @FXML private RadioButton outdoorVenueRadio;
+    @FXML private RadioButton convertibleVenueRadio;
     private ToggleGroup categoryGroup;
+
     @FXML private TextField searchVenueNameField;
     @FXML private TableView<Venue> searchVenueTable;
     @FXML private TableColumn<Venue, Integer> venueIdColumn;
@@ -56,7 +59,6 @@ public class VenuesController {
             try {
                 searchVenues();
             } catch (SQLException e) {
-                e.printStackTrace();
                 AlertUtils.showAlert("Error", "Failed to search venues.", Alert.AlertType.ERROR);
             }
         });
@@ -82,6 +84,7 @@ public class VenuesController {
 
     // LOAD TABLE DATA
     private void loadData() {
+
         searchVenueTable.setItems(VenueService.getAllVenues());
     }
 
@@ -99,10 +102,12 @@ public class VenuesController {
     @FXML
     private void deleteVenue() {
         Venue selectedVenue = searchVenueTable.getSelectionModel().getSelectedItem();
+
         if (selectedVenue == null) {
             AlertUtils.showAlert("No Selection", "Select a venue to delete", Alert.AlertType.WARNING);
             return;
         }
+
         // CONFIRM DELETION
         if (AlertUtils.showConfirmation("Confirm Deletion", "Are you sure you want to delete this venue?\nVenue: " + selectedVenue.getName())) {
             if (VenueService.deleteVenue(selectedVenue.getVenueId())) {

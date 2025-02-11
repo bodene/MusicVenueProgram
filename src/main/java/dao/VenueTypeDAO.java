@@ -12,6 +12,7 @@ public class VenueTypeDAO {
     // SAVE VENUE TYPES FOR A GIVEN VENUE
     public static void saveVenueTypes(int venueId, List<String> venueTypes, Connection conn) throws SQLException {
         String sql = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             for (String type : venueTypes) {
                 int typeId = findOrCreateVenueTypeId(type, conn);

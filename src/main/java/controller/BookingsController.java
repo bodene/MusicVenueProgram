@@ -40,11 +40,8 @@ public class BookingsController {
     @FXML private TableColumn<Client, String> clientCommissionColumn;
     @FXML private TableColumn<Client, String> totalClientSpendColumn;
 
-    @FXML private Button updateBookingButton, cancelBookingButton, dashboardButton;
-    @FXML private Button logoutButton;
-    @FXML private Button adminButton;
     @FXML private ToggleButton filterConfirmedOnlyToggle;
-    private ObservableList<Booking> originalBookingList;
+
     private FilteredList<Booking> filteredBookingList;
 
     @FXML
@@ -54,34 +51,31 @@ public class BookingsController {
     }
 
     private void setupTables() {
-        // Initialise the booking list as an empty observable list
-        originalBookingList = FXCollections.observableArrayList();
 
-        // Initialise Booking Table
+        // INITIALISE BOOKING TABLE
         requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
         eventDateColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventDateProperty());
         eventNameColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventNameProperty());
         venueNameColumn.setCellValueFactory(cellData -> cellData.getValue().getVenue().venueNameProperty());
-
         bookingCostColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingHirePriceProperty());
         bookingCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingEventCommissionProperty());
         bookingTotalColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingTotalProperty());
         statusColumn.setCellValueFactory(cellData -> cellData.getValue().getStatusProperty());
 
-        // Fetch data from ClientDAO.getAllClientSummaries()
+        // FETCH DATA FROM DATABASE
         List<Client> clientList = ClientDAO.getAllClientSummaries();
 
-        // Extract all bookings from the fetched clients
+        // EXTRACT ALL BOOKINGS FROM CLIENT LIST
         List<Booking> allBookings = clientList.stream()
-                .flatMap(client -> client.getBookings().stream())  // Flatten the list of bookings from all clients
+                .flatMap(client -> client.getBookings().stream())
                 .toList();
 
-        // Use the filtered bookings for the Booking table
+        // USE FILTERED BOOKINGS
         ObservableList<Booking> bookingObservableList = FXCollections.observableArrayList(allBookings);
         filteredBookingList = new FilteredList<>(bookingObservableList, p -> true);
         bookingOrderSummaryTable.setItems(filteredBookingList);
 
-        // Setup Client table with the fetched client list
+        // SETUP CLIENT TABLE FROM FETCHED CLIENT LIST
         clientIdColumn.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
         totalJobsColumn.setCellValueFactory(cellData -> cellData.getValue().confirmedJobCountProperty().asObject());
@@ -89,11 +83,12 @@ public class BookingsController {
         clientCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getTotalCommissionProperty());
         totalClientSpendColumn.setCellValueFactory(cellData -> cellData.getValue().getClientBookingTotalProperty());
 
-        // Convert client list to an ObservableList and set it in the client table
+        // CONVERT CLIENT LIST AND SET IN CLIENT TABLE
         ObservableList<Client> observableClientList = FXCollections.observableArrayList(clientList);
         clientOrderSummaryTable.setItems(observableClientList);
     }
 
+    // SET-UP TOGGLE BUTTON FOR CONFIRMED BOOKINGS
     private void setupToggleButton() {
         filterConfirmedOnlyToggle.setOnAction(event -> {
             if (filterConfirmedOnlyToggle.isSelected()) {
@@ -145,6 +140,7 @@ public class BookingsController {
         }
 
         boolean confirmed = AlertUtils.showConfirmation("Confirm Cancellation", "Are you sure you want to cancel this booking? This action cannot be undone.");
+
         if (confirmed) {
             Task<Boolean> cancelTask = new Task<>() {
                 @Override
@@ -172,31 +168,32 @@ public class BookingsController {
         }
     }
 
+    // REFRESH BOOKING DATA IN TABLES
     private void refreshBookingData() {
-        // Retrieve all clients and their bookings
+
+        // RETRIEVE ALL CLIENTS & THEIR BOOKINGS
         List<Client> updatedClients = ClientDAO.getAllClientSummaries();
 
-        // Extract all bookings
+        // EXTRACT ALL BOOKINGS
         List<Booking> updatedBookings = updatedClients.stream()
                 .flatMap(client -> client.getBookings().stream())
                 .toList();
 
-        // Create a new ObservableList for bookings
+        // CREATE AN UPDATED OBSERVABLE LIST FOR BOOKINGS
         ObservableList<Booking> updatedBookingList = FXCollections.observableArrayList(updatedBookings);
 
-        // Create a new FilteredList with the updated booking list
+        // CREATE NEW FILTERED LIST
         FilteredList<Booking> newFilteredList = new FilteredList<>(updatedBookingList, p -> true);
 
-        // Apply the filter if the toggle is selected
+        // APPLY FILTER IF TOGGLE SELECTED
         if (filterConfirmedOnlyToggle.isSelected()) {
             newFilteredList.setPredicate(booking -> booking.getStatus() == BookingStatus.CONFIRMED);
         }
 
-        // Set the new filtered list to the table
         filteredBookingList = newFilteredList;
         bookingOrderSummaryTable.setItems(filteredBookingList);
 
-        // Update the client table similarly to ensure consistency
+        // UPDATE CLIENT TABLE
         ObservableList<Client> updatedClientList = FXCollections.observableArrayList(updatedClients);
         clientOrderSummaryTable.setItems(updatedClientList);
     }

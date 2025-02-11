@@ -1,9 +1,8 @@
 package controller;
-//done
+
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.event.ActionEvent;
 import service.SessionManager;
 import service.UserService;
 import model.User;
@@ -14,11 +13,16 @@ import java.util.Optional;
 public class UserEditController {
     private User selectedUser;
 
-    @FXML private TextField firstNameField, lastNameField, usernameField, passwordField, confirmPasswordField;
-    @FXML private Button updateUserDetailsButton, backButton;
+    @FXML private TextField firstNameField;
+    @FXML private TextField lastNameField;
+    @FXML private TextField usernameField;
+    @FXML private TextField passwordField;
+    @FXML private TextField confirmPasswordField;
+
 
     @FXML
     private void initialize() throws SQLException {
+
         // GET LOGGED-IN USER IF NO SELECTION
         if (selectedUser == null) {
             selectedUser = SessionManager.getInstance().getCurrentUser();
@@ -45,7 +49,7 @@ public class UserEditController {
 
     // SAVE CHANGES FOR USER DETAILS
     @FXML
-    public void saveProfileChanges(ActionEvent actionEvent) {
+    public void saveProfileChanges() {
         if (selectedUser == null) {
             AlertUtils.showAlert("Error", "No user selected for updating!", Alert.AlertType.ERROR);
             return;

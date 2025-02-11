@@ -16,12 +16,14 @@ public class MainController {
     // SHOW MANAGE CODE PANE & PROMPT FOR CODE
     @FXML
     private void goToAddNewUser() {
+
         managerCodePane.setVisible(true); // Show manager code pane
     }
 
     // VALIDATE MANAGER CODE
     @FXML
     private void handleManagerCodeSubmit() {
+
         String code = managerCodeField.getText().trim();
 
         if (AuthService.validateManagerCode(code)) {
@@ -35,4 +37,5 @@ public class MainController {
     @FXML private void goToLogin() {
         SceneManager.switchScene("login-view.fxml");
     }
+
 }

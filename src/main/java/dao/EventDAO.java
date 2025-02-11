@@ -12,10 +12,12 @@ import java.util.List;
 
 public class EventDAO {
 
+    private EventDAO() {}
+
     // Add events to the database
     public static void saveEvents(List<Event> events) throws SQLException {
         String insertEventSQL = """
-            INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration, 
+            INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration,
                                 event_end_time, required_capacity, event_type, event_category, client_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
@@ -84,7 +86,7 @@ public class EventDAO {
         String sql = """
         SELECT e.event_id, e.event_name, e.event_artist, e.event_date, e.event_time,
                e.event_duration, e.required_capacity, e.event_type, e.event_category,
-               c.client_name 
+               c.client_name
         FROM events e
         JOIN clients c ON e.client_id = c.client_id""";
 

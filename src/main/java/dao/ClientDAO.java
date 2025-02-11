@@ -16,6 +16,9 @@ import model.Event;
 import model.Venue;
 
 public class ClientDAO {
+
+    private ClientDAO() {}
+
     private static List<Client> clients = new ArrayList<>();
 
     public static Client findOrCreateClient(String clientName) {
@@ -85,7 +88,7 @@ public class ClientDAO {
     // GET ALL CLIENT SUMMARIES FOR CLIENT COMMISSIONS
     public static List<Client> getAllClientSummaries() {
         String sql = """
-                        SELECT c.client_id, c.client_name, c.contact_info, 
+                        SELECT c.client_id, c.client_name, c.contact_info,
                                 b.booking_id, b.booking_date, b.booking_status, b.booked_by,
                                         e.event_id, e.event_name, e.event_date, e.event_time, e.event_duration, e.event_artist,
                                         v.venue_id, v.venue_name, v.hire_price

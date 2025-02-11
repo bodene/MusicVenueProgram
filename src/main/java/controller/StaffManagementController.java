@@ -1,5 +1,5 @@
 package controller;
-//DONE
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -21,7 +21,6 @@ public class StaffManagementController {
     @FXML private TableColumn<User, String> usernameColumn;
     @FXML private TableColumn<User, String> roleColumn;
     @FXML private TextField searchStaffField;
-    @FXML private Button searchStaffButton, addStaffButton, updateStaffButton, deleteStaffButton, promoteToManagerButton, backButton;
 
     private ObservableList<User> staffList = FXCollections.observableArrayList();
 
@@ -33,6 +32,7 @@ public class StaffManagementController {
 
     // SET UP COLUMNS TO MATCH STAFF OBJECT PROPERTIES
     private void setupTableColumns() {
+
         staffIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getUserId()));
         firstNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFirstName()));
         lastNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getLastName()));
@@ -53,6 +53,7 @@ public class StaffManagementController {
         staffList.setAll(query.isEmpty() ? UserService.getAllUsers() : UserService.searchUsers(query));
     }
 
+    // ADD STAFF
     @FXML
     private void addStaff() {
         SceneManager.switchScene("add-user-view.fxml");
@@ -117,4 +118,5 @@ public class StaffManagementController {
 
     @FXML private void goToSettings() {SceneManager.switchScene("manager-view.fxml");}
     @FXML private void logout() {SceneManager.switchScene("login.fxml");}
+
 }

@@ -1,16 +1,13 @@
 package controller;
 
-import com.sun.jdi.request.EventRequest;
 import dao.*;
-import javafx.scene.control.Alert;
 import model.*;
 import service.BackupHandler;
 import service.ManagementService;
 import service.SceneManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
 import util.AlertUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,63 +15,57 @@ import java.util.Map;
 public class ManagerController {
     private final ManagementService managementService = ManagementService.getInstance();
 
-    @FXML
-    private Button viewVenuesButton, viewBookingsButton, staffManagementButton, managerSummaryButton,
-            importVenuesCSVButton, importEventsCSVButton, backupTransactionDataButton,
-            restoreTransactionDataButton, backupMasterDataButton, restoreMasterDataButton, dashboardButton, logoutButton;
-
-    // View Venues Page
-    @FXML
-    private void viewVenues() {
+    // VIEW VENUES PAGE
+    @FXML private void viewVenues() {
         SceneManager.switchScene("view-venue-details.fxml");
     }
 
-    // View Orders Page
-    @FXML
-    private void viewBookings() {SceneManager.switchScene("bookings-view.fxml");}
+    // VIEW BOOKINGS PAGE
+    @FXML private void viewBookings() {SceneManager.switchScene("bookings-view.fxml");}
 
-    // User Management
+    // USER MANAGEMENT
     @FXML private void staffManagement() {SceneManager.switchScene("staff-management-view.fxml");}
 
-    // View Management Summary
+    // VIEW MANAGEMENT SUMMARY
     @FXML private void managerSummary() {
         SceneManager.switchScene("management-summary.fxml");
     }
 
-    // Import Venues CSV
+    // IMPORT VENUES CSV
     @FXML private void importVenuesCSV() {
         managementService.importVenuesCSV();
     }
 
-    // Import Events CSV
+    // IMPORT EVENTS CSV
     @FXML private void importEventsCSV() {
         managementService.importEventsCSV();
     }
 
+    // BACK-UP TRANSACTION DATA
     @FXML
     private void backupTransactionData() {
         try {
             List<Booking> bookings = BookingDAO.getAllBookingsBU();
             List<Event> events = EventDAO.getAllEventsBU();
-            List<Venue> venues = VenueDAO.getAllVenuesBU();  // Venues without types yet
-            List<VenueType> venueTypes = VenueTypeDAO.getAllVenueTypesBU();  // Fetch all venue types
-            Map<Integer, List<Integer>> venueTypeVenueMap = VenueTypeDAO.getAllVenueTypesVenuesBU();  // Venue-to-type mapping
+            List<Venue> venues = VenueDAO.getAllVenuesBU();  // VENUES WITHOUT TYPES
+            List<VenueType> venueTypes = VenueTypeDAO.getAllVenueTypesBU();  // FETCH ALL VENUE TYPES
+            Map<Integer, List<Integer>> venueTypeVenueMap = VenueTypeDAO.getAllVenueTypesVenuesBU();  // VENUE-TO-TYPE MATCHING
 
-            // Associate each venue with its venue types
+            // ASSOCIATE EACH VENUE WITH ITS TYPES
             for (Venue venue : venues) {
                 List<Integer> typeIds = venueTypeVenueMap.getOrDefault(venue.getVenueId(), new ArrayList<>());
                 List<VenueType> typesForVenue = typeIds.stream()
                         .map(id -> venueTypes.stream().filter(type -> type.getVenueTypeId() == id).findFirst().orElse(null))
-                        .filter(type -> type != null)  // Ensure no nulls
+                        .filter(type -> type != null)
                         .toList();
 
-                venue.setVenueTypes(typesForVenue);  // Venue has a method to set a list of VenueType objects
+                venue.setVenueTypes(typesForVenue);
             }
 
-            // Backup the data
+            // BACKUP DATA
             BackupHandler.backupTransactionData(bookings, events, venues);
 
-            // Show a summary popup
+            // SUMMARY POP-UP
             String summary = String.format("""
                 Backup Successful:
                 - Bookings: %d
@@ -85,11 +76,11 @@ public class ManagerController {
             AlertUtils.showAlert("Backup Summary", summary, Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            e.printStackTrace();
             AlertUtils.showAlert("Backup Failed", "An error occurred during the backup process: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
+    // RESTORE TRANSACTION DATA
     @FXML
     private void restoreTransactionData() {
         try {
@@ -97,7 +88,7 @@ public class ManagerController {
             List<Event> events = BackupHandler.restoreEvents();
             List<Venue> venues = BackupHandler.restoreVenues();
 
-            // Show a summary popup
+            // SUMMARY POP-UP
             String summary = String.format("""
                 Restore Successful:
                 - Bookings: %d
@@ -108,11 +99,11 @@ public class ManagerController {
             AlertUtils.showAlert("Restore Summary", summary, Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            e.printStackTrace();
             AlertUtils.showAlert("Restore Failed", "An error occurred during the restore process: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
+    // BACKUP MASTER DATA
     @FXML
     private void backupMasterData() {
         try {
@@ -121,6 +112,7 @@ public class ManagerController {
 
             BackupHandler.backupMasterData(users, clients);
 
+            // POP-UP SUMMARY
             String summary = String.format("""
                 Backup Successful:
                 - Users: %d
@@ -130,17 +122,19 @@ public class ManagerController {
             AlertUtils.showAlert("Master Data Backup Summary", summary, Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            e.printStackTrace();
             AlertUtils.showAlert("Backup Failed", "An error occurred during the master data backup process.", Alert.AlertType.ERROR);
         }
     }
 
+    // RESTORE MASTER BACKUP
     @FXML
     private void restoreMasterData() {
+
         try {
             List<User> users = BackupHandler.restoreUsers();
             List<Client> clients = BackupHandler.restoreClients();
 
+            // POP-UP SUMMARY
             String summary = String.format("""
                 Restore Successful:
                 - Users: %d
@@ -150,7 +144,6 @@ public class ManagerController {
             AlertUtils.showAlert("Master Data Restore Summary", summary, Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            e.printStackTrace();
             AlertUtils.showAlert("Restore Failed", "An error occurred during the master data restore process.", Alert.AlertType.ERROR);
         }
     }

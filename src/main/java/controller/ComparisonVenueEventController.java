@@ -1,5 +1,5 @@
 package controller;
-//DONE
+
 import java.util.List;
 import java.util.stream.Collectors;
 import javafx.fxml.FXML;
@@ -12,11 +12,16 @@ import util.NumberUtils;
 
 public class ComparisonVenueEventController {
 
-    @FXML private Label eventNameLabel, venueNameLabel;
-    @FXML private Label eventCategoryLabel, venueCategoryLabel;
-    @FXML private Label eventCapacityLabel, venueCapacityLabel;
-    @FXML private Label eventTypeLabel, venueTypesLabel;
-    @FXML private Label eventDateTimeLabel, venueAvailabilityLabel;
+    @FXML private Label eventNameLabel;
+    @FXML private Label venueNameLabel;
+    @FXML private Label eventCategoryLabel;
+    @FXML private Label venueCategoryLabel;
+    @FXML private Label eventCapacityLabel;
+    @FXML private Label venueCapacityLabel;
+    @FXML private Label eventTypeLabel;
+    @FXML private Label venueTypesLabel;
+    @FXML private Label eventDateTimeLabel;
+    @FXML private Label venueAvailabilityLabel;
     @FXML private Label venuePriceLabel;
 
     private Event selectedEvent;
@@ -65,16 +70,20 @@ public class ComparisonVenueEventController {
         }
     }
 
+    // HELPER METHOD - MATCHING VENUE TYPES
     private boolean hasMatchingVenueType(String eventType, List<VenueType> venueTypes) {
+
         List<String> venueTypeNames = venueTypes.stream()
                 .map(VenueType::getVenueType)
-                .map(String::toLowerCase) // Convert to lowercase for case-insensitive comparison
-                .collect(Collectors.toList());
+                .map(String::toLowerCase)
+                .toList();
 
         return venueTypeNames.contains(eventType.toLowerCase());
     }
 
+    // HELPER METHOD - FORMAT VENUE TYPES
     private String formatVenueTypes(List<VenueType> venueTypes) {
+
         if (venueTypes == null || venueTypes.isEmpty()) return "N/A";
         return venueTypes.stream()
                 .map(VenueType::getVenueType)
@@ -88,4 +97,5 @@ public class ComparisonVenueEventController {
     @FXML private void closeWindow() {
         ((Stage) eventNameLabel.getScene().getWindow()).close();
     }
+
 }

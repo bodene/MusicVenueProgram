@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class DatabaseHandler {
@@ -33,7 +32,7 @@ public class DatabaseHandler {
 		String filePath = "src/main/resources/db/schema.sql";
 		String checkTablesSQL = """
             SELECT COUNT(*) AS count FROM sqlite_master
-            WHERE type='table' 
+            WHERE type='table'
             AND name IN ('clients', 'events', 'venues', 'venue_types', 'venue_types_venues', 'bookings', 'users');
         """;
 

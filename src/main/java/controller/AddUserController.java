@@ -1,5 +1,5 @@
 package controller;
-//DONE
+
 import model.UserRole;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -17,13 +17,11 @@ public class AddUserController {
     @FXML private PasswordField confirmPasswordField;
     @FXML private RadioButton staffRadioButton;
     @FXML private RadioButton managerRadioButton;
-    @FXML private Button confirmUserButton;
-    @FXML private Button backButton1;
 
-    private ToggleGroup roleToggleGroup;
 
     @FXML
     public void initialize() {
+        ToggleGroup roleToggleGroup;
         roleToggleGroup = new ToggleGroup();
         staffRadioButton.setToggleGroup(roleToggleGroup);
         managerRadioButton.setToggleGroup(roleToggleGroup);
@@ -44,7 +42,7 @@ public class AddUserController {
                     passwordField.getText().trim(),
                     confirmPasswordField.getText().trim(),
                     staffRadioButton.isSelected() ? UserRole.STAFF :
-                            managerRadioButton.isSelected() ? UserRole.MANAGER : null
+                            (managerRadioButton.isSelected() ? UserRole.MANAGER : null)
             );
 
             if (success) {

@@ -1,5 +1,5 @@
 package controller;
-//DONE
+
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -21,6 +21,7 @@ public class LoginController {
 
     @FXML
     private void loginUser() {
+
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
 
@@ -28,6 +29,7 @@ public class LoginController {
         Optional<User> authenticatedUser = UserService.authenticateUser(username, password);
 
         if (authenticatedUser.isPresent()) {
+
             // STORE USER IN SESSION
             SessionManager.getInstance().setCurrentUser(authenticatedUser.get());
 
