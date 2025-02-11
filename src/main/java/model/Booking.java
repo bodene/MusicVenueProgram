@@ -19,6 +19,7 @@ public class Booking {
 	private LocalDate bookingDate;
 	private BookingStatus status;
 	private String bookedBy;
+	private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
 	/**
 	 * Constructor for Booking
@@ -36,6 +37,17 @@ public class Booking {
 		this.client = client;
 		this.bookingDate = bookingDate;
 		this.status = BookingStatus.CONFIRMED;
+	}
+
+	// CONSTRUCTORS
+	public Booking(int bookingId, String bookingStatus, Event event, Venue venue, Client client, LocalDate bookingDate, String bookedBy) {
+		this.bookingId = bookingId;
+		this.event = event;
+		this.venue = venue;
+		this.client = client;
+		this.bookingDate = bookingDate;
+		this.status = parseBookingStatus(bookingStatus);
+		this.bookedBy = bookedBy;
 	}
 
 	// CONSTRUCTOR FOR UI BASED OBJECT CREATION
@@ -86,7 +98,7 @@ public class Booking {
 
 	// Calculate event cost dynamically based on venue's base price and event duration
 	public double getBookingHirePrice() {
-		if (venue == null || event == null) return 0;
+		if (status != BookingStatus.CONFIRMED || venue == null || event == null) return 0;
 		double basePrice = venue.getHirePricePerHour();
 		int duration = event.getDuration();
 		return basePrice * duration;
@@ -94,15 +106,25 @@ public class Booking {
 
 	// Calculate commission dynamically based on the client’s commission rate
 	public double getBookingEventCommission() {
-		if (this.client == null) {
-			return 0;
-		}
+		if (status != BookingStatus.CONFIRMED || client == null) return 0;
 		double eventCost = getBookingHirePrice();
 		double commissionRate = client.getCommissionRate();
 		return eventCost * commissionRate;
 	}
+//	}
+//		if (status != BookingStatus.CONFIRMED || client == null) return 0;
+//
+//		double eventCost = getBookingHirePrice();
+//
+//		// Calculate commission rate based on the total number of confirmed jobs for the client
+//		// 9% for multiple, 10% for single-job clients
+//		long confirmedJobs = client.getConfirmedJobCount();
+//		double commissionRate = client.getCommissionRate();
+//		return eventCost * commissionRate;
+//	}
 
 	public double getBookingTotal() {
+		if (status != BookingStatus.CONFIRMED) return 0;
 		return getBookingHirePrice() + getBookingEventCommission();
 	}
 
@@ -133,34 +155,33 @@ public class Booking {
 	}
 
 	public StringProperty getBookedByProperty() {
-		return new SimpleStringProperty(bookedBy.toString());
+		return new SimpleStringProperty(this.bookedBy != null ? this.bookedBy.toString() : "N/A");
 	}
 
 	public StringProperty getBookingHirePriceProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getBookingHirePrice()));
+		return new SimpleStringProperty(currencyFormatter.format(getBookingHirePrice()));
 	}
 
 	// Example for booking event commission
 	public StringProperty getBookingEventCommissionProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getBookingEventCommission()));
+		return new SimpleStringProperty(currencyFormatter.format(getBookingEventCommission()));
 	}
 
 	public StringProperty getBookingTotalProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getBookingTotal()));
+		return new SimpleStringProperty(currencyFormatter.format(getBookingTotal()));
 	}
 
 	@Override
 	public String toString() {
 		return "Booking{" +
-				"bookingId=" + bookingId +
-				", eventName='" + (event != null ? event.getEventName() : "") + '\'' +
-				", venueName='" + (venue != null ? venue.getName() : "") + '\'' +
-				", clientName='" + (client != null ? client.getClientName() : "") + '\'' +
-				", bookingDate=" + bookingDate +
-				", eventCost=" + getBookingHirePrice() +
-				", commission=" + getBookingEventCommission() +
+				"bookingId: " + bookingId +
+				", eventName: " + (event != null ? event.getEventName() : "") + '\'' +
+				", venueName: " + (venue != null ? venue.getName() : "") + '\'' +
+				", clientName: " + (client != null ? client.getClientName() : "") + '\'' +
+				", bookingDate: " + bookingDate +
+				", eventCost: " + getBookingHirePrice() +
+				", commission: " + getBookingEventCommission() +
 				", Booking Total: " + getBookingTotal() +
-				", status=" + status +
-				'}';
+				", status: " + status;
 	}
 }

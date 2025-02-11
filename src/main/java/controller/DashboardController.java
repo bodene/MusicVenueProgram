@@ -119,15 +119,6 @@ public class DashboardController {
         compatibilityScoreColumn.setSortType(TableColumn.SortType.DESCENDING);
     }
 
-    // Set up booking Table
-//    private void setupBookingTableColumns() {
-//        bookingIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getBookingId()));
-//        eventDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEventDate().toString()));
-//        eventTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEventTime().toString()));
-//
-//        currentBookingTable.setItems(bookingList);
-//    }
-
     // Load event Data from database
     private void loadEventData() {
         List<Event> events = EventDAO.getAllEvents();
@@ -160,13 +151,6 @@ public class DashboardController {
                 venueList.setAll(filteredVenues);
                 venueTable.setItems(venueList);
 
-//            if (!filteredVenues.isEmpty()) {
-//                Venue selectedVenue = venueTable.getSelectionModel().getSelectedItem();
-//                if (selectedVenue != null) {
-//                    //loadBookingsForVenue(selectedVenue.getVenueId());
-//                }
-//            }
-
                 if (filteredVenues.isEmpty()) {
                     AlertUtils.showAlert("No Matches", "Unable to find a match, please add more venue data or try loosening up your criteria.", Alert.AlertType.WARNING);
                 }
@@ -175,17 +159,6 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
-
-    // Helper Method - Load Bookings for Venue
-//    private void loadBookingsForVenue(int venueId) {
-//        try {
-//            List<Booking> bookings = BookingDAO.getBookingsByVenueId(venueId);
-//            bookingList.setAll(bookings);
-//            bookingTable.setItems(bookingList);
-//        } catch (SQLException e) {
-//            System.err.println("Error loading bookings: " + e.getMessage());
-//        }
-//    }
 
     // Calculate Venue Compatibility
     private int calculateCompatibility(Venue venue, Event event) throws SQLException {

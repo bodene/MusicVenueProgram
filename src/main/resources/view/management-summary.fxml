@@ -56,37 +56,37 @@
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="325.0" prefWidth="765.0">
                         <children>
-                            <VBox prefHeight="560.0" prefWidth="382.0" AnchorPane.rightAnchor="3.0">
+                            <VBox prefHeight="560.0" prefWidth="452.0" AnchorPane.rightAnchor="5.0">
                                 <children>
-                                    <PieChart fx:id="venueUtilisationChart" legendSide="LEFT" prefHeight="242.0" prefWidth="382.0" title="Venue Utilisation" />
-                                    <BarChart fx:id="incomeCommissionChart" prefHeight="319.0" prefWidth="382.0" title="Income vs Commission per Order">
-                                        <xAxis>
-                                            <CategoryAxis side="BOTTOM" />
-                                        </xAxis>
+                                    <PieChart fx:id="venueUtilisationChart" legendSide="LEFT" prefHeight="214.0" prefWidth="382.0" title="Venue Utilisation" />
+                                    <BarChart fx:id="incomeCommissionChart" prefHeight="350.0" prefWidth="428.0" title="Income vs Commission per Order">
                                         <yAxis>
-                                            <NumberAxis side="LEFT" />
+                                            <CategoryAxis fx:id="yAxis" label="Event" side="BOTTOM" />
                                         </yAxis>
+                                        <xAxis>
+                                            <NumberAxis label="Amount ($)" side="LEFT" fx:id="xAxis" />
+                                        </xAxis>
                                     </BarChart>
                                 </children>
                             </VBox>
                      <Label text="Event Confirmed Bookings" underline="true" AnchorPane.leftAnchor="5.0" />
-                            <TableView fx:id="managementEventCommissionTable" layoutX="7.2" layoutY="30.0" prefHeight="266.0" prefWidth="559.0" AnchorPane.leftAnchor="7.0">
+                            <TableView fx:id="managementEventCommissionTable" layoutX="7.2" layoutY="30.0" prefHeight="266.0" prefWidth="488.0" AnchorPane.leftAnchor="7.0">
                                 <columns>
-                                    <TableColumn fx:id="bookingNoColumn" prefWidth="50.399995386600494" text="No." />
-                                    <TableColumn fx:id="eventNameColumn" prefWidth="135.99999237060547" text="Event Name" />
-                                    <TableColumn fx:id="venueNameColumn" prefWidth="155.20004272460938" text="Venue" />
-                                    <TableColumn fx:id="bookingCommissionColumn" prefWidth="115.20001220703125" text="Commission" />
-                                    <TableColumn fx:id="bookedByUserColumn" prefWidth="104.0" text="Booked By" />
+                                    <TableColumn fx:id="bookingNoColumn" prefWidth="38.399995028972626" text="No." />
+                                    <TableColumn fx:id="eventNameColumn" prefWidth="163.99999618530273" text="Event Name" />
+                                    <TableColumn fx:id="venueNameColumn" prefWidth="92.80000305175781" text="Venue" />
+                                    <TableColumn fx:id="bookingCommissionColumn" prefWidth="104.0" text="Commission" />
+                                    <TableColumn fx:id="bookedByUserColumn" prefWidth="88.0" text="Booked By" />
                                 </columns>
                             </TableView>
                      <Label layoutX="14.0" layoutY="296.0" text="Client Summary" underline="true" AnchorPane.leftAnchor="5.0" />
-                            <TableView fx:id="clientCommissionTable" layoutY="324.0" prefHeight="236.0" prefWidth="561.0" AnchorPane.leftAnchor="5.0">
+                            <TableView fx:id="clientCommissionTable" layoutY="324.0" prefHeight="236.0" prefWidth="488.0" AnchorPane.leftAnchor="5.0">
                                 <columns>
-                                    <TableColumn fx:id="clientIdColumn" prefWidth="64.79998934268951" text="ID" />
-                                    <TableColumn fx:id="clientNameColumn" prefWidth="213.6000213623047" text="Client Name" />
-                                    <TableColumn fx:id="noOfJobsColumn" prefWidth="58.4000244140625" text="Jobs" />
-                                    <TableColumn fx:id="totalCommissionColumn" prefWidth="113.5999755859375" text="Commission" />
-                                    <TableColumn fx:id="totalClientCostColumn" prefWidth="105.60003662109375" text="Total Spend" />
+                                    <TableColumn fx:id="clientIdColumn" prefWidth="36.799990475177765" text="ID" />
+                                    <TableColumn fx:id="clientNameColumn" prefWidth="157.5999641418457" text="Client Name" />
+                                    <TableColumn fx:id="noOfJobsColumn" prefWidth="51.999969482421875" text="Jobs" />
+                                    <TableColumn fx:id="totalCommissionColumn" prefWidth="109.60008239746094" text="Commission" />
+                                    <TableColumn fx:id="totalClientCostColumn" prefWidth="130.39996337890625" text="Total Spend" />
                                 </columns>
                             </TableView>
                         </children>

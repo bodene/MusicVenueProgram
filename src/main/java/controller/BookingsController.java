@@ -2,8 +2,8 @@ package controller;
 
 import dao.BookingDAO;
 import dao.ClientDAO;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import java.sql.SQLException;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -19,12 +19,6 @@ import model.*;
 import service.SceneManager;
 import service.SessionManager;
 import util.AlertUtils;
-import util.NumberUtils;
-import javafx.collections.transformation.FilteredList;
-
-import java.sql.SQLException;
-import java.util.List;
-
 
 public class BookingsController {
 
@@ -60,22 +54,34 @@ public class BookingsController {
     }
 
     private void setupTables() {
-        // Initialize Booking Table
+        // Initialise the booking list as an empty observable list
+        originalBookingList = FXCollections.observableArrayList();
+
+        // Initialise Booking Table
         requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
         eventDateColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventDateProperty());
         eventNameColumn.setCellValueFactory(cellData -> cellData.getValue().getEvent().eventNameProperty());
         venueNameColumn.setCellValueFactory(cellData -> cellData.getValue().getVenue().venueNameProperty());
+
         bookingCostColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingHirePriceProperty());
         bookingCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingEventCommissionProperty());
         bookingTotalColumn.setCellValueFactory(cellData -> cellData.getValue().getBookingTotalProperty());
         statusColumn.setCellValueFactory(cellData -> cellData.getValue().getStatusProperty());
 
-        // Load Booking data once
-        originalBookingList = BookingDAO.getBookingOrderSummary();
-        filteredBookingList = new FilteredList<>(originalBookingList, p -> true);
+        // Fetch data from ClientDAO.getAllClientSummaries()
+        List<Client> clientList = ClientDAO.getAllClientSummaries();
+
+        // Extract all bookings from the fetched clients
+        List<Booking> allBookings = clientList.stream()
+                .flatMap(client -> client.getBookings().stream())  // Flatten the list of bookings from all clients
+                .toList();
+
+        // Use the filtered bookings for the Booking table
+        ObservableList<Booking> bookingObservableList = FXCollections.observableArrayList(allBookings);
+        filteredBookingList = new FilteredList<>(bookingObservableList, p -> true);
         bookingOrderSummaryTable.setItems(filteredBookingList);
 
-        // Initialize Client Table
+        // Setup Client table with the fetched client list
         clientIdColumn.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         clientNameColumn.setCellValueFactory(new PropertyValueFactory<>("clientName"));
         totalJobsColumn.setCellValueFactory(cellData -> cellData.getValue().confirmedJobCountProperty().asObject());
@@ -83,17 +89,10 @@ public class BookingsController {
         clientCommissionColumn.setCellValueFactory(cellData -> cellData.getValue().getTotalCommissionProperty());
         totalClientSpendColumn.setCellValueFactory(cellData -> cellData.getValue().getClientBookingTotalProperty());
 
-        // Load Client data
-        List<Client> clientList = ClientDAO.getAllClientSummaries();
+        // Convert client list to an ObservableList and set it in the client table
         ObservableList<Client> observableClientList = FXCollections.observableArrayList(clientList);
         clientOrderSummaryTable.setItems(observableClientList);
     }
-
-    private ObservableList<Client> getClientOrderSummaryData() {
-        ObservableList<Client> data = BookingDAO.getAllCommissionSummaries();
-        return data != null ? data : FXCollections.observableArrayList();
-    }
-
 
     private void setupToggleButton() {
         filterConfirmedOnlyToggle.setOnAction(event -> {
@@ -106,7 +105,6 @@ public class BookingsController {
             }
         });
     }
-
 
     // UPDATE A BOOKING FROM USER SELECTION
     @FXML
@@ -129,14 +127,12 @@ public class BookingsController {
             stage.setScene(new Scene(root));
             stage.showAndWait();
 
-            refreshBookingData();  // Refresh table after updating
+            refreshBookingData();
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.showAlert("Error", "Failed to load booking edit view: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
-
-
 
     // CANCEL A BOOKING FROM USER SELECTION
     @FXML
@@ -177,23 +173,36 @@ public class BookingsController {
     }
 
     private void refreshBookingData() {
-        // Refresh Booking Data
-        List<Booking> updatedBookings = BookingDAO.getBookingOrderSummary();
-        originalBookingList.setAll(updatedBookings);
-        filteredBookingList.setPredicate(filterConfirmedOnlyToggle.isSelected()
-                ? booking -> booking.getStatus() == BookingStatus.CONFIRMED
-                : booking -> true);
+        // Retrieve all clients and their bookings
+        List<Client> updatedClients = ClientDAO.getAllClientSummaries();
+
+        // Extract all bookings
+        List<Booking> updatedBookings = updatedClients.stream()
+                .flatMap(client -> client.getBookings().stream())
+                .toList();
+
+        // Create a new ObservableList for bookings
+        ObservableList<Booking> updatedBookingList = FXCollections.observableArrayList(updatedBookings);
+
+        // Create a new FilteredList with the updated booking list
+        FilteredList<Booking> newFilteredList = new FilteredList<>(updatedBookingList, p -> true);
+
+        // Apply the filter if the toggle is selected
+        if (filterConfirmedOnlyToggle.isSelected()) {
+            newFilteredList.setPredicate(booking -> booking.getStatus() == BookingStatus.CONFIRMED);
+        }
+
+        // Set the new filtered list to the table
+        filteredBookingList = newFilteredList;
         bookingOrderSummaryTable.setItems(filteredBookingList);
 
-        // Refresh Client Summary Data
-        List<Client> updatedClients = ClientDAO.getAllClientSummaries(); // Ensure this method recalculates totals and commissions
-        clientOrderSummaryTable.setItems(FXCollections.observableArrayList(updatedClients));
+        // Update the client table similarly to ensure consistency
+        ObservableList<Client> updatedClientList = FXCollections.observableArrayList(updatedClients);
+        clientOrderSummaryTable.setItems(updatedClientList);
     }
 
-
-
-
     @FXML private void goToDashboard() {SceneManager.switchScene("dashboard.fxml");}
+
     @FXML private void goToSettings() {
         if (SessionManager.getInstance().isManager()) {
             SceneManager.switchScene("manager-view.fxml");
@@ -204,5 +213,3 @@ public class BookingsController {
 
     @FXML private void logout() {SceneManager.switchScene("main-view.fxml");}
 }
-
-

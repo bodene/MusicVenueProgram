@@ -4,14 +4,19 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Client {
 	private int clientId;
 	private String clientName;
 	private String contactInfo;
 	private List<Booking> bookings;
+	private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+
 
 	// CONSTRUCTORS
 	public Client(int clientId, String clientName) {
@@ -46,10 +51,7 @@ public class Client {
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
 				.count();
 
-		if (confirmedJobs > 1) {
-			return 0.09;  // 9% commission for clients with multiple confirmed jobs
-		}
-		return 0.10;  // 10% commission for single-job clients
+		return (confirmedJobs > 1) ? 0.09 : 0.10;
 	}
 
 	public double getClientTotalHire() {
@@ -89,17 +91,17 @@ public class Client {
 
 	// Client Total Hire Property
 	public StringProperty getClientTotalHireProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getClientTotalHire()));
+		return new SimpleStringProperty(currencyFormatter.format(getClientTotalHire()));
 	}
 
 	// Client Commission Property
 	public StringProperty getTotalCommissionProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getTotalCommission()));
+		return new SimpleStringProperty(currencyFormatter.format(getTotalCommission()));
 	}
 
 	// Client Booking Total Property
 	public StringProperty getClientBookingTotalProperty() {
-		return new SimpleStringProperty(String.format("%.2f", getClientBookingTotal()));
+		return new SimpleStringProperty(currencyFormatter.format(getClientBookingTotal()));
 	}
 
 
@@ -115,6 +117,14 @@ public class Client {
 	public List<Booking> getBookings() {
 		return bookings;
 	}
+
+	public void addBooking(Booking booking) {
+		if (this.bookings == null) {
+			this.bookings = new ArrayList<>();
+		}
+		this.bookings.add(booking);
+	}
+
 
 
 }
