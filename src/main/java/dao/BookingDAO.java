@@ -294,4 +294,64 @@ public class BookingDAO {
             throw new SQLException("Error updating booking with ID " + booking.getBookingId(), e);
         }
     }
+
+    // BACKUP DATABASE
+    public static List<Booking> getAllBookingsBU() {
+        List<Booking> bookings = new ArrayList<>();
+        String query = "SELECT * FROM bookings";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int bookingId = rs.getInt("booking_id");
+                long bookingDateEpochDays = rs.getLong("booking_date");
+                LocalDate bookingDate = LocalDate.ofEpochDay(bookingDateEpochDays);;
+                String bookingStatus = rs.getString("booking_status");
+                int eventId = rs.getInt("event_id");
+                int venueId = rs.getInt("venue_id");
+                int clientId = rs.getInt("client_id");
+                String bookedBy = rs.getString("booked_by");
+
+                Booking booking = new Booking(bookingId, bookingDate, bookingStatus, eventId, venueId, clientId, bookedBy);
+                bookings.add(booking);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+
+    // CLEAR ALL BOOKINGS
+    public static void clearAllBookings() {
+        String sql = "DELETE FROM bookings";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // RESTORE FROM BACKUP
+    public static void insertBooking(Booking booking) {
+        String sql = "INSERT INTO bookings (booking_id, booking_date, booking_status, event_id, venue_id, client_id, booked_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, booking.getBookingId());
+            stmt.setString(1, String.valueOf(booking.getBookingDate().toEpochDay()));
+            stmt.setString(3, booking.getStatus().toString());
+            stmt.setInt(4, booking.getEvent().getEventId());
+            stmt.setInt(5, booking.getVenue().getVenueId());
+            stmt.setInt(6, booking.getClient().getClientId());
+            stmt.setString(7, booking.getBookedBy());
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

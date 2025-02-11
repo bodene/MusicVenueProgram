@@ -1,6 +1,8 @@
 package model;
 
-public enum UserRole {
+import java.io.Serializable;
+
+public enum UserRole implements Serializable {
 	MANAGER,
 	STAFF
 }

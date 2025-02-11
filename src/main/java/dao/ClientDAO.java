@@ -158,4 +158,27 @@ public class ClientDAO {
 
         return clientList;
     }
+
+    // BACKUP CLIENTS FROM DB
+    public static List<Client> getAllClientsBU() {
+        List<Client> clients = new ArrayList<>();
+        String query = "SELECT * FROM clients";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("client_name");
+                String contactInfo = rs.getString("contact_info");
+                Client client = new Client(clientId, clientName, contactInfo);
+                clients.add(client);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return clients;
+    }
 }
+
+

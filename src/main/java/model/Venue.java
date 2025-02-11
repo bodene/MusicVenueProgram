@@ -5,11 +5,13 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import service.VenueService;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class Venue {
+public class Venue implements Serializable {
 
 	private int venueId;
 	private String name;
@@ -61,6 +63,20 @@ public class Venue {
 
 	public Venue(String venueName) {
 		this.name = venueName;
+	}
+
+	// CONSTRUCTOR FOR BACKUP
+	public Venue(int venueId) {
+		this.venueId = venueId;
+	}
+
+	// CONSTRUCTOR FOR BACKUP
+	public Venue(int venueId, String venueName, String venueCategory, int venueCapacity, String hirePricePerHour) {
+		this.venueId = venueId;
+		this.name = venueName;
+		this.category = VenueCategory.valueOf(venueCategory.toUpperCase());
+		this.capacity = venueCapacity;
+		this.hirePricePerHour = Double.parseDouble(hirePricePerHour);
 	}
 
 	// GETTERS
@@ -119,6 +135,10 @@ public class Venue {
 	// ADD VENUE-TYPE MANUALLY (FROM CSV)
 	public void addVenueType(VenueType venueTypes) {
 		this.venueTypes.add(venueTypes);
+	}
+
+	public void setVenueTypes(List<VenueType> venueTypes) {
+		this.venueTypes = venueTypes;
 	}
 
 	// Property for venue name

@@ -1,16 +1,27 @@
 package controller;
 
+import com.sun.jdi.request.EventRequest;
+import dao.*;
+import javafx.scene.control.Alert;
+import model.*;
+import service.BackupHandler;
 import service.ManagementService;
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import util.AlertUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ManagerController {
     private final ManagementService managementService = ManagementService.getInstance();
 
     @FXML
     private Button viewVenuesButton, viewBookingsButton, staffManagementButton, managerSummaryButton,
-            importVenuesCSVButton, importEventsCSVButton, backupDataButton, masterBackupButton, transactionBackupButton, importTransactionButton, importMasterBackupButton, dashboardButton, logoutButton;
+            importVenuesCSVButton, importEventsCSVButton, backupTransactionDataButton,
+            restoreTransactionDataButton, backupMasterDataButton, restoreMasterDataButton, dashboardButton, logoutButton;
 
     // View Venues Page
     @FXML
@@ -40,40 +51,111 @@ public class ManagerController {
         managementService.importEventsCSV();
     }
 
-    // Backup Data
     @FXML
-    private void backupData() {
-        System.out.println("Backup Data Clicked");
-        // TODO Implement Backup Data
+    private void backupTransactionData() {
+        try {
+            List<Booking> bookings = BookingDAO.getAllBookingsBU();
+            List<Event> events = EventDAO.getAllEventsBU();
+            List<Venue> venues = VenueDAO.getAllVenuesBU();  // Venues without types yet
+            List<VenueType> venueTypes = VenueTypeDAO.getAllVenueTypesBU();  // Fetch all venue types
+            Map<Integer, List<Integer>> venueTypeVenueMap = VenueTypeDAO.getAllVenueTypesVenuesBU();  // Venue-to-type mapping
+
+            // Associate each venue with its venue types
+            for (Venue venue : venues) {
+                List<Integer> typeIds = venueTypeVenueMap.getOrDefault(venue.getVenueId(), new ArrayList<>());
+                List<VenueType> typesForVenue = typeIds.stream()
+                        .map(id -> venueTypes.stream().filter(type -> type.getVenueTypeId() == id).findFirst().orElse(null))
+                        .filter(type -> type != null)  // Ensure no nulls
+                        .toList();
+
+                venue.setVenueTypes(typesForVenue);  // Venue has a method to set a list of VenueType objects
+            }
+
+            // Backup the data
+            BackupHandler.backupTransactionData(bookings, events, venues);
+
+            // Show a summary popup
+            String summary = String.format("""
+                Backup Successful:
+                - Bookings: %d
+                - Events: %d
+                - Venues: %d
+                """, bookings.size(), events.size(), venues.size());
+
+            AlertUtils.showAlert("Backup Summary", summary, Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showAlert("Backup Failed", "An error occurred during the backup process: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
-    // Master Backup
     @FXML
-    private void masterBackup() {
-        System.out.println("Master Backup Clicked");
-        // TODO Implement Master Backup
+    private void restoreTransactionData() {
+        try {
+            List<Booking> bookings = BackupHandler.restoreBookings();
+            List<Event> events = BackupHandler.restoreEvents();
+            List<Venue> venues = BackupHandler.restoreVenues();
+
+            // Show a summary popup
+            String summary = String.format("""
+                Restore Successful:
+                - Bookings: %d
+                - Events: %d
+                - Venues: %d
+                """, bookings.size(), events.size(), venues.size());
+
+            AlertUtils.showAlert("Restore Summary", summary, Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showAlert("Restore Failed", "An error occurred during the restore process: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
-    private void transactionBackup() {
-        System.out.println("Backing up Transactions...");
-        // TODO Implement the actual logic here
+    private void backupMasterData() {
+        try {
+            List<User> users = UserDAO.getAllUsers();
+            List<Client> clients = ClientDAO.getAllClientsBU();
+
+            BackupHandler.backupMasterData(users, clients);
+
+            String summary = String.format("""
+                Backup Successful:
+                - Users: %d
+                - Clients: %d
+                """, users.size(), clients.size());
+
+            AlertUtils.showAlert("Master Data Backup Summary", summary, Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showAlert("Backup Failed", "An error occurred during the master data backup process.", Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
-    private void importTransaction() {
-        System.out.println("Importing Transaction Data...");
-        // TODO Implement the actual logic here
+    private void restoreMasterData() {
+        try {
+            List<User> users = BackupHandler.restoreUsers();
+            List<Client> clients = BackupHandler.restoreClients();
+
+            String summary = String.format("""
+                Restore Successful:
+                - Users: %d
+                - Clients: %d
+                """, users.size(), clients.size());
+
+            AlertUtils.showAlert("Master Data Restore Summary", summary, Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showAlert("Restore Failed", "An error occurred during the master data restore process.", Alert.AlertType.ERROR);
+        }
     }
 
-    @FXML
-    private void importMasterBackup() {
-        System.out.println("Importing Master Backup...");
-        // TODO Implement the actual logic here
-    }
-
-    @FXML
-    private void goToDashboard() {
+    @FXML private void goToDashboard() {
         SceneManager.switchScene("dashboard.fxml");
     }
 

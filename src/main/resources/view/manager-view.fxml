@@ -126,7 +126,7 @@
                                              <Insets bottom="5.0" />
                                           </VBox.margin>
                                        </Button>
-                                       <Button fx:id="backupDataButton" mnemonicParsing="false" onAction="#backupData" prefHeight="36.0" prefWidth="216.0" text="Backup Data">
+                                       <Button fx:id="backupTransactionDataButton" mnemonicParsing="false" onAction="#backupTransactionData" prefHeight="38.0" prefWidth="281.0" text="Backup Transaction Data">
                                           <font>
                                              <Font name="Montreal Regular" size="18.0" />
                                           </font>
@@ -134,7 +134,7 @@
                                              <Insets bottom="5.0" />
                                           </VBox.margin>
                                        </Button>
-                                       <Button fx:id="masterBackupButton" mnemonicParsing="false" onAction="#masterBackup" prefHeight="36.0" prefWidth="217.0" text="Master Backup">
+                                       <Button fx:id="restoreTransactionDataButton" mnemonicParsing="false" onAction="#restoreTransactionData" prefHeight="37.0" prefWidth="281.0" text="Restore Transaction Data">
                                           <font>
                                              <Font name="Montreal Regular" size="18.0" />
                                           </font>
@@ -142,7 +142,7 @@
                                              <Insets bottom="5.0" />
                                           </VBox.margin>
                                        </Button>
-                                       <Button fx:id="transactionBackupButton" mnemonicParsing="false" onAction="#transactionBackup" prefHeight="36.0" prefWidth="217.0" text="Transaction Backup">
+                                       <Button fx:id="backupMasterDataButton" mnemonicParsing="false" onAction="#backupMasterData" prefHeight="36.0" prefWidth="217.0" text="Backup Master Data">
                                           <font>
                                              <Font name="Montreal Regular" size="18.0" />
                                           </font>
@@ -150,20 +150,12 @@
                                              <Insets bottom="5.0" />
                                           </VBox.margin>
                                        </Button>
-                                       <Button fx:id="importTransactionButton" mnemonicParsing="false" onAction="#importTransaction" prefHeight="36.0" prefWidth="217.0" text="Import Transaction Data">
+                                       <Button fx:id="restoreMasterDataButton" mnemonicParsing="false" onAction="#restoreMasterData" prefHeight="36.0" prefWidth="217.0" text="Restore Master Data">
                                           <font>
                                              <Font name="Montreal Regular" size="18.0" />
                                           </font>
                                           <VBox.margin>
                                              <Insets bottom="5.0" />
-                                          </VBox.margin>
-                                       </Button>
-                                       <Button fx:id="importMasterBackupButton" mnemonicParsing="false" onAction="#importMasterBackup" prefHeight="36.0" prefWidth="217.0" text="Import Master Backup">
-                                          <font>
-                                             <Font name="Montreal Regular" size="18.0" />
-                                          </font>
-                                          <VBox.margin>
-                                             <Insets right="5.0" />
                                           </VBox.margin>
                                        </Button>
                                     </children>

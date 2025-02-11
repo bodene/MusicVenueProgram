@@ -1,6 +1,8 @@
 package model;
 
-public enum BookingStatus {
+import java.io.Serializable;
+
+public enum BookingStatus implements Serializable {
 	PENDING,
 	CONFIRMED,
 	CANCELLED

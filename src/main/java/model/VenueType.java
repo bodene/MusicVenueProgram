@@ -1,6 +1,9 @@
 package model;
+
+import java.io.Serializable;
+
 //DONE
-public class VenueType {
+public class VenueType implements Serializable {
 	private int venueTypeId;
 	private String venueType;
 
@@ -29,6 +32,8 @@ public class VenueType {
 	public void setVenueType(String venueType) {
 		this.venueType = venueType;
 	}
+
+
 
 	@Override
 	public String toString() {

@@ -1,6 +1,8 @@
 package model;
 
-public enum VenueCategory {
+import java.io.Serializable;
+
+public enum VenueCategory implements Serializable {
 	INDOOR,
 	OUTDOOR,
 	CONVERTIBLE

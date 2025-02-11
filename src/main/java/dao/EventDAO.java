@@ -7,6 +7,7 @@ import model.*;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventDAO {
@@ -150,4 +151,65 @@ public class EventDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
+
+    public static List<Event> getAllEventsBU() {
+        List<Event> events = new ArrayList<>();
+        String query = "SELECT * FROM events";
+        try (Connection conn = DatabaseHandler.getConnection(); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int eventId = rs.getInt("event_id");
+                String eventName = rs.getString("event_name");
+                String eventArtist = rs.getString("event_artist");
+                long epochDays = rs.getLong("event_date");
+                LocalDate eventDate = LocalDate.ofEpochDay(epochDays);
+                LocalTime eventTime = LocalTime.parse(rs.getString("event_time"));
+                LocalTime eventEndTime = LocalTime.parse(rs.getString("event_end_time"));
+                int eventDuration = rs.getInt("event_duration");
+                int eventCapacity = rs.getInt("required_capacity");
+                String eventType = rs.getString("event_type");
+                String eventCategory = rs.getString("event_category");
+                int clientId = rs.getInt("client_id");
+                Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration, eventCapacity, eventType, eventCategory, clientId);
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
+    }
+
+    // CLEAR ALL EVENTS
+    public static void clearAllEvents() {
+        String sql = "DELETE FROM events";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // RESTORE EVENTS FROM BACKUP
+    public static void insertEvent(Event event) {
+        String sql = "INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration, required_capacity, event_type, event_category, client_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, event.getEventId());
+            stmt.setString(2, event.getEventName());
+            stmt.setString(3, event.getArtist());
+            stmt.setString(4, String.valueOf(event.getEventDate().toEpochDay()));
+            stmt.setString(5, event.getEventTime().toString());
+            stmt.setInt(6, event.getDuration());
+            stmt.setInt(7, event.getRequiredCapacity());
+            stmt.setString(8, event.getEventType());
+            stmt.setString(9, event.getCategory().toString());
+            stmt.setInt(10, event.getClient().getClientId());
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

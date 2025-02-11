@@ -3,10 +3,11 @@ package model;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class Event {
+public class Event implements Serializable {
 
 	private int eventId;
 	private String eventName;
@@ -54,6 +55,25 @@ public class Event {
 
 	public Event(String eventName) {
 		this.eventName = eventName;
+	}
+
+	// CONSTRUCTOR FOR BACKUP
+	public Event(int eventId) {
+		this.eventId = eventId;
+	}
+
+	// CONSTRUCTOR FOR BACKUP
+	public Event(int eventId, String eventName, String eventArtist, LocalDate eventDate, LocalTime eventTime, int eventDuration, int eventCapacity, String eventType, String eventCategory, int clientId) {
+		this.eventId = eventId;
+		this.eventName = eventName;
+		this.artist = eventArtist;
+		this.eventDate = eventDate;
+		this.eventTime = eventTime;
+		this.duration = eventDuration;
+		this.requiredCapacity = eventCapacity;
+		this.eventType = eventType;
+		this.eventCategory = setCategory(eventCategory);
+		this.client = new Client(clientId);
 	}
 
 	public int getEventId() {

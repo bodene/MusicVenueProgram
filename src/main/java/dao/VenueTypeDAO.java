@@ -3,7 +3,9 @@ package dao;
 import model.VenueType;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VenueTypeDAO {
 
@@ -95,4 +97,51 @@ public class VenueTypeDAO {
         }
         throw new SQLException("Error inserting venue type: " + description);
     }
+
+    // DATABASE BACKUP: Fetch all venue types with their IDs
+    public static List<VenueType> getAllVenueTypesBU() {
+        List<VenueType> venueTypes = new ArrayList<>();
+        String sql = "SELECT * FROM venue_types";
+
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int typeId = rs.getInt("venue_type_id");
+                String typeName = rs.getString("venue_type");
+                VenueType venueType = new VenueType(typeId, typeName);
+                venueTypes.add(venueType);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return venueTypes;
+    }
+
+
+
+    // DATABASE BACKUP: Fetch all venue-type associations
+    public static Map<Integer, List<Integer>> getAllVenueTypesVenuesBU() {
+        Map<Integer, List<Integer>> venueTypeMap = new HashMap<>();
+        String sql = "SELECT venue_id, venue_type_id FROM venue_types_venues";
+
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int venueId = rs.getInt("venue_id");
+                int typeId = rs.getInt("venue_type_id");
+
+                venueTypeMap.computeIfAbsent(venueId, k -> new ArrayList<>()).add(typeId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return venueTypeMap;
+    }
+
+
+
 }

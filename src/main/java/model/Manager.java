@@ -1,6 +1,9 @@
 package model;
+
+import java.io.Serializable;
+
 //done
-public class Manager extends User {
+public class Manager extends User implements Serializable {
 
 	public Manager(int userId, String firstName, String lastName, String username, String password) {
 		super(userId, firstName, lastName, username, password, UserRole.MANAGER);

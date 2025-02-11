@@ -1,6 +1,9 @@
 package model;
+
+import java.io.Serializable;
+
 //done
-public class Staff extends User {
+public class Staff extends User implements Serializable {
 
 	// Constructor
 	public Staff(int userId, String firstName, String lastName, String username, String password) {

@@ -1,11 +1,13 @@
 package dao;
 //DONE
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Venue;
+import model.VenueType;
 
 public class VenueDAO {
 
@@ -166,4 +168,79 @@ public class VenueDAO {
             return false;
         }
     }
+
+    // RETRIEVE ALL VENUES FOR BACKUP
+    public static List<Venue> getAllVenuesBU() {
+        List<Venue> venueList = new ArrayList<>();
+        String sql = "SELECT * FROM venues";
+
+        try (Connection connection = DatabaseHandler.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                int venueId = rs.getInt("venue_id");
+                String venueName = rs.getString("venue_name");
+                String venueCategory = rs.getString("venue_category");
+                int venueCapacity = rs.getInt("venue_capacity");
+                String hirePricePerHour = rs.getString("hire_price");
+
+                Venue venue = new Venue(venueId, venueName, venueCategory, venueCapacity, hirePricePerHour);
+                venueList.add(venue);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error fetching venues from database.");
+        }
+        return venueList;
+    }
+
+    // CLEAR ALL VENUES
+    public static void clearAllVenues() {
+        String sql = "DELETE FROM venues";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // RESTORE VENUES FROM BACKUP
+    public static void insertVenue(Venue venue) {
+        String sql = "INSERT INTO venues (venue_id, venue_name, venue_category, venue_capacity, hire_price) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, venue.getVenueId());
+            stmt.setString(2, venue.getName());
+            stmt.setString(3, venue.getCategory().name());
+            stmt.setInt(4, venue.getCapacity());
+            stmt.setDouble(5, venue.getHirePricePerHour());
+
+            stmt.executeUpdate();
+
+            // Handle VenueType associations
+            for (VenueType type : venue.getVenueTypes()) {
+                insertVenueTypeAssociation(venue.getVenueId(), type.getVenueTypeId());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertVenueTypeAssociation(int venueId, int typeId) {
+        String sql = "INSERT INTO venue_types_venues (venue_id, venue_type_id) VALUES (?, ?)";
+        try (Connection conn = DatabaseHandler.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, venueId);
+            stmt.setInt(2, typeId);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

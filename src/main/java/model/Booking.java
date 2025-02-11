@@ -3,14 +3,14 @@ package model;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Locale;
 
-import static util.NumberUtils.formatCurrency;
-
-public class Booking {
+public class Booking implements Serializable {
+	private static final long serialVersionUID = 1L;  // Ensure compatibility for serialization
 
 	private int bookingId;
 	private Event event;
@@ -68,6 +68,17 @@ public class Booking {
 		this.status = BookingStatus.CONFIRMED;
 	}
 
+	// CONSTRUCTOR FOR BACKUP
+	public Booking(int bookingId, LocalDate bookingDate, String status, int eventId, int venueId, int clientId, String bookedBy) {
+		this.bookingId = bookingId;
+		this.bookingDate = bookingDate;
+		this.status = parseBookingStatus(status);
+		this.event = new Event(eventId);
+		this.venue = new Venue(venueId);
+		this.client = new Client(clientId);
+		this.bookedBy = bookedBy;
+	}
+
 	// GETTERS
 	public int getBookingId() {
 		return bookingId;
@@ -111,17 +122,6 @@ public class Booking {
 		double commissionRate = client.getCommissionRate();
 		return eventCost * commissionRate;
 	}
-//	}
-//		if (status != BookingStatus.CONFIRMED || client == null) return 0;
-//
-//		double eventCost = getBookingHirePrice();
-//
-//		// Calculate commission rate based on the total number of confirmed jobs for the client
-//		// 9% for multiple, 10% for single-job clients
-//		long confirmedJobs = client.getConfirmedJobCount();
-//		double commissionRate = client.getCommissionRate();
-//		return eventCost * commissionRate;
-//	}
 
 	public double getBookingTotal() {
 		if (status != BookingStatus.CONFIRMED) return 0;
