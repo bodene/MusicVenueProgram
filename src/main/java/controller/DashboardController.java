@@ -1,6 +1,7 @@
 package controller;
 
 import dao.BookingDAO;
+import dao.ClientDAO;
 import dao.EventDAO;
 import dao.VenueDAO;
 import javafx.application.Platform;
@@ -32,6 +33,8 @@ public class DashboardController {
     @FXML private TableColumn<Event, String> eventNameColumn;
     @FXML private TableColumn<Event, String> eventArtistColumn;
     @FXML private TableColumn<Event, String> eventClientColumn;
+    @FXML private TableColumn<Event, String> eventDateColumn;
+    @FXML private TableColumn<Event, String> eventTimeColumn;
     private ObservableList<Event> eventList;
 
     // VENUE TABLE
@@ -44,8 +47,9 @@ public class DashboardController {
     // BOOKINGS TABLE
     @FXML private TableView<Booking> currentBookingTable;
     @FXML private TableColumn<Booking, Integer> bookingIdColumn;
-    @FXML private TableColumn<Booking, String> eventDateColumn;
-    @FXML private TableColumn<Booking, String> eventTimeColumn;
+    @FXML private TableColumn<Booking, String> bookedEventDateColumn;
+    @FXML private TableColumn<Booking, String> bookedEventTimeColumn;
+    @FXML private TableColumn<Booking, String> bookedEventNameColumn;
     private ObservableList<Booking> bookingList = FXCollections.observableArrayList();
 
     @FXML private CheckBox availableCheckbox;
@@ -61,7 +65,8 @@ public class DashboardController {
         setupEventTableColumns();
         eventList = FXCollections.observableArrayList();
         setupVenueTableColumns();
-        //setupBookingTableColumns();
+        setUpBookingTableColumns();
+        currentBookingTable.setPlaceholder(new Label("Please select a venue to view bookings."));
         Platform.runLater(this::loadEventData);
     }
 
@@ -73,6 +78,8 @@ public class DashboardController {
         eventNameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventName()));
         eventArtistColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getArtist()));
         eventClientColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getClientName()));
+        eventDateColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventDate().toString()));
+        eventTimeColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventTime().toString()));
 
         // LISTEN TO EVENT SELECTION & LOAD VENUES
         eventTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -85,7 +92,6 @@ public class DashboardController {
 
     // HELPER METHOD - GET SELECTED EVENT
     private Event getSelectedEvent() {
-
         return eventTable.getSelectionModel().getSelectedItem();
     }
 
@@ -111,6 +117,7 @@ public class DashboardController {
         venueTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedVenue = newSelection;
+                loadConfirmedBookingsForVenue(selectedVenue);  // Load confirmed bookings for the selected venue
             }
         });
 
@@ -128,15 +135,33 @@ public class DashboardController {
 
     // LOAD EVENT DATA FROM DB
     private void loadEventData() {
-        List<Event> events = EventDAO.getAllEvents();
+        // Step 1: Retrieve all events from EventDAO
+        List<Event> allEvents = EventDAO.getAllEvents();
 
-        if (events != null) {
-            eventList.setAll(events);
+        // Step 2: Retrieve all bookings to identify already booked events
+        List<Client> allClients = ClientDAO.getAllClientSummaries();
+        List<Integer> bookedEventIds = allClients.stream()
+                .flatMap(client -> client.getBookings().stream())
+                .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
+                .map(booking -> booking.getEvent().getEventId())
+                .collect(Collectors.toList());
+
+        // Step 3: Filter events to exclude those that are already booked
+        List<Event> availableEvents = allEvents.stream()
+                .filter(event -> !bookedEventIds.contains(event.getEventId()))
+                .collect(Collectors.toList());
+
+        // Step 4: Set the available events in the event table
+        if (!availableEvents.isEmpty()) {
+            eventList.setAll(availableEvents);
         } else {
             eventList.clear();
+            eventTable.setPlaceholder(new Label("No available events."));
         }
+
         eventTable.setItems(eventList);
     }
+
 
     // LOAD VENUES FOR SELECTED EVENT AND APPLY FILTERS
     private void loadVenuesForEvent(Event event) {
@@ -199,6 +224,33 @@ public class DashboardController {
 
         return score; // 0 TO 100%
     }
+
+    // SET UP TABLE FOR VENUES BOOKINGS
+    private void setUpBookingTableColumns() {
+        bookingIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getBookingId()));
+        bookedEventDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvent().getEventDate().toString()));
+        bookedEventTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvent().getEventTime().toString()));
+        bookedEventNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvent().getEventName()));
+    }
+
+    // LOAD CONFIRMED BOOKINGS FOR SELECTED VENUE
+    private void loadConfirmedBookingsForVenue(Venue venue) {
+        List<Client> clients = ClientDAO.getAllClientSummaries();  // Fetch all clients and bookings
+        List<Booking> filteredBookings = clients.stream()
+                .flatMap(client -> client.getBookings().stream())
+                .filter(booking -> booking.getVenue().getVenueId() == venue.getVenueId() && booking.getStatus().equals(BookingStatus.CONFIRMED))
+                .collect(Collectors.toList());
+
+        if (filteredBookings.isEmpty()) {
+            currentBookingTable.setPlaceholder(new Label("No confirmed bookings for this venue."));
+            bookingList.clear();
+        } else {
+            bookingList.setAll(filteredBookings);
+            currentBookingTable.setItems(bookingList);
+        }
+    }
+
+
 
     // FILTER VENUES BASED ON SELECTED CHECKBOXES
     @FXML
@@ -301,10 +353,7 @@ public class DashboardController {
         }
 
         try {
-            // Capture today's date
-            LocalDate bookingDate = LocalDate.now();
-
-            // Check if the venue is available
+            // Step 1: Check if the venue is already booked
             boolean isAvailable = BookingDAO.checkAvailability(
                     selectedVenue.getVenueId(),
                     selectedEvent.getEventDate(),
@@ -313,17 +362,49 @@ public class DashboardController {
             );
 
             if (!isAvailable) {
-                AlertUtils.showAlert("Booking Error", "The selected venue is not available for the chosen time slot.", Alert.AlertType.WARNING);
+                AlertUtils.showAlert("Booking Error", "The selected venue is already booked for the chosen time slot.", Alert.AlertType.WARNING);
                 return;
             }
 
-            // Set booking status
-            String bookingStatus = "CONFIRMED";
+            // Step 2: Check criteria and build a list of unmet criteria
+            StringBuilder unmetCriteria = new StringBuilder();
+            if (selectedVenue.getCapacity() < selectedEvent.getRequiredCapacity()) {
+                unmetCriteria.append("- Insufficient Capacity (Required: ").append(selectedEvent.getRequiredCapacity())
+                        .append(", Available: ").append(selectedVenue.getCapacity()).append(")\n");
+            }
 
-            // Get the logged-in user
+            boolean eventCategoryMatch = switch (selectedEvent.getCategory()) {
+                case INDOOR -> selectedVenue.getCategory() == VenueCategory.INDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
+                case OUTDOOR -> selectedVenue.getCategory() == VenueCategory.OUTDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
+                case CONVERTIBLE -> selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
+            };
+            if (!eventCategoryMatch) {
+                unmetCriteria.append("- Event Category Mismatch (Event: ").append(selectedEvent.getCategory())
+                        .append(", Venue: ").append(selectedVenue.getCategory()).append(")\n");
+            }
+
+            boolean eventTypeMatch = selectedVenue.getVenueTypes().stream()
+                    .map(type -> type.toString().trim().toLowerCase())
+                    .collect(Collectors.toSet())
+                    .contains(selectedEvent.getEventType().toLowerCase().trim());
+            if (!eventTypeMatch) {
+                unmetCriteria.append("- Venue Type Mismatch (Event Type: ").append(selectedEvent.getEventType()).append(")\n");
+            }
+
+            // Step 3: Show confirmation alert if there are unmet criteria
+            if (unmetCriteria.length() > 0) {
+                boolean proceed = AlertUtils.showConfirmation("Compatibility Warning",
+                        "The selected venue does not meet the following criteria:\n\n" + unmetCriteria + "\nDo you still want to proceed?");
+                if (!proceed) {
+                    return;
+                }
+            }
+
+            // Step 4: Book the venue
+            LocalDate bookingDate = LocalDate.now();
+            String bookingStatus = "CONFIRMED";
             String bookedBy = SessionManager.getCurrentUser().getUsername();
 
-            // Insert the booking into the database
             boolean success = BookingDAO.bookVenue(
                     bookingDate,
                     bookingStatus,
@@ -333,15 +414,16 @@ public class DashboardController {
                     bookedBy
             );
 
-            // 7️Notify the user
+            // Step 5: Notify the user and refresh data
             if (success) {
                 AlertUtils.showAlert("Success", "Venue successfully booked!", Alert.AlertType.INFORMATION);
-                loadVenuesForEvent(selectedEvent); // Refresh venue list
+                loadEventData();  // Refresh event list to exclude the booked event
             } else {
                 AlertUtils.showAlert("Booking Error", "Failed to book the venue.", Alert.AlertType.ERROR);
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             AlertUtils.showAlert("Database Error", "Error booking venue: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }

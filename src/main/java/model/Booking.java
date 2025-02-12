@@ -155,7 +155,7 @@ public class Booking implements Serializable {
 	}
 
 	public StringProperty getBookedByProperty() {
-		return new SimpleStringProperty(this.bookedBy != null ? this.bookedBy.toString() : "N/A");
+		return new SimpleStringProperty(this.bookedBy != null ? this.bookedBy : "N/A");
 	}
 
 	public StringProperty getBookingHirePriceProperty() {

@@ -85,7 +85,7 @@ public class ClientDAO {
         return null;
     }
 
-    // GET ALL CLIENT SUMMARIES FOR CLIENT COMMISSIONS
+    // GET ALL CLIENT SUMMARIES FOR CLIENT BOOKINGS
     public static List<Client> getAllClientSummaries() {
         String sql = """
                         SELECT c.client_id, c.client_name, c.contact_info,
