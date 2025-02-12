@@ -11,6 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
+/**
+ * Represents a client who books events at a venue.
+ * <p>
+ * The {@code Client} class stores client details such as client ID, client name, and contact information.
+ * It also maintains a list of {@link Booking} objects associated with the client and provides methods for
+ * calculating commission rates, total hire amounts, commissions, and overall booking totals.
+ * </p>
+ * <p>
+ * This class implements {@code Serializable} to support object serialization.
+ * </p>
+ *
+ * @author	Bodene Downie
+ * @version 1.0
+ */
 public class Client implements Serializable {
 	private int clientId;
 	private String clientName;
@@ -18,14 +33,27 @@ public class Client implements Serializable {
 	private List<Booking> bookings;
 	private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
-
 	// CONSTRUCTORS
+
+	/**
+	 * Constructs a Client with the specified ID and name.
+	 *
+	 * @param clientId   the unique client identifier
+	 * @param clientName the name of the client
+	 */
 	public Client(int clientId, String clientName) {
 		this.clientId = clientId;
 		this.clientName = clientName;
-		bookings = new ArrayList<Booking>();
+		bookings = new ArrayList<>();
 	}
 
+	/**
+	 * Constructs a Client with the specified ID, name, and contact information.
+	 *
+	 * @param clientId    the unique client identifier
+	 * @param clientName  the name of the client
+	 * @param contactInfo the contact information for the client
+	 */
 	public Client(int clientId, String clientName, String contactInfo) {
 		this.clientId = clientId;
 		this.clientName = clientName;
@@ -33,7 +61,11 @@ public class Client implements Serializable {
 		bookings = new ArrayList<>();
 	}
 
-	// CONSTRUCTOR FOR BACKUP DATABASE
+	/**
+	 * Constructs a Client for backup purposes with only the client ID.
+	 *
+	 * @param clientId the unique client identifier
+	 */
 	public Client(int clientId) {
 		this.clientId = clientId;
 	}
@@ -51,7 +83,18 @@ public class Client implements Serializable {
 		return contactInfo;
 	}
 
-	// Calculate commission rate dynamically
+	public List<Booking> getBookings() {
+		return bookings;
+	}
+
+	/**
+	 * Calculates the commission rate for the client based on confirmed bookings.
+	 * <p>
+	 * If the client has more than one confirmed booking, a commission rate of 9% is applied; otherwise, 10%.
+	 * </p>
+	 *
+	 * @return the commission rate as a double
+	 */
 	public double getCommissionRate() {
 		long confirmedJobs = bookings.stream()
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
@@ -60,6 +103,11 @@ public class Client implements Serializable {
 		return (confirmedJobs > 1) ? 0.09 : 0.10;
 	}
 
+	/**
+	 * Calculates the total hire cost for the client from confirmed bookings.
+	 *
+	 * @return the total hire amount as a double
+	 */
 	public double getClientTotalHire() {
 		return bookings.stream()
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
@@ -67,7 +115,11 @@ public class Client implements Serializable {
 				.sum();
 	}
 
-	// Calculate total commission for this client across all bookings
+	/**
+	 * Calculates the total commission earned for the client across all confirmed bookings.
+	 *
+	 * @return the total commission as a double
+	 */
 	public double getTotalCommission() {
 		return bookings.stream()
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
@@ -75,6 +127,11 @@ public class Client implements Serializable {
 				.sum();
 	}
 
+	/**
+	 * Calculates the total booking cost (hire price + commission) for the client from confirmed bookings.
+	 *
+	 * @return the total booking cost as a double
+	 */
 	public double getClientBookingTotal() {
 		return bookings.stream()
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
@@ -82,29 +139,49 @@ public class Client implements Serializable {
 				.sum();
 	}
 
-	// Count confirmed bookings for reporting purposes
+	/**
+	 * Counts the number of confirmed bookings for the client.
+	 *
+	 * @return the count of confirmed bookings as a long
+	 */
 	public long getConfirmedJobCount() {
 		return bookings.stream()
 				.filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
 				.count();
 	}
 
-	// Confirmed job count
+	/**
+	 * Returns an {@code IntegerProperty} representing the confirmed job count.
+	 *
+	 * @return the confirmed job count as an {@code IntegerProperty}
+	 */
 	public IntegerProperty confirmedJobCountProperty() {
 		return new SimpleIntegerProperty((int) getConfirmedJobCount());
 	}
 
-	// Client Total Hire Property
+	/**
+	 * Returns a {@code StringProperty} representing the client's total hire amount formatted as currency.
+	 *
+	 * @return the formatted total hire amount as a {@code StringProperty}
+	 */
 	public StringProperty getClientTotalHireProperty() {
 		return new SimpleStringProperty(currencyFormatter.format(getClientTotalHire()));
 	}
 
-	// Client Commission Property
+	/**
+	 * Returns a {@code StringProperty} representing the total commission formatted as currency.
+	 *
+	 * @return the formatted total commission as a {@code StringProperty}
+	 */
 	public StringProperty getTotalCommissionProperty() {
 		return new SimpleStringProperty(currencyFormatter.format(getTotalCommission()));
 	}
 
-	// Client Booking Total Property
+	/**
+	 * Returns a {@code StringProperty} representing the total booking cost formatted as currency.
+	 *
+	 * @return the formatted total booking cost as a {@code StringProperty}
+	 */
 	public StringProperty getClientBookingTotalProperty() {
 		return new SimpleStringProperty(currencyFormatter.format(getClientBookingTotal()));
 	}
@@ -118,10 +195,11 @@ public class Client implements Serializable {
 		this.bookings = bookings;
 	}
 
-	public List<Booking> getBookings() {
-		return bookings;
-	}
-
+	/**
+	 * Adds a booking to the client's list of bookings.
+	 *
+	 * @param booking the {@code Booking} object to add
+	 */
 	public void addBooking(Booking booking) {
 		if (this.bookings == null) {
 			this.bookings = new ArrayList<>();
@@ -129,6 +207,11 @@ public class Client implements Serializable {
 		this.bookings.add(booking);
 	}
 
+	/**
+	 * Returns a string representation of the client.
+	 *
+	 * @return a {@code String} representing the client details and booking summaries
+	 */
 	@Override
 	public String toString() {
 		return 	"Client Id: " + clientId +

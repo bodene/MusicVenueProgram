@@ -10,11 +10,36 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data Access Object (DAO) class for managing Event-related database operations.
+ * <p>
+ * This class provides methods to save events to the database, retrieve events,
+ * update event details, clear events, and restore events from backup.
+ * It uses JDBC to connect to an SQLite database and follows a static-method-only pattern.
+ * </p>
+ *
+ * @author  Bodene Downie
+ * @version 1.0
+ */
 public class EventDAO {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private EventDAO() {}
 
-    // Add events to the database
+
+    /**
+     * Saves a list of events to the database.
+     * <p>
+     * For each event in the provided list, a unique event ID is generated and the associated
+     * client is ensured to exist in the database. The event end time is calculated from the start time
+     * and duration. The events are inserted using a prepared statement within a transaction.
+     * </p>
+     *
+     * @param events the list of {@code Event} objects to save
+     * @throws SQLException if a database access error occurs
+     */
     public static void saveEvents(List<Event> events) throws SQLException {
         String insertEventSQL = """
             INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration,
@@ -25,20 +50,25 @@ public class EventDAO {
         try (Connection connection = DatabaseHandler.getConnection();
              PreparedStatement eventStmt = connection.prepareStatement(insertEventSQL)) {
 
+            // Disable auto-commit to execute batch inserts within a transaction.
             connection.setAutoCommit(false); // Disable auto-commit to batch inserts
 
             for (Event event : events) {
                 try {
-                    int eventId = generateUniqueEventId(connection); // Generate unique event ID
+                    // Generate a unique event ID for each event.
+                    int eventId = generateUniqueEventId(connection);
+
+                    // Ensure the client exists in the database and retrieve its ID.
                     int clientId = ClientDAO.findOrCreateClientId(event.getClient().getClientName(), connection); // Ensure client exists
 
-                    // Handle invalid client ID
+                    // If client ID is invalid, skip this event.
                     if (clientId <= 0) {
                         continue;
                     }
-                    // Calculate event end time
+                    // Calculate event end time by adding the duration (in hours) to the start time.
                     Time eventEndTime = Time.valueOf(event.getEventTime().plusHours(event.getDuration()));
 
+                    // Set parameters for the prepared statement.
                     eventStmt.setInt(1, eventId);
                     eventStmt.setString(2, event.getEventName());
                     eventStmt.setString(3, event.getArtist());
@@ -51,15 +81,18 @@ public class EventDAO {
                     eventStmt.setString(10, event.getCategory().name());
                     eventStmt.setInt(11, clientId);
 
+                    // Execute the insertion.
                     eventStmt.executeUpdate();
 
                 } catch (SQLException e) {
+                    // Log error for the specific event and continue with the next.
                     System.err.println("SQL Error inserting event: " + event.getEventName() + " | " + e.getMessage());
                     e.printStackTrace();
                 }
             }
 
-            connection.commit(); // Commit the batch insertions
+            // Commit all insertions.
+            connection.commit();
 
         } catch (SQLException e) {
             System.err.println("Database Error: " + e.getMessage());
@@ -67,7 +100,13 @@ public class EventDAO {
         }
     }
 
-    // Helper Method - Generate Unique event ID
+    /**
+     * Generates a unique event ID by retrieving the current maximum event_id from the database and adding 1.
+     *
+     * @param connection the {@code Connection} to the database
+     * @return the next available event ID as an integer
+     * @throws SQLException if a database access error occurs
+     */
     private static int generateUniqueEventId(Connection connection) throws SQLException {
         String query = "SELECT COALESCE(MAX(event_id), 0) + 1 FROM events";
         try (PreparedStatement stmt = connection.prepareStatement(query);
@@ -79,7 +118,15 @@ public class EventDAO {
         throw new SQLException("Error generating event ID");
     }
 
-
+    /**
+     * Retrieves all events from the database.
+     * <p>
+     * This method performs a JOIN query between events and clients to retrieve event details along with the
+     * associated client name. Each event is constructed as an {@code Event} object.
+     * </p>
+     *
+     * @return an {@code ObservableList<Event>} containing all events
+     */
     public static ObservableList<Event> getAllEvents() {
         ObservableList<Event> eventList = FXCollections.observableArrayList();
 
@@ -104,9 +151,11 @@ public class EventDAO {
                 String eventName = rs.getString("event_name");
                 String eventArtist = rs.getString("event_artist");
 
-                // Handle null dates safely
+                // Convert the stored epoch days into a LocalDate.
                 long epochDays = rs.getLong("event_date");
                 LocalDate eventDate = LocalDate.ofEpochDay(epochDays);
+
+                // Parse the event time from the stored string.
                 LocalTime eventTime = LocalTime.parse(rs.getString("event_time"));
                 int eventDuration = rs.getInt("event_duration");
                 int eventCapacity = rs.getInt("required_capacity");
@@ -114,8 +163,10 @@ public class EventDAO {
                 String eventCategory = rs.getString("event_category");
                 String clientName = rs.getString("client_name");
 
-                // Create and add Event object
+                // Retrieve the client; if not present, create a new one.
                 Client client = ClientDAO.findOrCreateClient(clientName);
+
+                // Construct an Event object.
                 Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration,
                         eventCapacity, eventType, eventCategory, client);
                 eventList.add(event);
@@ -125,6 +176,7 @@ public class EventDAO {
             e.printStackTrace();
             System.err.println("Error fetching events from database: " + e.getMessage());
         } finally {
+            // Close resources in reverse order of their opening.
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
@@ -137,6 +189,16 @@ public class EventDAO {
         return eventList;
     }
 
+    /**
+     * Updates the details of an event in the database.
+     * <p>
+     * Only the event date, event time, and event artist are updated. The update is based on the event ID.
+     * </p>
+     *
+     * @param event the {@code Event} object containing updated details
+     * @return {@code true} if the update was successful, {@code false} otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean updateEvent(Event event) throws SQLException {
         String sql = """
         UPDATE events
@@ -154,6 +216,15 @@ public class EventDAO {
         }
     }
 
+    /**
+     * Retrieves all events from the database for backup purposes.
+     * <p>
+     * This method fetches all records from the events table and constructs a list of {@code Event} objects.
+     * The event date is converted from epoch days and the event time is parsed from its string representation.
+     * </p>
+     *
+     * @return a {@code List<Event>} containing all events
+     */
     public static List<Event> getAllEventsBU() {
         List<Event> events = new ArrayList<>();
         String query = "SELECT * FROM events";
@@ -171,6 +242,8 @@ public class EventDAO {
                 String eventType = rs.getString("event_type");
                 String eventCategory = rs.getString("event_category");
                 int clientId = rs.getInt("client_id");
+
+                // Construct an Event object with a constructor that takes clientId.
                 Event event = new Event(eventId, eventName, eventArtist, eventDate, eventTime, eventDuration, eventCapacity, eventType, eventCategory, clientId);
                 events.add(event);
             }
@@ -180,7 +253,12 @@ public class EventDAO {
         return events;
     }
 
-    // CLEAR ALL EVENTS
+    /**
+     * Clears all events from the database.
+     * <p>
+     * This method executes a DELETE statement to remove all records from the events table.
+     * </p>
+     */
     public static void clearAllEvents() {
         String sql = "DELETE FROM events";
         try (Connection conn = DatabaseHandler.getConnection();
@@ -191,7 +269,14 @@ public class EventDAO {
         }
     }
 
-    // RESTORE EVENTS FROM BACKUP
+    /**
+     * Inserts an event into the database (used for restoring from backup).
+     * <p>
+     * This method inserts a record into the events table with all relevant fields.
+     * </p>
+     *
+     * @param event the {@code Event} object to insert
+     */
     public static void insertEvent(Event event) {
         String sql = "INSERT INTO events (event_id, event_name, event_artist, event_date, event_time, event_duration, required_capacity, event_type, event_category, client_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseHandler.getConnection();
@@ -213,5 +298,4 @@ public class EventDAO {
             e.printStackTrace();
         }
     }
-
 }

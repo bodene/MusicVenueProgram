@@ -25,9 +25,32 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+/**
+ * Controller class for the Dashboard view.
+ * <p>
+ * This class is responsible for managing and displaying events, venues, and bookings on the dashboard.
+ * It fetches data from the database via DAO classes, sets up table views with appropriate columns and listeners,
+ * and provides functionality for filtering, sorting, and booking venues for selected events.
+ * </p>
+ * <p>
+ * The dashboard supports:
+ * <ul>
+ *   <li>Displaying available events and enabling event selection.</li>
+ *   <li>Loading and sorting venues based on compatibility with the selected event.</li>
+ *   <li>Displaying current confirmed bookings for a selected venue.</li>
+ *   <li>Filtering venues using various criteria such as availability, capacity, event category, and venue type.</li>
+ *   <li>Providing detailed views for events and venue comparisons.</li>
+ *   <li>Booking venues for events and handling booking errors.</li>
+ * </ul>
+ * </p>
+ *
+ * @author  Bodene Downie
+ * @version 1.0
+ */
 public class DashboardController {
 
-    // EVENT TABLE
+    /* EVENT TABLE COMPONENTS */
     @FXML private TableView<Event> eventTable;
     @FXML private TableColumn<Event, Integer> eventIdColumn;
     @FXML private TableColumn<Event, String> eventNameColumn;
@@ -37,14 +60,14 @@ public class DashboardController {
     @FXML private TableColumn<Event, String> eventTimeColumn;
     private ObservableList<Event> eventList;
 
-    // VENUE TABLE
+    /* VENUE TABLE COMPONENTS */
     @FXML private TableView<Venue> venueTable;
     @FXML private TableColumn<Venue, Integer> venueNoColumn;
     @FXML private TableColumn<Venue, String> venueNameColumn;
     @FXML private TableColumn<Venue, Integer> compatibilityScoreColumn;
     private ObservableList<Venue> venueList = FXCollections.observableArrayList();
 
-    // BOOKINGS TABLE
+    /* BOOKINGS TABLE COMPONENTS */
     @FXML private TableView<Booking> currentBookingTable;
     @FXML private TableColumn<Booking, Integer> bookingIdColumn;
     @FXML private TableColumn<Booking, String> bookedEventDateColumn;
@@ -52,14 +75,23 @@ public class DashboardController {
     @FXML private TableColumn<Booking, String> bookedEventNameColumn;
     private ObservableList<Booking> bookingList = FXCollections.observableArrayList();
 
+    /* CHECK BOX FILTERS */
     @FXML private CheckBox availableCheckbox;
     @FXML private CheckBox sufficientCapacityCheckbox;
     @FXML private CheckBox eventTypeCheckbox;
     @FXML private CheckBox venueCategoryCheckbox;
 
+    /** The event and venue selected by the user. */
     private Event selectedEvent;
     private Venue selectedVenue;
 
+    /**
+     * Initialises the Dashboard controller after the FXML elements have been loaded.
+     * <p>
+     * This method sets up the event, venue, and booking table columns, initialises the placeholder for
+     * the booking table, and loads the event data asynchronously.
+     * </p>
+     */
     @FXML
     public void initialize() {
         setupEventTableColumns();
@@ -67,13 +99,20 @@ public class DashboardController {
         setupVenueTableColumns();
         setUpBookingTableColumns();
         currentBookingTable.setPlaceholder(new Label("Please select a venue to view bookings."));
+
+        // Load event data after UI initialisation.
         Platform.runLater(this::loadEventData);
     }
 
-    // SET TO COLUMNS TO MATCH EVENT OBJECT PROPERTIES AND ALLOW USER SELECTION
+    /**
+     * Configures the columns of the event table and sets a listener for event selection.
+     * <p>
+     * The listener loads the venues related to the selected event.
+     * </p>
+     */
     private void setupEventTableColumns() {
 
-        // EVENT TABLE
+        // Set up event table columns with property value factories.
         eventIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventId()));
         eventNameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventName()));
         eventArtistColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getArtist()));
@@ -81,7 +120,7 @@ public class DashboardController {
         eventDateColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventDate().toString()));
         eventTimeColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getEventTime().toString()));
 
-        // LISTEN TO EVENT SELECTION & LOAD VENUES
+        // Add listener to load venues when an event is selected.
         eventTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedEvent = newSelection;
@@ -90,42 +129,54 @@ public class DashboardController {
         });
     }
 
-    // HELPER METHOD - GET SELECTED EVENT
+    /**
+     * Returns the currently selected event from the event table.
+     *
+     * @return the selected {@code Event} or {@code null} if none is selected
+     */
     private Event getSelectedEvent() {
         return eventTable.getSelectionModel().getSelectedItem();
     }
 
-    // SET UP VENUE TABLE BASED ON EVENT SELECTED
+    /**
+     * Configures the columns of the venue table and sets a listener for venue selection.
+     * <p>
+     * This method also sorts the venues by their compatibility score with the selected event.
+     * </p>
+     */
     private void setupVenueTableColumns() {
 
+        // Set up venue table columns.
         venueNoColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getVenueId()));
         venueNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
 
+        // Calculate and display compatibility score for each venue.
         compatibilityScoreColumn.setCellValueFactory(cellData -> {
             try {
                 Event selectedEvent = getSelectedEvent();
                 if (selectedEvent == null) return new SimpleObjectProperty<>(0);
-
                 return new SimpleObjectProperty<>(calculateCompatibility(cellData.getValue(), selectedEvent));
             } catch (SQLException e) {
-                System.err.println("Error calculating venue compatibility: " + e.getMessage());
+                AlertUtils.showAlert("Error calculating venue compatibility: ", e.getMessage(), Alert.AlertType.ERROR);
                 return new SimpleObjectProperty<>(0);
             }
         });
 
-        // LISTEN FOR VENUE SELECTION
+        // Add listener to load confirmed bookings when a venue is selected.
         venueTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedVenue = newSelection;
-                loadConfirmedBookingsForVenue(selectedVenue);  // Load confirmed bookings for the selected venue
+                loadConfirmedBookingsForVenue(selectedVenue);
             }
         });
 
-        // SORT VENUES BY COMPATIBILITY
+        // Sort venues by compatibility score.
         sortVenuesByCompatibility();
     }
 
-    // SORT BY COMPATIBILITY
+    /**
+     * Sorts the venue table by compatibility score in descending order.
+     */
     @FXML
     private void sortVenuesByCompatibility() {
         venueTable.getSortOrder().clear();
@@ -133,25 +184,33 @@ public class DashboardController {
         compatibilityScoreColumn.setSortType(TableColumn.SortType.DESCENDING);
     }
 
-    // LOAD EVENT DATA FROM DB
+    /**
+     * Loads event data from the database.
+     * <p>
+     * This method retrieves all events, excludes those that have confirmed bookings,
+     * and updates the event table with the available events.
+     * </p>
+     */
     private void loadEventData() {
-        // Step 1: Retrieve all events from EventDAO
+        // Retrieve all events from the database.
         List<Event> allEvents = EventDAO.getAllEvents();
 
-        // Step 2: Retrieve all bookings to identify already booked events
+        // Retrieve all clients and their bookings.
         List<Client> allClients = ClientDAO.getAllClientSummaries();
+
+        // Extract event IDs that already have confirmed bookings.
         List<Integer> bookedEventIds = allClients.stream()
                 .flatMap(client -> client.getBookings().stream())
                 .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
                 .map(booking -> booking.getEvent().getEventId())
                 .collect(Collectors.toList());
 
-        // Step 3: Filter events to exclude those that are already booked
+        // Filter events to include only those that are not booked.
         List<Event> availableEvents = allEvents.stream()
                 .filter(event -> !bookedEventIds.contains(event.getEventId()))
                 .collect(Collectors.toList());
 
-        // Step 4: Set the available events in the event table
+        // Update the event table with available events.
         if (!availableEvents.isEmpty()) {
             eventList.setAll(availableEvents);
         } else {
@@ -163,12 +222,21 @@ public class DashboardController {
     }
 
 
-    // LOAD VENUES FOR SELECTED EVENT AND APPLY FILTERS
+    /**
+     * Loads venues for the selected event and applies compatibility calculations.
+     * <p>
+     * The method retrieves all venues, calculates their compatibility with the given event,
+     * sorts them by compatibility score, and updates the venue table.
+     * </p>
+     *
+     * @param event the selected event for which venues are to be loaded
+     */
     private void loadVenuesForEvent(Event event) {
-
         try {
+            // Retrieve all venues from the database.
             List<Venue> allVenues = VenueDAO.getAllVenues();
 
+            // Calculate compatibility scores and sort venues.
             List<Venue> filteredVenues = allVenues.stream()
                 .map(venue -> {
                     try {
@@ -178,12 +246,13 @@ public class DashboardController {
                     }
                     return venue;
                 })
-        .sorted((v1, v2) -> Double.compare(v2.getCompatibilityScore(), v1.getCompatibilityScore()))
+                .sorted((v1, v2) -> Double.compare(v2.getCompatibilityScore(), v1.getCompatibilityScore()))
                         .collect(Collectors.toList());
 
                 venueList.setAll(filteredVenues);
                 venueTable.setItems(venueList);
 
+                // Alert if no matching venues are found.
                 if (filteredVenues.isEmpty()) {
                     AlertUtils.showAlert("No Matches", "Unable to find a match, please add more venue data or try loosening up your criteria.", Alert.AlertType.WARNING);
                 }
@@ -193,18 +262,40 @@ public class DashboardController {
         }
     }
 
-    // CALCULATE VENUE COMPATIBILITY
+    /**
+     * Calculates the compatibility score between a venue and an event.
+     * <p>
+     * The score is based on four criteria:
+     * <ol>
+     *   <li>Availability: adds 25 points if the venue is available.</li>
+     *   <li>Capacity: adds 25 points if the venue has sufficient capacity.</li>
+     *   <li>Event category matching: adds 25 points if the venue category matches the event category.</li>
+     *   <li>Venue type matching: adds 25 points if the event type matches one of the venue types.</li>
+     * </ol>
+     * The maximum score is 100.
+     * </p>
+     *
+     * @param venue the venue to evaluate
+     * @param event the event for which compatibility is calculated
+     * @return the compatibility score as an integer
+     * @throws SQLException if a database access error occurs during availability check
+     */
     private int calculateCompatibility(Venue venue, Event event) throws SQLException {
         int score = 0;
 
-        // 1. CHECK AVAILABILITY
-        boolean isAvailable = BookingDAO.checkAvailability(venue.getVenueId(), event.getEventDate(), event.getEventTime(), event.getDuration());
-        if (isAvailable) score += 25;
+        // 1. Check venue availability.
+        boolean isAvailable = BookingDAO.checkAvailability(venue.getVenueId(),
+                event.getEventDate(), event.getEventTime(), event.getDuration());
+        if (isAvailable) {
+            score += 25;
+        }
 
-        // 2. CHECK CAPACITY
-        if (venue.getCapacity() >= event.getRequiredCapacity()) score += 25;
+        // 2. Check if the venue's capacity meets the event's requirement.
+        if (venue.getCapacity() >= event.getRequiredCapacity()) {
+            score += 25;
+        }
 
-        // 3. CHECK EVENT CATEGORY MATCHING
+        // 3. Check if the venue category matches the event category.
         boolean eventCategoryMatch = switch (event.getCategory()) {
             case INDOOR -> venue.getCategory() == VenueCategory.INDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
             case OUTDOOR -> venue.getCategory() == VenueCategory.OUTDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
@@ -214,18 +305,23 @@ public class DashboardController {
         if (eventCategoryMatch) {
             score += 25;}
 
-        // 4. CHECK VENUE TYPES MATCH
-                if (venue.getVenueTypes().stream()
+        // 4. Check if the event type matches one of the venue types.
+        if (venue.getVenueTypes().stream()
                 .map(type -> type.toString().trim().toLowerCase())
-                .collect(Collectors.toSet()) // Ensure uniqueness
+                .collect(Collectors.toSet())            // Ensure uniqueness
                 .contains(event.getEventType().trim().toLowerCase())) {
             score += 25;
         }
 
-        return score; // 0 TO 100%
+        return score; // Score ranges from 0 to 100.
     }
 
-    // SET UP TABLE FOR VENUES BOOKINGS
+    /**
+     * Sets up the columns for the booking table.
+     * <p>
+     * This method configures the booking table to display booking ID, event date, event time, and event name.
+     * </p>
+     */
     private void setUpBookingTableColumns() {
         bookingIdColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getBookingId()));
         bookedEventDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvent().getEventDate().toString()));
@@ -233,9 +329,19 @@ public class DashboardController {
         bookedEventNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvent().getEventName()));
     }
 
-    // LOAD CONFIRMED BOOKINGS FOR SELECTED VENUE
+    /**
+     * Loads confirmed bookings for the selected venue.
+     * <p>
+     * The method retrieves all clients and their bookings, filters the bookings by the selected venue and
+     * confirmed status, and updates the booking table.
+     * </p>
+     *
+     * @param venue the selected venue for which bookings are to be loaded
+     */
     private void loadConfirmedBookingsForVenue(Venue venue) {
-        List<Client> clients = ClientDAO.getAllClientSummaries();  // Fetch all clients and bookings
+
+        // Retrieve all client summaries, which include bookings.
+        List<Client> clients = ClientDAO.getAllClientSummaries();
         List<Booking> filteredBookings = clients.stream()
                 .flatMap(client -> client.getBookings().stream())
                 .filter(booking -> booking.getVenue().getVenueId() == venue.getVenueId() && booking.getStatus().equals(BookingStatus.CONFIRMED))
@@ -250,9 +356,13 @@ public class DashboardController {
         }
     }
 
-
-
-    // FILTER VENUES BASED ON SELECTED CHECKBOXES
+    /**
+     * Filters the list of venues based on the selected checkboxes.
+     * <p>
+     * The filtering criteria include availability, capacity, event category, and venue type matching.
+     * If no event is selected, a warning alert is displayed.
+     * </p>
+     */
     @FXML
     private void filterVenues() {
         if (selectedEvent == null) {
@@ -263,7 +373,7 @@ public class DashboardController {
                 .filter(venue -> {
                     boolean match = true;
 
-                    // Filter by Availability
+                    // Filter by Availability.
                     if (availableCheckbox.isSelected()) {
                         try {
                             match &= BookingDAO.checkAvailability(venue.getVenueId(), selectedEvent.getEventDate(), selectedEvent.getEventTime(), selectedEvent.getDuration());
@@ -272,32 +382,29 @@ public class DashboardController {
                         }
                     }
 
-                    // Filter by Capacity
+                    // Filter by Capacity.
                     if (sufficientCapacityCheckbox.isSelected()) {
                         match &= venue.getCapacity() >= selectedEvent.getRequiredCapacity();
                     }
 
-                    // Filter by **Event Category** (Indoor/Outdoor/Convertible)
+                    // Filter by Venue Category.
                     if (venueCategoryCheckbox.isSelected()) {
                         boolean categoryMatch = switch (selectedEvent.getCategory()) {
                             case INDOOR -> venue.getCategory() == VenueCategory.INDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
                             case OUTDOOR -> venue.getCategory() == VenueCategory.OUTDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
                             case CONVERTIBLE -> venue.getCategory() == VenueCategory.CONVERTIBLE;
                         };
-
                         match &= categoryMatch;
                     }
 
-                    // Filter by **Venue Type** (gig, concert, etc.)
+                    // Filter by Venue Type.
                     if (eventTypeCheckbox.isSelected()) {
                         boolean typeMatch = venue.getVenueTypes().stream()
                                 .map(type -> type.toString().trim().toLowerCase())
                                 .collect(Collectors.toSet())
                                 .contains(selectedEvent.getEventType().toLowerCase().trim());
-
                         match &= typeMatch;
                     }
-
                     return match;
                 })
                 .sorted((v1, v2) -> Double.compare(v2.getCompatibilityScore(), v1.getCompatibilityScore()))
@@ -314,7 +421,13 @@ public class DashboardController {
         // TODO Implement automatching logic
     }
 
-    // Show Venue Details
+    /**
+     * Displays detailed venue comparison information.
+     * <p>
+     * This method opens a new window that compares the selected venue and event. It loads the comparison
+     * view, sets the appropriate data, and displays the window.
+     * </p>
+     */
     @FXML
     private void showVenueDetails() {
         Venue selectedVenue = venueTable.getSelectionModel().getSelectedItem();
@@ -327,11 +440,13 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/comparison-venue-event-view.fxml"));
             Parent root = loader.load();
 
+            // Pass selected venue and event data to the comparison controller.
             ComparisonVenueEventController controller = loader.getController();
             controller.setVenueAndEvent(selectedVenue, selectedEvent, BookingDAO.checkAvailability(
                     selectedVenue.getVenueId(), selectedEvent.getEventDate(), selectedEvent.getEventTime(), selectedEvent.getDuration()
             ));
 
+            // Set the stage for the venue and event comparison
             Stage stage = new Stage();
             stage.setTitle("Venue & Event Comparison");
             stage.setScene(new Scene(root));
@@ -343,8 +458,14 @@ public class DashboardController {
         }
     }
 
-
-    // Book Selected Venue
+    /**
+     * Books the selected venue for the selected event.
+     * <p>
+     * This method verifies that both an event and a venue have been selected. It then performs
+     * additional compatibility checks (capacity, category, and type) and, if necessary, warns the user
+     * about unmet criteria. If the user proceeds, the venue is booked and the event list is refreshed.
+     * </p>
+     */
     @FXML
     private void bookVenue() {
         if (selectedEvent == null || selectedVenue == null) {
@@ -353,7 +474,7 @@ public class DashboardController {
         }
 
         try {
-            // Step 1: Check if the venue is already booked
+            // Step 1: Check venue availability.
             boolean isAvailable = BookingDAO.checkAvailability(
                     selectedVenue.getVenueId(),
                     selectedEvent.getEventDate(),
@@ -366,7 +487,7 @@ public class DashboardController {
                 return;
             }
 
-            // Step 2: Check criteria and build a list of unmet criteria
+            // Step 2: Build a list of unmet criteria.
             StringBuilder unmetCriteria = new StringBuilder();
             if (selectedVenue.getCapacity() < selectedEvent.getRequiredCapacity()) {
                 unmetCriteria.append("- Insufficient Capacity (Required: ").append(selectedEvent.getRequiredCapacity())
@@ -391,16 +512,17 @@ public class DashboardController {
                 unmetCriteria.append("- Venue Type Mismatch (Event Type: ").append(selectedEvent.getEventType()).append(")\n");
             }
 
-            // Step 3: Show confirmation alert if there are unmet criteria
-            if (unmetCriteria.length() > 0) {
+            // Step 3: Prompt user if there are unmet criteria.
+            if (!unmetCriteria.isEmpty()) {
                 boolean proceed = AlertUtils.showConfirmation("Compatibility Warning",
-                        "The selected venue does not meet the following criteria:\n\n" + unmetCriteria + "\nDo you still want to proceed?");
+                        "The selected venue does not meet the following criteria:\n\n" + unmetCriteria +
+                                "\nDo you still want to proceed?");
                 if (!proceed) {
                     return;
                 }
             }
 
-            // Step 4: Book the venue
+            // Step 4: Book the venue.
             LocalDate bookingDate = LocalDate.now();
             String bookingStatus = "CONFIRMED";
             String bookedBy = SessionManager.getCurrentUser().getUsername();
@@ -414,7 +536,7 @@ public class DashboardController {
                     bookedBy
             );
 
-            // Step 5: Notify the user and refresh data
+            // Step 5: Notify user and refresh event list.
             if (success) {
                 AlertUtils.showAlert("Success", "Venue successfully booked!", Alert.AlertType.INFORMATION);
                 loadEventData();  // Refresh event list to exclude the booked event
@@ -428,8 +550,12 @@ public class DashboardController {
         }
     }
 
-
-    // When manager logs in go to manager setting and admin for Admin Settings
+    /**
+     * Navigates to the settings view based on the current user's role.
+     * <p>
+     * If the user is a manager, the manager settings view is shown; otherwise, the admin view is displayed.
+     * </p>
+     */
     @FXML
     private void goToSettings() {
         if (SessionManager.getInstance().isManager()) {
@@ -439,6 +565,12 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Displays detailed information about the selected event.
+     * <p>
+     * This method loads the event details view in a modal window and passes the selected event data to the controller.
+     * </p>
+     */
     @FXML
     private void showEventDetails() {
         Event selectedEvent = eventTable.getSelectionModel().getSelectedItem();
@@ -451,11 +583,11 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/event-details-view.fxml"));
             Parent root = loader.load();
 
-            // Pass event data to the popup controller
+            // Pass event details to the controller.
             EventDetailsController controller = loader.getController();
             controller.setEventDetails(selectedEvent);
 
-            // Create popup window
+            // Create a modal popup window.
             Stage stage = new Stage();
             stage.setTitle("Event Details");
             stage.setScene(new Scene(root));
@@ -468,5 +600,10 @@ public class DashboardController {
         }
     }
 
-    @FXML private void logout() {SceneManager.switchScene("main-view.fxml");}
+    /**
+     * Logs out the current user and switches to the main view.
+     */
+    @FXML private void logout() {
+        SceneManager.switchScene("main-view.fxml");
+    }
 }

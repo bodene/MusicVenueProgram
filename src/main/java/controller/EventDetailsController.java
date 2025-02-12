@@ -12,6 +12,18 @@ import model.Event;
 import util.AlertUtils;
 import util.DateUtils;
 
+
+/**
+ * Controller class for displaying event details in a popup window.
+ * <p>
+ * This controller is responsible for populating the UI with full event details from an {@code Event} object.
+ * It updates the UI labels with formatted event information and
+ * handles the closing of the popup window with a fade-out transition effect.
+ * </p>
+ *
+ * @author  Bodene Downie
+ * @version 1.0
+ */
 public class EventDetailsController {
 
     @FXML private Label eventNameLabel;
@@ -24,13 +36,23 @@ public class EventDetailsController {
     @FXML private Label eventCategoryLabel;
     @FXML private Label eventClientLabel;
 
-    // SHOW FULL EVENT DETAILS ON POPUP SCREEN
+
+    /**
+     * Populates the UI with details of the specified event.
+     * <p>
+     * This method updates each label with event information including name, artist, date, time, duration, capacity,
+     * type, category, and client details. If the provided event is {@code null}, an error alert is displayed.
+     * </p>
+     *
+     * @param event the {@code Event} object containing event details
+     */
     public void setEventDetails(Event event) {
         if (event == null) {
             AlertUtils.showAlert("Error", "No event data available!", Alert.AlertType.ERROR);
             return;
         }
 
+        // Update each label with the event information using the helper method.
         updateLabel(eventNameLabel, event.getEventName(), "N/A");
         updateLabel(eventArtistLabel, event.getArtist(), "N/A");
         updateLabel(eventDateLabel, DateUtils.formatDate(event.getEventDate()), "N/A");
@@ -42,23 +64,34 @@ public class EventDetailsController {
         updateLabel(eventClientLabel, event.getClient() != null ? event.getClient().getClientName() : "N/A", "N/A");
     }
 
+    /**
+     * Updates the text of a label with the given value, or a default value if the provided value is {@code null}.
+     *
+     * @param label the {@code Label} to be updated
+     * @param value the new text value for the label
+     * @param defaultValue the default text to display if {@code value} is {@code null}
+     */
     private void updateLabel(Label label, String value, String defaultValue) {
         label.setText(value != null ? value : defaultValue);
     }
 
-    public void initialize(URL location, ResourceBundle resources) {
-        // Ensure styles are applied correctly
-        if (eventNameLabel.getScene() != null) {
-            eventNameLabel.getScene().getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-        }
-    }
-
+    /**
+     * Closes the current window with a fade-out transition.
+     * <p>
+     * This method creates a fade transition that gradually decreases the opacity of the window's root node over 300 milliseconds.
+     * Once the transition completes, the window is closed.
+     * </p>
+     */
     @FXML
     private void closeWindow() {
         Stage stage = (Stage) eventNameLabel.getScene().getWindow();
+
+        // Create a fade transition with a duration of 300 milliseconds.
         FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
-        fadeOut.setFromValue(1);
-        fadeOut.setToValue(0);
+        fadeOut.setFromValue(1);    // Start fully opaque.
+        fadeOut.setToValue(0);      // End fully transparent.
+
+        // When the fade-out finishes, close the stage.
         fadeOut.setOnFinished(event -> stage.close());
         fadeOut.play();
     }
