@@ -6,18 +6,60 @@ import model.Event;
 import model.Venue;
 import model.VenueCategory;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The {@code VenueMatchingService} class provides functionality to generate venue recommendations for events.
+ * <p>
+ * It evaluates available venues based on several criteria:
+ * <ul>
+ *   <li><b>Availability</b>: Awards 25 points if the venue is available during the event's time slot.</li>
+ *   <li><b>Capacity</b>: Awards 25 points if the venue's capacity meets or exceeds the event's requirement.</li>
+ *   <li><b>Event Category Matching</b>: Awards 25 points if the venue's category (or convertible status) matches the event's category.</li>
+ *   <li><b>Venue Type Matching</b>: Awards 25 points if the venue supports the event's type.</li>
+ * </ul>
+ * The total compatibility score is the sum of these criteria and ranges from 0 to 100.
+ * </p>
+ *
+ * <p>
+ * This class contains two helper inner classes:
+ * <ul>
+ *   <li>{@link VenueCandidate} - Encapsulates a candidate venue along with its computed compatibility score and
+ *       the difference between the venue's capacity and the event's required capacity.</li>
+ *   <li>{@link AutoMatchResult} - Represents a recommendation for an event, including the best candidate venue (if any)
+ *       and a list of any unmet criteria.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Key methods:
+ * <ul>
+ *   <li>{@link #getRecommendations(List)} - Generates a list of venue recommendations for the given events.</li>
+ *   <li>{@link #calculateCompatibility(Venue, Event)} - Calculates the compatibility score between a specific venue and event.</li>
+ * </ul>
+ * </p>
+ *
+ * @author  Bodene Downie
+ * @version 1.0
+ */
 public class VenueMatchingService {
 
-    // Helper classes
+    /**
+     * Represents a candidate venue for an event, including its compatibility score and capacity difference.
+     */
     public static class VenueCandidate {
         public Venue venue;
         public int score;
         public int capacityDiff;
 
+        /**
+         * Constructs a {@code VenueCandidate} with the specified venue, compatibility score, and capacity difference.
+         *
+         * @param venue the candidate venue
+         * @param score the compatibility score for the venue-event pair
+         * @param capacityDiff the difference between the venue's capacity and the event's required capacity
+         */
         public VenueCandidate(Venue venue, int score, int capacityDiff) {
             this.venue = venue;
             this.score = score;
@@ -25,11 +67,24 @@ public class VenueMatchingService {
         }
     }
 
+    /**
+     * Represents the result of the auto-matching process for an event.
+     * <p>
+     * Contains the event, the best matching candidate venue (if any), and a list of criteria that the candidate did not meet.
+     * </p>
+     */
     public static class AutoMatchResult {
         public Event event;
         public VenueCandidate candidate;
         public List<String> unmetCriteria;
 
+        /**
+         * Constructs an {@code AutoMatchResult} with the specified event, candidate, and list of unmet criteria.
+         *
+         * @param event the event for which a recommendation is generated
+         * @param candidate the best matching candidate venue (or {@code null} if no suitable venue is found)
+         * @param unmetCriteria a list of criteria that the candidate venue did not meet
+         */
         public AutoMatchResult(Event event, VenueCandidate candidate, List<String> unmetCriteria) {
             this.event = event;
             this.candidate = candidate;
@@ -38,7 +93,21 @@ public class VenueMatchingService {
     }
 
     /**
-     * Generates recommendations for a list of events.
+     * Generates venue recommendations for a list of events.
+     * <p>
+     * For each event, this method evaluates all available venues by:
+     * <ol>
+     *   <li>Checking if the venue is available for the event's time slot.</li>
+     *   <li>Ensuring the venue's capacity meets the event's requirements.</li>
+     *   <li>Calculating a compatibility score based on availability, capacity, event category, and venue type matching.</li>
+     *   <li>Sorting the candidate venues by their compatibility score (and capacity difference as a secondary criterion).</li>
+     *   <li>Identifying any unmet criteria for the best candidate.</li>
+     * </ol>
+     * The method returns a list of {@code AutoMatchResult} objects, one for each event.
+     * </p>
+     *
+     * @param events a list of events for which to generate venue recommendations
+     * @return a list of {@code AutoMatchResult} objects representing the recommendations for each event
      */
     public List<AutoMatchResult> getRecommendations(List<Event> events) {
         List<Venue> allVenues = VenueDAO.getAllVenues();
@@ -180,35 +249,5 @@ public class VenueMatchingService {
         }
 
         return score; // Score ranges from 0 to 100.
-    }
-
-
-    /**
-     * Performs bulk booking for recommended matches.
-     */
-    public Map<Event, Boolean> bulkBookRecommendations(List<AutoMatchResult> recommendations) {
-        Map<Event, Boolean> bookingResults = new HashMap<>();
-        for (AutoMatchResult result : recommendations) {
-            if (result.candidate != null) {
-                try {
-                    boolean success = BookingDAO.bookVenue(
-                            LocalDate.now(),
-                            "CONFIRMED",
-                            result.event.getEventId(),
-                            result.candidate.venue.getVenueId(),
-                            result.event.getClientId(),
-                            // Get current user
-                            SessionManager.getInstance().getCurrentUser().getUsername()
-                    );
-                    bookingResults.put(result.event, success);
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                    bookingResults.put(result.event, false);
-                }
-            } else {
-                bookingResults.put(result.event, false);
-            }
-        }
-        return bookingResults;
     }
 }

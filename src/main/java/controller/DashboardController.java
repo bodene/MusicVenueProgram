@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.*;
+import service.BookingService;
 import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,7 +23,6 @@ import service.SessionManager;
 import service.VenueMatchingService;
 import util.AlertUtils;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -361,8 +361,31 @@ public class DashboardController {
         venueTable.setItems(FXCollections.observableArrayList(filteredList));
     }
 
-
-    //  Automatch Venues with Events
+    /**
+     * Automatically matches venues with active events and presents the recommendations to the user.
+     * <p>
+     * This method performs the following steps:
+     * <ol>
+     *   <li>Retrieves the current active events from the event list.</li>
+     *   <li>Uses the {@code VenueMatchingService} to generate a list of {@code AutoMatchResult} objects,
+     *       each containing a recommended venue candidate (if any) along with its compatibility score and unmet criteria.</li>
+     *   <li>Builds a detailed recommendation text for each event, including:
+     *       <ul>
+     *         <li>The event name</li>
+     *         <li>The recommended venue (or "NONE" if no candidate is available)</li>
+     *         <li>The compatibility score</li>
+     *         <li>The venue capacity details (and the difference from the required capacity)</li>
+     *         <li>Any unmet criteria (if applicable)</li>
+     *       </ul>
+     *   </li>
+     *   <li>Displays the recommendations in a wide confirmation alert using {@code AlertUtils.showWideAlert()},
+     *       providing the user with a choice to "Book All" or cancel.</li>
+     *   <li>If the user selects "Book All", the method calls {@code BookingService.bulkBookRecommendations()}
+     *       to perform bulk bookings based on the recommendations, then builds and displays the booking results in another wide alert.</li>
+     *   <li>Finally, it refreshes the event data by calling {@code loadEventData()}.</li>
+     * </ol>
+     * </p>
+     */
     @FXML
     private void autoMatch() {
         VenueMatchingService matchingService = new VenueMatchingService();
@@ -394,18 +417,7 @@ public class DashboardController {
             }
         }
 
-        // Create a wide alert with the recommendation text.
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Auto-Match Recommendations");
-        alert.setHeaderText("Review and Bulk Book All Recommendations");
-        alert.getDialogPane().setMinWidth(800);
-
-        TextArea textArea = new TextArea(recommendationText.toString());
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setPrefWidth(780);
-        textArea.setPrefHeight(400);
-        alert.getDialogPane().setContent(textArea);
+        Alert alert = AlertUtils.showWideAlert("Auto-Match Recommendations", "Review and Bulk Book All Recommendations", recommendationText.toString(), Alert.AlertType.CONFIRMATION);
 
         ButtonType bookAllButton = new ButtonType("Book All", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -414,7 +426,7 @@ public class DashboardController {
         Optional<ButtonType> userResponse = alert.showAndWait();
         if (userResponse.isPresent() && userResponse.get() == bookAllButton) {
             // Use the service to bulk book recommendations.
-            Map<Event, Boolean> bookingResults = matchingService.bulkBookRecommendations(recommendations);
+            Map<Event, Boolean> bookingResults = BookingService.bulkBookRecommendations(recommendations);
             StringBuilder bookingResultText = new StringBuilder();
             bookingResults.forEach((event, success) -> {
                 if (success) {
@@ -424,12 +436,7 @@ public class DashboardController {
                 }
             });
 
-            Alert bookingAlert = new Alert(Alert.AlertType.INFORMATION);
-            bookingAlert.setTitle("Bulk Booking Results");
-            bookingAlert.setHeaderText("Results of Bulk Booking");
-            bookingAlert.getDialogPane().setMinWidth(600);
-            bookingAlert.setContentText(bookingResultText.toString());
-            bookingAlert.showAndWait();
+            AlertUtils.showWideAlert("Bulk Booking Results", "Results of Bulk Booking", bookingResultText.toString(), Alert.AlertType.INFORMATION );
 
             // Refresh events if needed.
             loadEventData();
@@ -489,6 +496,9 @@ public class DashboardController {
         }
 
         try {
+            // Create an instance of the BookingService
+            BookingService bookingService = new BookingService();
+
             // Step 1: Check venue availability.
             boolean isAvailable = BookingDAO.checkAvailability(
                     selectedVenue.getVenueId(),
@@ -510,8 +520,10 @@ public class DashboardController {
             }
 
             boolean eventCategoryMatch = switch (selectedEvent.getCategory()) {
-                case INDOOR -> selectedVenue.getCategory() == VenueCategory.INDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
-                case OUTDOOR -> selectedVenue.getCategory() == VenueCategory.OUTDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
+                case INDOOR ->
+                        selectedVenue.getCategory() == VenueCategory.INDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
+                case OUTDOOR ->
+                        selectedVenue.getCategory() == VenueCategory.OUTDOOR || selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
                 case CONVERTIBLE -> selectedVenue.getCategory() == VenueCategory.CONVERTIBLE;
             };
             if (!eventCategoryMatch) {
@@ -537,24 +549,11 @@ public class DashboardController {
                 }
             }
 
-            // Step 4: Book the venue.
-            LocalDate bookingDate = LocalDate.now();
-            String bookingStatus = "CONFIRMED";
-            String bookedBy = SessionManager.getCurrentUser().getUsername();
-
-            boolean success = BookingDAO.bookVenue(
-                    bookingDate,
-                    bookingStatus,
-                    selectedEvent.getEventId(),
-                    selectedVenue.getVenueId(),
-                    selectedEvent.getClientId(),
-                    bookedBy
-            );
-
-            // Step 5: Notify user and refresh event list.
+            // Book the venue via the BookingService.
+            boolean success = bookingService.bookVenue(selectedEvent, selectedVenue);
             if (success) {
                 AlertUtils.showAlert("Success", "Venue successfully booked!", Alert.AlertType.INFORMATION);
-                loadEventData();  // Refresh event list to exclude the booked event
+                loadEventData();  // Refresh event list to exclude the booked event.
             } else {
                 AlertUtils.showAlert("Booking Error", "Failed to book the venue.", Alert.AlertType.ERROR);
             }

@@ -3,6 +3,8 @@ package util;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.TextArea;
+
 import java.util.Optional;
 
 
@@ -109,6 +111,32 @@ public class AlertUtils {
         styleAlert(alert);
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+    /**
+     * Shows a wide alert with a text area for lengthy content.
+     *
+     * @param title the title of the alert
+     * @param header the header text
+     * @param content the content to display inside the text area
+     * @param alertType the type of alert
+     * @return the alert instance
+     */
+    public static Alert showWideAlert(String title, String header, String content, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.getDialogPane().setMinWidth(800);
+
+        TextArea textArea = new TextArea(content);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefWidth(780);
+        textArea.setPrefHeight(400);
+        alert.getDialogPane().setContent(textArea);
+
+        alert.showAndWait();
+        return alert;
     }
 
     /**
