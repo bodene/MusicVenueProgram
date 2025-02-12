@@ -19,10 +19,11 @@ import service.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import service.SessionManager;
+import service.VenueMatchingService;
 import util.AlertUtils;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -155,7 +156,7 @@ public class DashboardController {
             try {
                 Event selectedEvent = getSelectedEvent();
                 if (selectedEvent == null) return new SimpleObjectProperty<>(0);
-                return new SimpleObjectProperty<>(calculateCompatibility(cellData.getValue(), selectedEvent));
+                return new SimpleObjectProperty<>(VenueMatchingService.calculateCompatibility(cellData.getValue(), selectedEvent));
             } catch (SQLException e) {
                 AlertUtils.showAlert("Error calculating venue compatibility: ", e.getMessage(), Alert.AlertType.ERROR);
                 return new SimpleObjectProperty<>(0);
@@ -240,7 +241,7 @@ public class DashboardController {
             List<Venue> filteredVenues = allVenues.stream()
                 .map(venue -> {
                     try {
-                        venue.setCompatibilityScore(calculateCompatibility(venue, event));
+                        venue.setCompatibilityScore(VenueMatchingService.calculateCompatibility(venue, event));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -262,59 +263,6 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Calculates the compatibility score between a venue and an event.
-     * <p>
-     * The score is based on four criteria:
-     * <ol>
-     *   <li>Availability: adds 25 points if the venue is available.</li>
-     *   <li>Capacity: adds 25 points if the venue has sufficient capacity.</li>
-     *   <li>Event category matching: adds 25 points if the venue category matches the event category.</li>
-     *   <li>Venue type matching: adds 25 points if the event type matches one of the venue types.</li>
-     * </ol>
-     * The maximum score is 100.
-     * </p>
-     *
-     * @param venue the venue to evaluate
-     * @param event the event for which compatibility is calculated
-     * @return the compatibility score as an integer
-     * @throws SQLException if a database access error occurs during availability check
-     */
-    private int calculateCompatibility(Venue venue, Event event) throws SQLException {
-        int score = 0;
-
-        // 1. Check venue availability.
-        boolean isAvailable = BookingDAO.checkAvailability(venue.getVenueId(),
-                event.getEventDate(), event.getEventTime(), event.getDuration());
-        if (isAvailable) {
-            score += 25;
-        }
-
-        // 2. Check if the venue's capacity meets the event's requirement.
-        if (venue.getCapacity() >= event.getRequiredCapacity()) {
-            score += 25;
-        }
-
-        // 3. Check if the venue category matches the event category.
-        boolean eventCategoryMatch = switch (event.getCategory()) {
-            case INDOOR -> venue.getCategory() == VenueCategory.INDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
-            case OUTDOOR -> venue.getCategory() == VenueCategory.OUTDOOR || venue.getCategory() == VenueCategory.CONVERTIBLE;
-            case CONVERTIBLE -> venue.getCategory() == VenueCategory.CONVERTIBLE;
-        };
-
-        if (eventCategoryMatch) {
-            score += 25;}
-
-        // 4. Check if the event type matches one of the venue types.
-        if (venue.getVenueTypes().stream()
-                .map(type -> type.toString().trim().toLowerCase())
-                .collect(Collectors.toSet())            // Ensure uniqueness
-                .contains(event.getEventType().trim().toLowerCase())) {
-            score += 25;
-        }
-
-        return score; // Score ranges from 0 to 100.
-    }
 
     /**
      * Sets up the columns for the booking table.
@@ -417,8 +365,75 @@ public class DashboardController {
     //  Automatch Venues with Events
     @FXML
     private void autoMatch() {
-        System.out.println("Auto Match Clicked");
-        // TODO Implement automatching logic
+        VenueMatchingService matchingService = new VenueMatchingService();
+
+        // Get current events
+        List<Event> activeEvents = new ArrayList<>(eventList);
+        List<VenueMatchingService.AutoMatchResult> recommendations = matchingService.getRecommendations(activeEvents);
+
+        // Build recommendation text.
+        StringBuilder recommendationText = new StringBuilder();
+        for (VenueMatchingService.AutoMatchResult result : recommendations) {
+            recommendationText.append("Event: ").append(result.event.getEventName()).append("\n");
+            if (result.candidate == null) {
+                recommendationText.append("  Recommended Venue: NONE\n")
+                        .append("  Unmet Criteria: ").append(String.join(", ", result.unmetCriteria))
+                        .append("\n\n");
+            } else {
+                recommendationText.append("  Recommended Venue: ").append(result.candidate.venue.getName()).append("\n")
+                        .append("  Compatibility Score: ").append(result.candidate.score).append("\n")
+                        .append("  Capacity: ").append(result.candidate.venue.getCapacity())
+                        .append(" (Required: ").append(result.event.getRequiredCapacity())
+                        .append(", Diff: ").append(result.candidate.capacityDiff).append(")\n");
+                if (!result.unmetCriteria.isEmpty()) {
+                    recommendationText.append("  Unmet Criteria: ").append(String.join(", ", result.unmetCriteria)).append("\n");
+                } else {
+                    recommendationText.append("  All criteria met.\n");
+                }
+                recommendationText.append("\n");
+            }
+        }
+
+        // Create a wide alert with the recommendation text.
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Auto-Match Recommendations");
+        alert.setHeaderText("Review and Bulk Book All Recommendations");
+        alert.getDialogPane().setMinWidth(800);
+
+        TextArea textArea = new TextArea(recommendationText.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefWidth(780);
+        textArea.setPrefHeight(400);
+        alert.getDialogPane().setContent(textArea);
+
+        ButtonType bookAllButton = new ButtonType("Book All", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(bookAllButton, cancelButton);
+
+        Optional<ButtonType> userResponse = alert.showAndWait();
+        if (userResponse.isPresent() && userResponse.get() == bookAllButton) {
+            // Use the service to bulk book recommendations.
+            Map<Event, Boolean> bookingResults = matchingService.bulkBookRecommendations(recommendations);
+            StringBuilder bookingResultText = new StringBuilder();
+            bookingResults.forEach((event, success) -> {
+                if (success) {
+                    bookingResultText.append("Booked '").append(event.getEventName()).append("'.\n");
+                } else {
+                    bookingResultText.append("Failed to book '").append(event.getEventName()).append("'.\n");
+                }
+            });
+
+            Alert bookingAlert = new Alert(Alert.AlertType.INFORMATION);
+            bookingAlert.setTitle("Bulk Booking Results");
+            bookingAlert.setHeaderText("Results of Bulk Booking");
+            bookingAlert.getDialogPane().setMinWidth(600);
+            bookingAlert.setContentText(bookingResultText.toString());
+            bookingAlert.showAndWait();
+
+            // Refresh events if needed.
+            loadEventData();
+        }
     }
 
     /**
