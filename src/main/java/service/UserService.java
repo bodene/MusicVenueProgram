@@ -163,7 +163,7 @@ public class UserService {
      * Registers a new user in the system.
      * <p>
      * This method validates that all required fields are filled, that the password and confirmation match,
-     * and that a valid role is provided. If validation passes, it delegates the user creation to {@link #addUser(...)}.
+     * and that a valid role is provided. If validation passes, it delegates the user creation.
      * </p>
      *
      * @param firstName       the user's first name
