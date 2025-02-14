@@ -45,4 +45,17 @@ Additional Notes
 •	Logging and Debugging: For enhanced error tracking, consider integrating a logging framework (e.g., SLF4J with Logback) instead of using printStackTrace().
 ________________________________________
 This README should help you install the required dependencies and run your LMVM application successfully. If you have any questions or run into issues, please consult the documentation provided with each dependency or reach out for support.
+________________________________________
+References 
+Authors, M. (2025, February 6). JavaFX Align Buttons Inside Buttonbar Using SceneBuilder or FXML. Retrieved from Stack Overflow: https://stackoverflow.com/questions/32426848/javafx-align-buttons-inside-buttonbar-using-scenebuilder-or-fxml
+Authors, M. (2025, January 30). JavaFX Background Image Using Scene Builder. Retrieved from Stack Overflow: https://stackoverflow.com/questions/46937470/javafx-background-image-using-scene-builder
+Authors, M. (2025, February 1). Selecting Multiple Items from Combobox. Retrieved from Stack Overflow: https://stackoverflow.com/questions/26186572/selecting-multiple-items-from-combobox
+Codez, B. (2025, January 30). BroCodez. Retrieved from YouTube: https://www.youtube.com/@BroCodez
+Geeks for Geeks. (2025, February 10). Comments In Java. Retrieved from Geeks for Geeks: https://www.geeksforgeeks.org/comments-in-java/
+Jenkov, J. (2025, February 1). Classes Related to Tableview. Retrieved from Jenkov: https://jenkov.com/tutorials/javafx/tableview.html#classes-related-to-tableview
+Junkie, J. C. (2025, February 3). Java Code Junkie. Retrieved from YouTube: https://www.youtube.com/channel/UCaB4hPBfWIR_mOFxMamBqrQ
+Oracle. (2025, February 2). Code Conventions. Retrieved from Oracle: https://www.oracle.com/java/technologies/javase/codeconventions-introduction.html
+The Music. (2025, January 30). Best Live Music Venues Australia. Retrieved from The Music: https://themusic.com.au/news/best-live-music-venues-australia/8JPo4uXk5-Y/27-10-22
+
+
 
